@@ -2,12 +2,15 @@ import "server-only";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { requireAdmin } from "../auth/guards";
 import { requireDb } from "../db";
-import { eventRequests, quotes, dateReservations } from "../db/schema";
+import { eventRequests, quotes, dateReservations, bookings } from "../db/schema";
 
 export async function getAdminInbox() {
   await requireAdmin();
   const db = requireDb();
-  return db.select().from(eventRequests).where(inArray(eventRequests.status, ["submitted", "quoted"])).orderBy(desc(eventRequests.createdAt));
+  const requests = await db.select().from(eventRequests).where(inArray(eventRequests.status, ["submitted", "quoted"])).orderBy(desc(eventRequests.createdAt));
+  const booked = await db.select({ eventDate: bookings.eventDate }).from(bookings).where(eq(bookings.status, "confirmed"));
+  const bookedDates = new Set(booked.map((row) => row.eventDate));
+  return requests.map((request) => ({ ...request, dateUnavailable: bookedDates.has(request.eventDate) }));
 }
 
 export async function getAdminRequest(requestId: string) {

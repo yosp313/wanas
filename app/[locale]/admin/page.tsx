@@ -15,7 +15,7 @@ export default async function AdminInboxPage({ params }: { params: Promise<{ loc
       {requests.map((request) => <li key={request.id}>
         <Link href={`/${locale}/admin/requests/${request.id}`}>{request.customerName}</Link>
         <span>{request.eventDate}</span>
-        <span>{request.status}</span>
+        <span>{request.status}</span>{request.dateUnavailable && <strong>Date unavailable</strong>}
       </li>)}
     </ul>}
   </main>;

@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, inArray, isNull, or } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { requireAdmin } from "../auth/guards";
 import { withMutation, lockDates, readDatabaseClock, type Database } from "../db/transactions";
 import { eventRequests, quotes, dateReservations } from "../db/schema";
@@ -50,13 +50,12 @@ export async function sendQuote(requestId: string, input: QuoteInput) {
 
   return withMutation(async (tx) => {
     const request = await lockRequest(tx, requestId);
+    const current = await tx.select().from(quotes).where(and(eq(quotes.requestId, requestId), eq(quotes.status, "current"))).for("update");
+    if (current[0]) throw new Error("QUOTE_ALREADY_CURRENT");
     await lockDates(tx, [request.eventDate, input.offeredDate]);
     const now = await readDatabaseClock(tx);
     if (!activeRequestStatus(request.status)) throw new Error("REQUEST_NOT_ACTIONABLE");
     if (input.offeredDate !== request.eventDate && !hasMinimumNotice(input.offeredDate, now)) throw new Error("OFFERED_DATE_TOO_SOON");
-
-    const current = await tx.select().from(quotes).where(and(eq(quotes.requestId, requestId), eq(quotes.status, "current"))).for("update");
-    if (current[0]) throw new Error("QUOTE_ALREADY_CURRENT");
     const existing = await tx.select().from(dateReservations).where(eq(dateReservations.eventDate, input.offeredDate)).for("update");
     const reservation = existing[0];
     if (reservation && (reservation.kind === "booking" || (reservation.holdExpiresAt && reservation.holdExpiresAt > now))) throw new Error("DATE_UNAVAILABLE");
