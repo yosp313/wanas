@@ -20,5 +20,5 @@ export async function getAdminRequest(requestId: string) {
   if (!request) return null;
   const requestQuotes = await db.select().from(quotes).where(eq(quotes.requestId, requestId)).orderBy(desc(quotes.createdAt));
   const reservations = await db.select().from(dateReservations).where(inArray(dateReservations.eventDate, [request.eventDate, ...requestQuotes.map((quote) => quote.offeredDate)]));
-  return { request, quotes: requestQuotes, reservations };
+  return { request, quotes: requestQuotes.map((quote) => ({ ...quote, effectiveExpiresAt: reservations.find((reservation) => reservation.quoteId === quote.id)?.holdExpiresAt ?? quote.expiresAt })), reservations };
 }

@@ -1,9 +1,9 @@
 import "server-only";
 
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { requireCustomer } from "../auth/guards";
 import { requireDb } from "../db";
-import { bookingChangeRequests, bookings, eventRequests, quotes } from "../db/schema";
+import { bookingChangeRequests, bookings, dateReservations, eventRequests, quotes } from "../db/schema";
 
 export async function getCustomerRequests() {
   const customer = await requireCustomer();
@@ -21,5 +21,6 @@ export async function getCustomerRequest(requestId: string) {
     db.select().from(bookings).where(eq(bookings.requestId, requestId)).orderBy(desc(bookings.createdAt)),
     db.select().from(bookingChangeRequests).where(eq(bookingChangeRequests.customerId, customer.id)).orderBy(asc(bookingChangeRequests.createdAt)),
   ]);
-  return { request, quotes: requestQuotes, bookings: requestBookings, changes: changes.filter((change) => requestBookings.some((booking) => booking.id === change.bookingId)) };
+  const reservations = await db.select().from(dateReservations).where(inArray(dateReservations.eventDate, requestQuotes.map((quote) => quote.offeredDate)));
+  return { request, quotes: requestQuotes.map((quote) => ({ ...quote, effectiveExpiresAt: reservations.find((reservation) => reservation.quoteId === quote.id)?.holdExpiresAt ?? quote.expiresAt })), bookings: requestBookings, changes: changes.filter((change) => requestBookings.some((booking) => booking.id === change.bookingId)) };
 }

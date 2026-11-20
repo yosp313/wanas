@@ -52,3 +52,39 @@ export async function acceptQuote(requestId: string, quoteId: string) {
     return booking;
   });
 }
+
+export async function declineQuote(requestId: string, quoteId: string) {
+  const customer = await requireCustomer();
+  assertUuid(requestId, "request_id");
+  assertUuid(quoteId, "quote_id");
+  return withMutation(async (tx) => {
+    const request = await ownedRequest(tx, requestId, customer.id);
+    const quote = (await tx.select().from(quotes).where(and(eq(quotes.id, quoteId), eq(quotes.requestId, requestId))).for("update"))[0];
+    if (!quote) throw new Error("QUOTE_NOT_FOUND");
+    await lockDates(tx, [quote.offeredDate]);
+    const now = await readDatabaseClock(tx);
+    if (request.status !== "quoted" || quote.status !== "current") throw new Error("QUOTE_NOT_DECLINABLE");
+    const reservation = (await tx.select().from(dateReservations).where(eq(dateReservations.eventDate, quote.offeredDate)).for("update"))[0];
+    if (!reservation || reservation.kind !== "hold" || reservation.quoteId !== quote.id || !reservation.holdExpiresAt || reservation.holdExpiresAt <= now || quote.expiresAt <= now) throw new Error("QUOTE_EXPIRED");
+    await tx.update(quotes).set({ status: "declined", updatedAt: now }).where(eq(quotes.id, quote.id));
+    await tx.delete(dateReservations).where(and(eq(dateReservations.eventDate, quote.offeredDate), eq(dateReservations.quoteId, quote.id)));
+    await tx.update(eventRequests).set({ status: "submitted", updatedAt: now }).where(eq(eventRequests.id, requestId));
+    return { requestId, quoteId, status: "declined" as const };
+  });
+}
+
+export async function withdrawRequest(requestId: string) {
+  const customer = await requireCustomer();
+  assertUuid(requestId, "request_id");
+  return withMutation(async (tx) => {
+    const request = await ownedRequest(tx, requestId, customer.id);
+    const current = (await tx.select().from(quotes).where(and(eq(quotes.requestId, requestId), eq(quotes.status, "current"))).for("update"))[0];
+    await lockDates(tx, current ? [current.offeredDate] : []);
+    const now = await readDatabaseClock(tx);
+    if (request.status === "booked") throw new Error("REQUEST_ALREADY_BOOKED");
+    if (request.status !== "submitted") throw new Error("REQUEST_NOT_WITHDRAWABLE");
+    if (current) throw new Error("REQUEST_HAS_CURRENT_QUOTE");
+    await tx.update(eventRequests).set({ status: "withdrawn", updatedAt: now }).where(eq(eventRequests.id, requestId));
+    return { requestId, status: "withdrawn" as const };
+  });
+}
