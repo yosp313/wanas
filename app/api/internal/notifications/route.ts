@@ -2,8 +2,6 @@ import { timingSafeEqual } from "node:crypto";
 import { getNotificationRepository } from "@/lib/server/notifications/repository";
 import { processNotifications } from "@/lib/server/notifications/worker";
 
-export const runtime = "nodejs";
-
 function isAuthorized(request: Request, secret: string | undefined) {
   const header = request.headers.get("authorization");
   if (!secret || !header?.startsWith("Bearer ")) return false;
