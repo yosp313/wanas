@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, gte, lt } from "drizzle-orm";
+import { and, gte, inArray, lt, eq } from "drizzle-orm";
 import { requireAdmin } from "../auth/guards";
 import { requireDb } from "../db";
 import { bookings, eventRequests } from "../db/schema";
@@ -20,6 +20,6 @@ export async function getAdminCalendar(month: string, includePending = false) {
   const db = requireDb();
   const bounds = monthBounds(month);
   const confirmed = await db.select().from(bookings).where(and(eq(bookings.status, "confirmed"), gte(bookings.eventDate, bounds.start), lt(bookings.eventDate, bounds.end)));
-  const pending = includePending ? await db.select().from(eventRequests).where(and(eq(eventRequests.status, "submitted"), gte(eventRequests.eventDate, bounds.start), lt(eventRequests.eventDate, bounds.end))) : [];
+  const pending = includePending ? await db.select().from(eventRequests).where(and(inArray(eventRequests.status, ["submitted", "quoted"]), gte(eventRequests.eventDate, bounds.start), lt(eventRequests.eventDate, bounds.end))) : [];
   return { month, confirmed, pending };
 }
