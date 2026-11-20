@@ -29,6 +29,13 @@
       "when": 1795212410708,
       "tag": "0003_restrict_business_data",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795213695006,
+      "tag": "0004_preserve_quote_and_delivery_invariants",
+      "breakpoints": true
     }
   ]
 }

@@ -1,13 +1,33 @@
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import Link from "next/link";
+import { catalogMode, type Locale } from "@/lib/catalog/catalog";
 import styles from "./homepage.module.css";
-import type { Locale } from "@/lib/catalog/catalog";
 
-export function Homepage({ locale, showNav = true }: { locale: Locale; showNav?: boolean }) {
+const examples = [
+  { image: "terracotta", en: "Sunlit terracotta", ar: "دفء التيراكوتا" },
+  { image: "garden", en: "A quiet garden", ar: "حديقة هادئة" },
+  { image: "candlelight", en: "Dinner at dusk", ar: "عشاء عند الغروب" },
+];
+
+export function Homepage({ locale }: { locale: Locale }) {
   const ar = locale === "ar";
-  return <main className={styles.home} dir={ar ? "rtl" : "ltr"}>
-    {showNav && <nav className={styles.nav}><span className={styles.logo}>WANAS <small>ونس</small></span><Link href={`/${locale === "ar" ? "en" : "ar"}`}>{ar ? "English" : "العربية"}</Link></nav>}
-    <section className={styles.hero}><p className={styles.kicker}>{ar ? "احتفالات مصممة بعناية في القاهرة" : "Thoughtful celebrations in Cairo"}</p><h1>{ar ? "لحظات تشبهكم" : "A celebration that feels like you"}</h1><p>{ar ? "ننسّق الديكور والضيافة ليصبح يومكم ذكرى جميلة." : "We shape decor and optional catering around the way you want to gather."}</p><Link className={styles.cta} href={`/${locale}/plan`}>{ar ? "خططوا حفلكم" : "Plan your event"}</Link></section>
-    <section className={styles.gallery} aria-label={ar ? "أمثلة من الديكور" : "Decor examples"}><div className={styles.card}><img src="https://lh3.googleusercontent.com/aida/ALJJyrAeB97aXXLVHYy8p6_IKEXgU-22Tgec92MT9e6EeD_8OCH-0jfMmDfKdEbLuSK7U6CGmc3cBl9hP4N8cHZUCmhrEFIk10QxO4S9nnhJ44zA4dLL3MNHw15hBzTUn-B2GFT79RpZcxzqqQOcwhnJtUfnyvcVuHT5MOrLih6YFvjIdQ-CFtzg2EFNZFtaElklBO8ev6L6T2baQtTvh_Y2WK-JiPnMHO8WsPvhiBaUD-mjJQ" alt={ar ? "تنسيق دافئ" : "Warm event styling"} /><div className={styles.cardOverlay}><h2>{ar ? "دفء التيراكوتا" : "Sunlit terracotta"}</h2></div></div><div className={`${styles.card} ${styles.cardAlt}`}><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCe2v9PSoI746P1xOf4yiEEI2SWxSi_x42-aSAYw-OXsoMJYYIGuAXmLwgIngerqECkowginnWvutfqyUJxSJHzSVUEN4nol3T9YohvjUpKSzq6Q_IhakRAZaeYvUQ-bAcqMYeZsNoD2EbHDxY9x7CIjImAXYgBs2z2EvHQOkbKs--DL-rTrMRGrEG_MS7utBGww4Do9DU0E9qrLbQtq7JpCs3s9K3u0E7bUgEKMG00" alt={ar ? "لوحة ألوان هادئة" : "A quiet moodboard"} /><div className={styles.cardOverlay}><h2>{ar ? "حديقة هادئة" : "A quiet garden"}</h2></div></div><div className={`${styles.card} ${styles.cardDark}`}><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnsxZ4VaslcRXnnhSWfNzzp-0dN_wj70vOmha1f5AMkVhG98bJ_1fM3hI0knKzjZeGYan6zuCVLRwqolUElthI-7qPPWuqJuFCGLLOgFJS0ho5w87Ek1GW0_1AVrUwkmnYiRkN6as64RJna_Xiyc9G6AsAf8jkDEaWJ0_Ym_Ez26PckTBTRAKHAhPxwPeaD4594k9HDxZSSWh2ULFgAoUq6fy9Cg6A8GiWxXjyoMBo" alt={ar ? "تنسيق عشاء" : "Candlelit dinner styling"} /><div className={styles.cardOverlay}><h2>{ar ? "ضوء الشموع" : "Candlelight"}</h2></div></div></section>
-  </main>;
+  return (
+    <main className={styles.home}>
+      <section className={styles.hero}>
+        <h1>{ar ? "احتفالات تشبهكم" : "A celebration that feels like you"}</h1>
+        <p>{ar ? "ننسّق ديكور المناسبات والضيافة في القاهرة." : "Event decor and optional catering in Cairo."}</p>
+        <Link className={styles.cta} href={`/${locale}/plan`}>{ar ? "خططوا حفلكم" : "Plan your event"}</Link>
+      </section>
+      {catalogMode === "fixtures" && (
+        <section className={styles.gallery} aria-label={ar ? "أمثلة من الديكور" : "Decor examples"}>
+          {examples.map((example) => (
+            <article className={styles.card} key={example.image}>
+              <Image src={`/decor-fixtures/${example.image}.webp`} alt="" fill sizes="(max-width: 700px) 100vw, 33vw" />
+              <div className={styles.cardOverlay}><h2>{example[locale]}</h2></div>
+            </article>
+          ))}
+        </section>
+      )}
+    </main>
+  );
 }

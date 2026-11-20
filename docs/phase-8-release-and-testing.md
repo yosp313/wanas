@@ -140,6 +140,34 @@ and the public month availability response. Assertions should use accessible
 roles and labels, not generated CSS class names. Capture a trace and screenshot
 on failure. Clean up by run ID even when a test fails.
 
+## Run the browser flow locally
+
+Use two disposable Postgres databases, one for WANAS migrations and the other
+behind local Supabase Auth. Start Supabase Auth with Mailpit and configure both
+the magic-link and confirmation email templates to include `{{ .Token }}`.
+The app uses the Supabase API URL and publishable key from the local stack.
+[Supabase email templates](https://supabase.com/docs/guides/local-development/customizing-email-templates)
+
+1. Set `DATABASE_URL` to the disposable WANAS database and run `npm run db:migrate`.
+2. Start the loopback mail capture with `node tests/fixtures/mail-capture.mjs`.
+3. Start the Next.js development server on loopback. Set
+   `NEXT_PUBLIC_WANAS_CATALOG_MODE=fixtures` and
+   `NOTIFICATION_TEST_TRANSPORT=loopback` for this run. Set
+   `NOTIFICATION_TEST_URL=http://127.0.0.1:3109/emails`,
+   `APP_ORIGIN`, `EMAIL_FROM`, a dummy `RESEND_API_KEY`, and a local
+   `NOTIFICATION_CRON_SECRET`. Use the same origin for the browser test.
+4. Set `E2E_FULL_FLOW=1`, `PLAYWRIGHT_BASE_URL`, `MAILPIT_URL`,
+   `SUPABASE_LOCAL_DATABASE_URL`, `DATABASE_URL`, `NOTIFICATION_TEST_URL`,
+   and `NOTIFICATION_CRON_SECRET` for the test process. Run
+   `npm run test:e2e -- --workers=1`. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`
+   if you want to use an installed Chromium executable.
+
+The browser suite submits an English curated request and an Arabic custom
+request. It uses Supabase email codes, opens a quote from the local delivery
+capture, confirms the booking, checks the calendar, reschedules the booking,
+and verifies admin revocation. Hosted staging uses the live Resend integration
+with a test sender. The loopback delivery transport is unavailable in production.
+
 ## Staging checklist
 
 1. Select and record the approved host, Supabase project, sender domain,

@@ -73,7 +73,7 @@ const fixtureCateringOptions: CatalogOption[] = [
 export const moodboards = catalogMode === "fixtures" ? fixtureMoodboards : [];
 export const palettes = catalogMode === "fixtures" ? fixturePalettes : [];
 export const decorElements = catalogMode === "fixtures" ? fixtureDecorElements : [];
-export const cateringOptions = catalogMode === "fixtures" ? fixtureCateringOptions : [];
+export const cateringOptions = catalogMode === "fixtures" ? fixtureCateringOptions : fixtureCateringOptions.filter((option) => option.id === "recommend");
 export const catalog = { eventTypes, venueTypes, budgetRanges, decorModes, moodboards, palettes, decorElements, cateringOptions } as const;
 
 export function assertCatalogMode() {

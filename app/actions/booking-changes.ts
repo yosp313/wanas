@@ -5,7 +5,13 @@ import { applyBookingChange, requestBookingChange, type BookingAgreement, type B
 export type BookingActionResult = { ok: true } | { ok: false; code: string };
 
 function errorCode(error: unknown) {
-  return error instanceof Error ? error.message : "UNKNOWN_ERROR";
+  const code = error instanceof Error ? error.message : "";
+  const known = [
+    "AUTH_REQUIRED", "ADMIN_REQUIRED", "BOOKING_NOT_ACTIVE", "BOOKING_CHANGE_CUTOFF_PASSED",
+    "STALE_BOOKING_REVISION", "DATE_UNAVAILABLE", "DESTINATION_TOO_SOON", "DATE_UNCHANGED",
+    "INVALID_AGREEMENT", "INVALID_CHANGE", "INVALID_TOTAL", "INVALID_REVISION",
+  ];
+  return known.includes(code) ? code : "UNAVAILABLE";
 }
 
 export async function submitBookingChange(bookingId: string, revision: number, change: BookingChange): Promise<BookingActionResult> {

@@ -1,20 +1,43 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAdminRequest } from "@/lib/server/admin/queries";
-import { isLocale } from "@/lib/i18n/config";
 import { AdminRequestActions } from "@/components/admin/AdminRequestActions";
+import { QuoteTerms } from "@/components/requests/QuoteTerms";
+import { RequestScope } from "@/components/requests/RequestScope";
+import { isLocale } from "@/lib/i18n/config";
+import type { RequestSnapshot } from "@/lib/planner/request-snapshot";
+import { getAdminRequest } from "@/lib/server/admin/queries";
+import { withPageAccess } from "@/lib/server/auth/page-access";
 
 export default async function AdminRequestPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale, id } = await params;
   if (!isLocale(locale)) notFound();
-  const data = await getAdminRequest(id);
+  const data = await withPageAccess(locale, `/${locale}/admin/requests/${id}`, () => getAdminRequest(id));
   if (!data) notFound();
-  return <main dir={locale === "ar" ? "rtl" : "ltr"}>
-    <h1>{data.request.customerName}</h1>
-    <p>{data.request.customerEmail}</p><p>{data.request.customerMobile}</p>
-    <p>{data.request.eventDate}</p>
-    <dl>{Object.entries(data.request.details as Record<string, unknown>).map(([key, value]) => <div key={key}><dt>{key}</dt><dd>{typeof value === "string" ? value : JSON.stringify(value)}</dd></div>)}</dl>
-    <h2>Quotes</h2>
-    <ul>{data.quotes.map((quote) => <li key={quote.id}>{quote.offeredDate} · {quote.totalEgp} EGP · {quote.status}</li>)}</ul>
-    <AdminRequestActions requestId={id} />
-  </main>;
+  const ar = locale === "ar";
+  const { request, quotes } = data;
+  const previous = quotes.find((quote) => quote.status === "current");
+  return (
+    <main className="shell">
+      <Link href={`/${locale}/admin/inbox`}>{ar ? "صندوق الطلبات" : "Request inbox"}</Link>
+      <section>
+        <h1>{request.customerName}</h1>
+        <p><span dir="ltr">{request.customerEmail}</span> · <span dir="ltr">{request.customerMobile}</span></p>
+        <p><time dateTime={request.eventDate}>{request.eventDate}</time></p>
+        <p>{ar ? "لغة الطلب" : "Request language"} · {request.language === "ar" ? "العربية" : "English"}</p>
+        <RequestScope details={request.details as RequestSnapshot} locale={locale} />
+      </section>
+      {quotes.length > 0 && (
+        <section>
+          <h2>{ar ? "عروض الأسعار" : "Quotes"}</h2>
+          <ul>{quotes.map((quote) => <li key={quote.id}><QuoteTerms quote={quote} locale={locale} /></li>)}</ul>
+        </section>
+      )}
+      {(request.status === "submitted" || request.status === "quoted") && (
+        <AdminRequestActions
+          requestId={id} locale={locale} eventDate={request.eventDate}
+          previous={previous ? { ...previous, services: typeof previous.services === "string" ? previous.services : "" } : undefined}
+        />
+      )}
+    </main>
+  );
 }

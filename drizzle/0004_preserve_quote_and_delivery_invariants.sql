@@ -1,0 +1,4 @@
+ALTER TABLE "date_reservations" DROP CONSTRAINT "date_reservations_owner_check";--> statement-breakpoint
+ALTER TABLE "notification_outbox" ADD COLUMN "first_attempt_at" timestamp with time zone;--> statement-breakpoint
+CREATE UNIQUE INDEX "quotes_one_current_per_request" ON "quotes" USING btree ("request_id") WHERE "quotes"."status" = 'current';--> statement-breakpoint
+ALTER TABLE "date_reservations" ADD CONSTRAINT "date_reservations_owner_check" CHECK ((kind = 'hold' and quote_id is not null and booking_id is null and hold_expires_at is not null) or (kind = 'booking' and booking_id is not null and quote_id is null and hold_expires_at is null));

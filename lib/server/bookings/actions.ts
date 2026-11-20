@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { requireAdmin, requireCustomer } from "../auth/guards";
 import { withMutation, lockDates, readDatabaseClock } from "../db/transactions";
 import type { Database } from "../db";
@@ -33,7 +33,8 @@ function validateAgreement(agreement: BookingAgreement) {
 }
 
 function sameChange(left: unknown, right: BookingChange) {
-  return JSON.stringify(left) === JSON.stringify(right);
+  const candidate = left as Partial<BookingChange> | null;
+  return candidate?.kind === right.kind && candidate.newDate === right.newDate && candidate.notes === right.notes;
 }
 
 async function getBooking(tx: Database, bookingId: string) {
@@ -49,13 +50,14 @@ export async function requestBookingChange(bookingId: string, seenRevision: numb
   validateChange(change);
   return withMutation(async (tx) => {
     const booking = await getBooking(tx, bookingId);
-    if (booking.requestId === null) throw new Error("BOOKING_NOT_FOUND");
+
     const requestRows = await tx.select({ customerId: eventRequests.customerId }).from(eventRequests).where(and(eq(eventRequests.id, booking.requestId), eq(eventRequests.customerId, customer.id))).limit(1);
     if (!requestRows[0]) throw new Error("BOOKING_NOT_FOUND");
+    if (seenRevision > booking.revision) throw new Error("INVALID_REVISION");
     const now = await readDatabaseClock(tx);
     if (booking.status !== "confirmed") throw new Error("BOOKING_NOT_ACTIVE");
     if (!isWithinBookingChangeCutoff(booking.eventDate, now)) throw new Error("BOOKING_CHANGE_CUTOFF_PASSED");
-    const existing = await tx.select().from(bookingChangeRequests).where(and(eq(bookingChangeRequests.bookingId, bookingId), eq(bookingChangeRequests.customerId, customer.id), eq(bookingChangeRequests.revision, seenRevision), eq(bookingChangeRequests.status, "pending"))).for("update");
+    const existing = await tx.select().from(bookingChangeRequests).where(and(eq(bookingChangeRequests.bookingId, bookingId), eq(bookingChangeRequests.customerId, customer.id), eq(bookingChangeRequests.revision, seenRevision), eq(bookingChangeRequests.status, "pending")));
     const duplicate = existing.find((candidate) => sameChange(candidate.change, change));
     if (duplicate) return duplicate;
     const inserted = await tx.insert(bookingChangeRequests).values({ bookingId, customerId: customer.id, revision: seenRevision, change }).returning();
@@ -83,17 +85,18 @@ export async function applyBookingChange(changeRequestId: string, reviewedRevisi
     const requested = change.change as BookingChange;
     const destination = requested.kind === "reschedule" ? requested.newDate! : booking.eventDate;
     if (requested.kind === "reschedule" && destination === booking.eventDate) throw new Error("DATE_UNCHANGED");
-    await lockDates(tx, destination === booking.eventDate ? [booking.eventDate] : [destination, booking.eventDate]);
+    const dates = destination === booking.eventDate ? [booking.eventDate] : [destination, booking.eventDate];
+    await lockDates(tx, dates);
+    const reservations = await tx.select().from(dateReservations)
+      .where(inArray(dateReservations.eventDate, dates)).orderBy(dateReservations.eventDate).for("update");
     const now = await readDatabaseClock(tx);
     if (booking.status !== "confirmed") throw new Error("BOOKING_NOT_ACTIVE");
     if (!isWithinBookingChangeCutoff(booking.eventDate, now)) throw new Error("BOOKING_CHANGE_CUTOFF_PASSED");
     if (requested.kind === "reschedule" && !hasMinimumNotice(destination, now)) throw new Error("DESTINATION_TOO_SOON");
-    const originalRows = await tx.select().from(dateReservations).where(eq(dateReservations.eventDate, booking.eventDate)).for("update");
-    const original = originalRows[0];
+    const original = reservations.find((reservation) => reservation.eventDate === booking.eventDate);
     if (!original || original.kind !== "booking" || original.bookingId !== booking.id) throw new Error("BOOKING_RESERVATION_MISSING");
     if (requested.kind === "reschedule") {
-      const targetRows = await tx.select().from(dateReservations).where(eq(dateReservations.eventDate, destination)).for("update");
-      const target = targetRows[0];
+      const target = reservations.find((reservation) => reservation.eventDate === destination);
       if (target && (target.kind === "booking" || (target.holdExpiresAt && target.holdExpiresAt > now))) throw new Error("DATE_UNAVAILABLE");
       if (target) await tx.delete(dateReservations).where(eq(dateReservations.eventDate, destination));
       await tx.insert(dateReservations).values({ eventDate: destination, kind: "booking", quoteId: null, bookingId: booking.id, holdExpiresAt: null, updatedAt: now });

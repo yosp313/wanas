@@ -1,15 +1,31 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { acceptQuote } from "@/lib/server/requests/actions";
+import { useState, useTransition } from "react";
+import { respondToQuote } from "@/app/actions/request-response";
+import type { Locale } from "@/lib/i18n/config";
 
-type Locale = "ar" | "en";
-type ActionState = { status: "idle" | "success" | "error"; message: string };
-const copy: Record<Locale, { accept: string; success: string; error: string }> = { en: { accept: "Accept quote", success: "Booking confirmed", error: "Unable to accept quote" }, ar: { accept: "قبول العرض", success: "تم تأكيد الحجز", error: "تعذر قبول العرض" } };
+const errors = {
+  AUTH_REQUIRED: ["Sign in to continue.", "سجّل الدخول للمتابعة."],
+  QUOTE_EXPIRED: ["This quote has expired.", "انتهت صلاحية العرض."],
+  QUOTE_CHANGED: ["This quote is no longer available.", "هذا العرض غير متاح الآن."],
+  UNAVAILABLE: ["Unable to accept the quote. Try again.", "تعذر قبول العرض. حاول مجددًا."],
+};
 
-export function AcceptQuoteButton({ requestId, quoteId, locale = "en" }: { requestId: string; quoteId: string; locale?: Locale }) {
+export function AcceptQuoteButton({ requestId, quoteId, locale }: { requestId: string; quoteId: string; locale: Locale }) {
+  const ar = locale === "ar";
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [state, setState] = useState<ActionState>({ status: "idle", message: "" }); const router = useRouter(); const text = copy[locale];
-  return <span><button disabled={pending} onClick={() => startTransition(async () => { try { await acceptQuote(requestId, quoteId); setState({ status: "success", message: text.success }); router.refresh(); } catch (error) { setState({ status: "error", message: error instanceof Error ? error.message : text.error }); } })}>{text.accept}</button>{state.status !== "idle" && <span role="status"> {state.message}</span>}</span>;
+  const [message, setMessage] = useState("");
+
+  return (
+    <span>
+      <button className="button" disabled={pending} type="button" onClick={() => startTransition(async () => {
+        const result = await respondToQuote(requestId, quoteId, "accept");
+        setMessage(result.ok ? (ar ? "تم تأكيد الحجز" : "Booking confirmed") : errors[result.error][ar ? 1 : 0]);
+        if (result.ok) router.refresh();
+      })}>{ar ? "قبول العرض" : "Accept quote"}</button>
+      {message && <span role="status"> {message}</span>}
+    </span>
+  );
 }
