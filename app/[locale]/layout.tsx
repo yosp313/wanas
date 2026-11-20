@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isLocale, locales } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -27,7 +28,8 @@ export default async function LocaleLayout({ children, params }: Params & { chil
     <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
       <body>
         <header className="locale-header">
-          <strong>WANAS</strong>
+          <Link href={`/${locale}`}>WANAS</Link>
+          <Link href={`/${locale}/requests`}>{dictionary.myRequests}</Link>
           <Suspense>
             <LocaleSwitcher locale={locale} label={dictionary.switchLanguage} />
           </Suspense>
