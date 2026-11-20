@@ -12,7 +12,7 @@ export function AdminRequestActions({ requestId }: { requestId: string }) {
       <label>Services <textarea name="services" required /></label>
       <label>Total EGP <input name="totalEgp" type="number" min="0" required /></label>
       <label>Scope explanation <textarea name="scopeExplanation" /></label>
-      <button disabled={pending}>Send quote</button>
+      <button disabled={pending}>Send or replace quote</button>
     </form>
     <button disabled={pending} onClick={() => startTransition(async () => { try { await declineRequest(requestId); setMessage("Request declined"); } catch (error) { setMessage(error instanceof Error ? error.message : "Unable to decline request"); } })}>Decline request</button>
     {message && <p role="status">{message}</p>}
