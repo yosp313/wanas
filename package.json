@@ -10,7 +10,11 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:check": "drizzle-kit check",
-    "admin:access": "node scripts/set-admin.ts"
+    "admin:access": "node scripts/set-admin.ts",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "tsx --test tests/notifications-worker.test.ts",
+    "test:integration": "tsx --test tests/postgres-business.test.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -31,6 +35,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
     "tailwindcss": "4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

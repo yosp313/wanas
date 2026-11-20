@@ -18,5 +18,9 @@ jobs:
       - run: npm ci
       - run: npm run db:migrate
         env: { DATABASE_URL: postgres://wanas:wanas_local@localhost:5432/wanas }
+      - run: npm run test
+        env: { DATABASE_URL: postgres://wanas:wanas_local@localhost:5432/wanas }
       - run: npm run lint
       - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
