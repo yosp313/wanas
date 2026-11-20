@@ -27,17 +27,17 @@ export const notificationRepository: NotificationRepository = {
     `));
     return result.map(asJob);
   },
-  async markSent(id, claimToken, at) {
-    await requireDb().execute(sql`update notification_outbox set status = 'sent', claim_token = null, claim_expires_at = null, updated_at = ${at} where ${guarded(id, claimToken)}`);
+  async markSent(id, claimToken) {
+    await requireDb().execute(sql`update notification_outbox set status = 'sent', claim_token = null, claim_expires_at = null, provider_error = null, updated_at = statement_timestamp() where ${guarded(id, claimToken)}`);
   },
-  async markSkipped(id, claimToken, reason, at) {
-    await requireDb().execute(sql`update notification_outbox set status = 'skipped', provider_error = ${reason}, claim_token = null, claim_expires_at = null, updated_at = ${at} where ${guarded(id, claimToken)}`);
+  async markSkipped(id, claimToken, reason) {
+    await requireDb().execute(sql`update notification_outbox set status = 'skipped', provider_error = ${reason}, claim_token = null, claim_expires_at = null, updated_at = statement_timestamp() where ${guarded(id, claimToken)}`);
   },
-  async scheduleRetry(id, claimToken, nextAttemptAt, errorCode, at) {
-    await requireDb().execute(sql`update notification_outbox set status = 'pending', next_attempt_at = ${nextAttemptAt}, provider_error = ${errorCode}, claim_token = null, claim_expires_at = null, updated_at = ${at} where ${guarded(id, claimToken)}`);
+  async scheduleRetry(id, claimToken, nextAttemptAt, errorCode) {
+    await requireDb().execute(sql`update notification_outbox set status = 'pending', next_attempt_at = ${nextAttemptAt.toISOString()}::timestamptz, provider_error = ${errorCode}, claim_token = null, claim_expires_at = null, updated_at = statement_timestamp() where ${guarded(id, claimToken)}`);
   },
-  async markFailed(id, claimToken, errorCode, at) {
-    await requireDb().execute(sql`update notification_outbox set status = 'failed', provider_error = ${errorCode}, claim_token = null, claim_expires_at = null, updated_at = ${at} where ${guarded(id, claimToken)}`);
+  async markFailed(id, claimToken, errorCode) {
+    await requireDb().execute(sql`update notification_outbox set status = 'failed', provider_error = ${errorCode}, claim_token = null, claim_expires_at = null, updated_at = statement_timestamp() where ${guarded(id, claimToken)}`);
   },
   async checkQuote(job) {
     if (!job.payload.quoteId) return "obsolete";
