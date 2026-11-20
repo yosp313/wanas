@@ -24,3 +24,11 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+.shell { min-height: 100vh; padding: 2rem clamp(1.25rem, 5vw, 5rem); background: #fbf8f2; color: #1f1c18; }
+.shell nav { display: flex; justify-content: space-between; align-items: center; max-width: 72rem; margin: auto; }
+.locale-header { display: flex; justify-content: space-between; max-width: 72rem; margin: auto; padding: 2rem clamp(1.25rem, 5vw, 5rem) 0; }
+.shell section { max-width: 48rem; margin: 18vh auto 0; }
+.shell h1 { font-size: clamp(2.5rem, 8vw, 6rem); line-height: .95; margin: 1rem 0; }
+.shell p { font-size: 1.15rem; max-width: 34rem; }
+.eyebrow { letter-spacing: .16em; font-size: .75rem !important; }
+.button { display: inline-block; margin-top: 2rem; border-radius: 999px; background: #1f1c18; color: white; padding: .8rem 1.4rem; }
