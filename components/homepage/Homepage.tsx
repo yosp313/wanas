@@ -17,21 +17,22 @@ export async function Homepage({ locale }: { locale: Locale }) {
   const dictionary = await getDictionary(locale);
   const nav = [
     { href: home, label: t(["Atelier", "الأتيليه"]) },
-    { href: "#ceremonies", label: t(["Ceremonies", "المراسم"]) },
-    { href: "#venues", label: t(["Venues", "الأماكن"]) },
-    { href: "#hospitality", label: t(["Hospitality", "الضيافة"]) },
+    { href: "#ceremonies", label: t(["Ceremonies & portfolio", "المراسم والأعمال"]) },
+    { href: "#venues", label: t(["Atmospheres & venues", "الأجواء والأماكن"]) },
+    { href: "#hospitality", label: t(["Culinary & hospitality", "الطعام والضيافة"]) },
     { href: "#studio", label: t(["Planning studio", "استوديو التخطيط"]) },
+    { href: "#concierge", label: t(["Concierge", "استفسارات"]) },
   ];
 
   const navigation = nav.map(({ href, label }) => href === home
     ? <Link key={href} href={href} aria-current="page">{label}</Link>
     : <a key={href} href={href}>{label}</a>);
 
-  function brand() {
+  function brand(showTagline = true) {
     return (
       <Link className={styles.brand} href={home}>
         <span dir="ltr">WANAS <bdi lang="ar">وَنَس</bdi></span>
-        <small>{t(["Celebration design", "تنسيق المناسبات"])}</small>
+        {showTagline && <small>{t(["Bespoke celebrations & spatial design", "تصميم وتنسيق المناسبات"])}</small>}
       </Link>
     );
   }
@@ -50,7 +51,7 @@ export async function Homepage({ locale }: { locale: Locale }) {
           </details>
           <div className={styles.headerActions}>
             <Link href={requests}>{dictionary.myRequests}</Link>
-            <Link className={styles.primary} href={planner}>{t(["Plan an event", "خطّطوا لمناسبتكم"])}</Link>
+            <Link className={styles.primary} href={planner}>{t(["Define your celebration", "خطّطوا لمناسبتكم"])}</Link>
             <Suspense>
               <LocaleSwitcher locale={locale} label={dictionary.switchLanguage} />
             </Suspense>
@@ -61,35 +62,30 @@ export async function Homepage({ locale }: { locale: Locale }) {
 
       <main>
         <section className={`${styles.hero} ${styles.wrap}`}>
-          <div className={styles.heroLead}>
-            <div className={styles.intro}>
-              <h1>{t(["Celebration design in Cairo", "تصميم وتنسيق المناسبات في القاهرة"])}</h1>
-              <p className={styles.lede}>{t([
-                "Kosha and ceremony decor, venue styling, and optional catering. Put together your event plan and send it to WANAS for a quote.",
-                "نصمّم الكوشة وننسّق ديكور المكان، مع إمكانية إضافة الضيافة. جهّزوا خطّتكم وأرسلوها إلى وناس لطلب عرض سعر.",
-              ])}</p>
-              <div className={styles.actions}>
-                <Link className={styles.primary} href={planner}>{t(["Plan an event", "خطّطوا لمناسبتكم"])} <span aria-hidden="true">→</span></Link>
-                <a className={styles.textLink} href="#ceremonies">{t(["Explore ceremony decor", "استكشفوا ديكور المراسم"])} <span aria-hidden="true">→</span></a>
-              </div>
+          <div className={styles.intro}>
+            <span className={`${styles.eyebrow} ${styles.heroLabel}`}>{t(["Atelier scenography & celebration design", "أتيليه لتصميم وتنسيق المناسبات"])}</span>
+            <h1>{t(["Poetic Spaces for", "مساحات شاعرية"])} <em>{t(["Singular Moments.", "للحظات لا تتكرّر."])}</em></h1>
+            <p className={styles.lede}>{t([
+              "Bespoke ceremony staging, venue styling, and hospitality for celebrations in Cairo. Plan the details and request a quote.",
+              "تصميم الكوشة وتنسيق المكان والضيافة لمناسباتكم في القاهرة. خطّطوا للتفاصيل واطلبوا عرض سعر.",
+            ])}</p>
+            <div className={styles.actions}>
+              <Link className={styles.primary} href={planner}>{t(["Launch event planning studio", "افتحوا استوديو التخطيط"])} <span aria-hidden="true">→</span></Link>
+              <a className={styles.secondary} href="#ceremonies">{t(["Explore ceremonial portfolio", "استكشفوا أعمالنا للمراسم"])} <span aria-hidden="true">↗</span></a>
             </div>
-            <figure className={styles.heroFigure}>
-              <div className={styles.heroPhoto}>
-                <Image src="/atelier/home/kosha.webp" alt={t(["A wedding kosha under three arches, with a low sofa and floral arrangements", "كوشة زفاف تحت ثلاثة أقواس، فيها أريكة منخفضة وتنسيقات زهور"])} fill preload sizes="(max-width: 760px) 100vw, (max-width: 1360px) 56vw, 744px" />
-              </div>
-              <figcaption>
-                <strong>{t(["Kosha and ceremony staging", "الكوشة وتنسيق المراسم"])}</strong>
-                <span>{t(["Stone arches, draped fabric, and flowers", "أقواس حجرية وأقمشة منسدلة وزهور"])}</span>
-              </figcaption>
-            </figure>
           </div>
           <div className={styles.highlights}>
             {highlights.map((card) => (
-              <article key={card.image}>
-                <div className={styles.photo}>
-                  <Image src={`/atelier/home/${card.image}.webp`} alt="" fill sizes="(max-width: 520px) 112px, 160px" />
-                </div>
-                <div>
+              <article className={styles.overlay} key={card.image}>
+                <Image
+                  src={`/atelier/home/${card.image}.webp`}
+                  alt=""
+                  fill
+                  preload={card.image === "kosha"}
+                  sizes={`(max-width: 700px) 94vw, ${card.image === "kosha" ? "38vw" : "30vw"}`}
+                />
+                <div className={styles.overlayCopy}>
+                  <span className={styles.eyebrow}>{t(card.kicker)}</span>
                   <h2>{t(card.title)}</h2>
                   <p>{t(card.description)}</p>
                 </div>
@@ -109,14 +105,17 @@ export async function Homepage({ locale }: { locale: Locale }) {
         <section id="studio" className={`${styles.band} ${styles.softBand}`}>
           <div className={styles.wrap}>
             <div className={styles.split}>
-              <h2>{t(["Plan your event in four steps", "خطّطوا لمناسبتكم في أربع خطوات"])}</h2>
-              <p>{t(["Choose your decor and add catering if you need it. Send your plan to WANAS for a quote.", "اختاروا الديكور وأضيفوا الضيافة إذا رغبتم. أرسلوا خطّتكم إلى وناس لطلب عرض سعر."])}</p>
+              <div>
+                <span className={styles.eyebrow}>{t(["Self-guided planning", "التخطيط الذاتي"])}</span>
+                <h2>{t(["The WANAS Interactive Planning Studio", "استوديو وناس التفاعلي للتخطيط"])}</h2>
+              </div>
+              <p>{t(["Choose your palette, decor, and optional catering in four steps, then send your plan to WANAS for a quote.", "اختاروا الديكور وأضيفوا الضيافة إذا رغبتم. أرسلوا خطّتكم إلى وناس لطلب عرض سعر."])}</p>
             </div>
             <div className={styles.studioPanel}>
               <ol className={styles.four}>
                 {studioSteps.map((step, index) => (
                   <li className={styles.step} key={step.title[0]}>
-                    <span className={styles.stepNumber}>{(index + 1).toLocaleString(ar ? "ar-EG" : "en")}</span>
+                    <span className={styles.stepNumber}>{t(["Step", "الخطوة"])} {(index + 1).toLocaleString(ar ? "ar-EG" : "en", { minimumIntegerDigits: 2 })}</span>
                     <h3>{t(step.title)}</h3>
                     <span className={styles.example}>{t(step.example)}</span>
                     <p>{t(step.description)}</p>
@@ -136,7 +135,8 @@ export async function Homepage({ locale }: { locale: Locale }) {
 
         <section id="ceremonies" className={`${styles.band} ${styles.wrap}`}>
           <div className={styles.sectionTitle}>
-            <h2>{t(["Decor by occasion", "ديكور لكل مناسبة"])}</h2>
+            <span className={styles.eyebrow}>{t(["Atelier portfolio", "أعمال الأتيليه"])}</span>
+            <h2>{t(["Crafted for Sacred & Joyous Rites", "تصميم يليق بمراسمكم واحتفالاتكم"])}</h2>
             <p>{t(["Explore settings for weddings, katb al-kitab, anniversaries, and private dinners.", "استكشفوا تنسيقات للزفاف وكتب الكتاب والاحتفال بالذكرى والعشاء الخاص."])}</p>
           </div>
           <div className={styles.four}>
@@ -146,6 +146,7 @@ export async function Homepage({ locale }: { locale: Locale }) {
                   <Image src={`/atelier/home/${card.image}.webp`} alt="" fill sizes="(max-width: 520px) 92vw, (max-width: 960px) 46vw, 310px" />
                 </div>
                 <div className={styles.cardBody}>
+                  <span className={styles.eyebrow}>{t(card.kicker)}</span>
                   <h3>{t(card.title)}</h3>
                   <p>{t(card.description)}</p>
                   <Link className={styles.cardLink} href={`${planner}?eventType=${card.eventType}`}>
@@ -157,19 +158,21 @@ export async function Homepage({ locale }: { locale: Locale }) {
           </div>
         </section>
 
-        <section id="venues" className={`${styles.band} ${styles.softBand}`}>
+        <section id="venues" className={`${styles.band} ${styles.warmBand}`}>
           <div className={styles.wrap}>
             <div className={styles.split}>
-              <h2>{t(["Decor for your venue", "ديكور يناسب مكان مناسبتكم"])}</h2>
+              <div>
+                <span className={styles.eyebrow}>{t(["Scenographic settings", "أماكن الاحتفال"])}</span>
+                <h2>{t(["Spatial Settings That Resonate", "مساحات تنبض بأجوائكم"])}</h2>
+              </div>
               <p>{t(["Explore how lighting, fabrics, and florals can shape the venue you choose.", "استكشفوا كيف تغيّر الإضاءة والأقمشة والزهور أجواء المكان الذي تختارونه."])}</p>
             </div>
             <div className={styles.four}>
               {venues.map((card) => (
-                <article className={styles.card} key={card.image}>
-                  <div className={styles.photo}>
-                    <Image src={`/atelier/home/${card.image}.webp`} alt="" fill sizes="(max-width: 520px) 92vw, (max-width: 960px) 46vw, 310px" />
-                  </div>
-                  <div className={styles.cardBody}>
+                <article className={`${styles.overlay} ${styles.venue}`} key={card.image}>
+                  <Image src={`/atelier/home/${card.image}.webp`} alt="" fill sizes="(max-width: 520px) 92vw, (max-width: 960px) 46vw, 25vw" />
+                  <div className={styles.overlayCopy}>
+                    <span className={styles.eyebrow}>{t(card.kicker)}</span>
                     <h3>{t(card.title)}</h3>
                     <p>{t(card.description)}</p>
                   </div>
@@ -181,7 +184,8 @@ export async function Homepage({ locale }: { locale: Locale }) {
 
         <section id="hospitality" className={`${styles.band} ${styles.wrap}`}>
           <div className={styles.sectionTitle}>
-            <h2>{t(["Catering and service", "الضيافة وتقديم الطعام"])}</h2>
+            <span className={styles.eyebrow}>{t(["Artisanal dining", "فن الضيافة"])}</span>
+            <h2>{t(["Gastronomy as Scenography", "الضيافة جزء من المشهد"])}</h2>
             <p>{t(["Choose tray service, a buffet with live cooking, or a plated dinner.", "اختاروا مقبلات تُقدّم على صوانٍ، أو بوفيه مع طهي مباشر، أو عشاءً بأطباق فردية."])}</p>
           </div>
           <div className={styles.three}>
@@ -191,6 +195,7 @@ export async function Homepage({ locale }: { locale: Locale }) {
                   <Image src={`/atelier/home/${card.image}.webp`} alt="" fill sizes="(max-width: 760px) 92vw, 410px" />
                 </div>
                 <div className={styles.cardBody}>
+                  <span className={styles.eyebrow}>{t(card.kicker)}</span>
                   <h3>{t(card.title)}</h3>
                   <p>{t(card.description)}</p>
                   <ul className={styles.tags}>
@@ -205,7 +210,8 @@ export async function Homepage({ locale }: { locale: Locale }) {
         <section className={`${styles.band} ${styles.softBand}`}>
           <div className={styles.wrap}>
             <div className={styles.sectionTitle}>
-              <h2>{t(["How we design your event", "كيف نصمّم مناسبتكم"])}</h2>
+              <span className={styles.eyebrow}>{t(["The atelier approach", "نهج الأتيليه"])}</span>
+              <h2>{t(["Disciplined Scenography", "تصميم مدروس لكل مناسبة"])}</h2>
             </div>
             <div className={styles.three}>
               {principles.map((principle) => (
@@ -221,7 +227,8 @@ export async function Homepage({ locale }: { locale: Locale }) {
         <section id="start" className={`${styles.band} ${styles.wrap}`}>
           <div className={styles.finalPanel}>
             <div className={styles.sectionTitle}>
-              <h2>{t(["Choose your occasion", "اختاروا نوع المناسبة"])}</h2>
+              <span className={styles.eyebrow}>{t(["Your celebration", "مناسبتكم"])}</span>
+              <h2>{t(["Begin Curating Your Celebration", "ابدأوا تنسيق مناسبتكم"])}</h2>
             </div>
             <form action={planner}>
               <fieldset>
@@ -235,7 +242,10 @@ export async function Homepage({ locale }: { locale: Locale }) {
                   ))}
                 </div>
               </fieldset>
-              <button className={styles.primary} type="submit">{t(["Open the planner", "افتحوا استوديو التخطيط"])} <span aria-hidden="true">→</span></button>
+              <div className={styles.actions}>
+                <button className={styles.primary} type="submit">{t(["Open the planner", "افتحوا استوديو التخطيط"])} <span aria-hidden="true">→</span></button>
+                <a className={styles.textLink} href="#concierge">{t(["Event inquiries", "استفسارات المناسبات"])} <span aria-hidden="true">→</span></a>
+              </div>
             </form>
           </div>
         </section>
@@ -245,7 +255,7 @@ export async function Homepage({ locale }: { locale: Locale }) {
         <div className={styles.wrap}>
           <div className={styles.footerGrid}>
             <div>
-              {brand()}
+              {brand(false)}
               <p>{t(["WANAS designs decor and optional catering for celebrations in Cairo.", "تنسّق وناس ديكور المناسبات والضيافة الاختيارية في القاهرة."])}</p>
             </div>
             <div>
@@ -258,7 +268,7 @@ export async function Homepage({ locale }: { locale: Locale }) {
                 {nav.map(({ href, label }) => <Link key={href} href={href}>{label}</Link>)}
               </nav>
             </div>
-            <div>
+            <div id="concierge">
               <h2>{t(["Event inquiries", "استفسارات المناسبات"])}</h2>
               <p>{t(["Tell us about your celebration and request a quote.", "أخبرونا بتفاصيل مناسبتكم واطلبوا عرض سعر."])}</p>
               <Link href={planner} className={styles.secondary}>{t(["Start your request", "ابدأوا طلبكم"])}</Link>

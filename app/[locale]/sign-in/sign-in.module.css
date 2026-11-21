@@ -229,13 +229,11 @@
 
 .emailField input::placeholder { color: var(--portal-muted); }
 
-.formNote,
-.error {
+.formNote {
   margin-block-start: 1.15rem;
   color: var(--portal-text);
   font-size: 0.75rem;
 }
-.error { color: var(--negative); }
 
 .invitation,
 .help {

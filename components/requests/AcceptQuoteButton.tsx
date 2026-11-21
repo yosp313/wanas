@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
+import { toast } from "sonner";
 import { respondToQuote } from "@/app/actions/request-response";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -16,16 +17,18 @@ export function AcceptQuoteButton({ requestId, quoteId, locale }: { requestId: s
   const ar = locale === "ar";
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [message, setMessage] = useState("");
 
   return (
     <span>
       <button className="button" disabled={pending} type="button" onClick={() => startTransition(async () => {
         const result = await respondToQuote(requestId, quoteId, "accept");
-        setMessage(result.ok ? (ar ? "تم تأكيد الحجز" : "Booking confirmed") : errors[result.error][ar ? 1 : 0]);
-        if (result.ok) router.refresh();
+        if (!result.ok) {
+          toast.error(errors[result.error][ar ? 1 : 0]);
+          return;
+        }
+        toast.success(ar ? "تم تأكيد الحجز" : "Booking confirmed");
+        router.refresh();
       })}>{ar ? "قبول العرض" : "Accept quote"}</button>
-      {message && <span role="status"> {message}</span>}
     </span>
   );
 }

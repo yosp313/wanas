@@ -130,6 +130,13 @@ accounts("delivers a quote and confirms and reschedules the booking through the 
     const [requestRow] = await appDb`select customer_id, customer_email from event_requests where id = ${requestId}`;
     assert.equal(requestRow.customer_id, importedId);
     assert.equal(requestRow.customer_email, customerEmail);
+    await customer.goto(origin + "/en/requests");
+    await customer.getByRole("button", { name: /^In review / }).click();
+    const requestSearch = customer.getByRole("searchbox", { name: "Search by reference or venue" });
+    await requestSearch.fill("Other venue");
+    await expect(customer.getByText("No matching requests.")).toBeVisible();
+    await requestSearch.fill("Garden Venue");
+    await expect(customer.getByRole("article").getByText("Garden Venue")).toBeVisible();
     await customer.evaluate(({ key, value }) => sessionStorage.setItem(key, value), { key: draftKey, value: savedDraft });
     await customer.goto(origin + "/en/plan?review=1");
     await customer.getByRole("button", { name: "Submit request" }).click();
@@ -177,6 +184,9 @@ accounts("delivers a quote and confirms and reschedules the booking through the 
     const quoteUrl = quoteMessages[0].text.match(/https?:\/\/\S+/)?.[0];
     assert.ok(quoteUrl);
     assert.equal(quoteUrl, origin + "/en/requests/" + requestId);
+    await customer.goto(origin + "/en/requests");
+    await customer.getByRole("button", { name: /^Proposals ready / }).click();
+    await expect(customer.getByRole("link", { name: "Review proposal" })).toHaveAttribute("href", `/en/requests/${requestId}#quotes`);
 
     const emailSession = await browser.newPage();
     await emailSession.goto(quoteUrl);
@@ -228,6 +238,11 @@ accounts("delivers a quote and confirms and reschedules the booking through the 
     assert.equal(updated.date, newDate);
     assert.equal(updated.revision, 2);
     assert.equal((await appDb`select kind from date_reservations where event_date = ${eventDate}`).length, 0);
+    await emailSession.goto(origin + "/en/requests");
+    await emailSession.getByRole("button", { name: /^Confirmed bookings / }).click();
+    const bookingCard = emailSession.getByRole("article").filter({ hasText: "Booking confirmed" });
+    await expect(bookingCard.locator("time")).toHaveAttribute("datetime", newDate);
+    await expect(bookingCard).toContainText("37,000");
     const outcomes: Email[] = await (await fetch(capture)).json();
     assert.ok(outcomes.some((message) => message.to.includes(customerEmail) && message.subject === "Your WANAS booking was rescheduled"));
 

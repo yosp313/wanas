@@ -3,6 +3,8 @@
 import { useClerk, useSignIn, useSignUp } from "@clerk/nextjs";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { type FormEvent, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useFieldValidation } from "@/components/forms/field-validation";
 import type { Locale } from "@/lib/i18n/config";
 import { safeReturnTo } from "@/lib/i18n/return-to";
 import { emailLinkMessage, finishEmailSignIn } from "./email-link";
@@ -22,11 +24,14 @@ export default function SignInForm({
   const [email, setEmail] = useState("");
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState(callbackError === "link"
-    ? emailLinkMessage("expired", locale)
-    : callbackError === "google"
-      ? ar ? "لم يكتمل تسجيل الدخول باستخدام Google. حاول مرة أخرى." : "Google sign-in didn't finish. Try again."
-      : "");
+  const { field, error } = useFieldValidation();
+  useEffect(() => {
+    if (callbackError === "link") {
+      toast.error(emailLinkMessage("expired", locale), { id: "sign-in-callback" });
+    } else if (callbackError === "google") {
+      toast.error(ar ? "لم يكتمل تسجيل الدخول باستخدام Google. حاول مرة أخرى." : "Google sign-in didn't finish. Try again.", { id: "sign-in-callback" });
+    }
+  }, [ar, callbackError, locale]);
   const query = new URLSearchParams({ returnTo: safeReturnTo(returnTo, locale) });
 
   useEffect(() => {
@@ -39,7 +44,6 @@ export default function SignInForm({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
     setPending(true);
     let linkSent = false;
     try {
@@ -60,7 +64,7 @@ export default function SignInForm({
         window.location.replace(decorateUrl(safeReturnTo(returnTo, locale)));
       }, transfer);
     } catch {
-      setError(linkSent
+      toast.error(linkSent
         ? emailLinkMessage(signIn.firstFactorVerification?.status ?? "failed", locale)
         : ar ? "تعذر إرسال الرابط. حاول مرة أخرى." : "We couldn't send the link. Try again.");
       setSent(false);
@@ -70,7 +74,6 @@ export default function SignInForm({
   }
 
   async function google() {
-    setError("");
     setPending(true);
     try {
       const callback = new URL(`/${locale}/sign-in/sso-callback?${query}`, window.location.origin).href;
@@ -84,7 +87,7 @@ export default function SignInForm({
       if (!redirect) throw new Error("CLERK_GOOGLE_REDIRECT_MISSING");
       window.location.assign(redirect.href);
     } catch {
-      setError(ar ? "تعذر تسجيل الدخول باستخدام Google. حاول مرة أخرى." : "We couldn't start Google sign-in. Try again.");
+      toast.error(ar ? "تعذر تسجيل الدخول باستخدام Google. حاول مرة أخرى." : "We couldn't start Google sign-in. Try again.");
       setPending(false);
     }
   }
@@ -109,8 +112,10 @@ export default function SignInForm({
             <path d="m3 7 9 6 9-6" />
           </svg>
           <input id="email" dir="ltr" type="email" autoComplete="email" required readOnly={pending}
-            placeholder="name@example.com" value={email} onChange={(event) => setEmail(event.target.value)} />
+            placeholder="name@example.com" value={email} onChange={(event) => setEmail(event.target.value)}
+            {...field("email", ar ? "أدخل بريدًا إلكترونيًا صالحًا." : "Enter a valid email address.")} />
         </div>
+        {error("email")}
         {sent ? (
           <>
             <p role="status">{ar ? "افتح الرابط في بريدك، ثم عُد إلى هذه الصفحة." : "Open the link in your email, then return to this tab."}</p>
@@ -125,7 +130,6 @@ export default function SignInForm({
           </button>
         )}
       </form>
-      {error && <p className={styles.error} role="alert">{error}</p>}
       <p className={styles.formNote}>
         {ar ? "سنرسل رابطًا للاستخدام مرة واحدة. لا حاجة إلى كلمة مرور." : "We’ll email you a single-use link. No password needed."}
       </p>

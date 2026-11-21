@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import Link from "next/link";
+import { Toaster } from "sonner";
 import { notFound } from "next/navigation";
 import { isLocale, locales } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -49,6 +50,14 @@ export default async function LocaleLayout({
               </Suspense>
             </nav>
           </header>
+          <Toaster
+            dir={locale === "ar" ? "rtl" : "ltr"}
+            position={locale === "ar" ? "bottom-left" : "bottom-right"}
+            containerAriaLabel={locale === "ar" ? "الإشعارات" : "Notifications"}
+            toastOptions={{ closeButtonAriaLabel: locale === "ar" ? "إغلاق الإشعار" : "Dismiss notification" }}
+            richColors
+            closeButton
+          />
           {children}
           <footer className="atelier-footer">
             <Link className="brand-lockup" href={`/${locale}`}>

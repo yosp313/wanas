@@ -1,7 +1,10 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type FocusEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
+import { FieldError } from "@/components/forms/field-validation";
+import { fieldsByStep, plannerFieldErrors, type PlannerField } from "./field-errors";
 import Image from "next/image";
 import { submitRequestAction } from "@/app/actions/submit-request";
 import { MoodboardGallery } from "./MoodboardGallery";
@@ -71,7 +74,6 @@ const copy = {
     booked: "Booked",
     held: "Held",
     unavailable: "This date is already booked.",
-    required: "Please complete the required fields.",
     failed: "We could not submit the request. Check the details and try again.",
     notRequested: "Not requested",
   },
@@ -103,7 +105,6 @@ const copy = {
     booked: "محجوز",
     held: "معلّق",
     unavailable: "هذا التاريخ محجوز بالفعل.",
-    required: "يرجى إكمال الحقول المطلوبة.",
     failed: "تعذر إرسال الطلب. تحققوا من البيانات وحاولوا مرة أخرى.",
     notRequested: "لا توجد ضيافة",
   },
@@ -277,7 +278,8 @@ export function Planner({ locale }: { locale: Locale }) {
   const [draft, setDraft] = useState<PlannerDraft>(() => emptyDraft(locale));
   const [submissionId, setSubmissionId] = useState("");
   const [step, setStep] = useState(1);
-  const [message, setMessage] = useState("");
+  const [touched, setTouched] = useState<Partial<Record<PlannerField, boolean>>>({});
+  const [dateError, setDateError] = useState("");
   const [bookedDates, setBookedDates] = useState<string[]>([]);
   const [heldDates, setHeldDates] = useState<string[]>([]);
   const [visibleMonth, setVisibleMonth] = useState("");
@@ -286,16 +288,24 @@ export function Planner({ locale }: { locale: Locale }) {
   const [availabilityError, setAvailabilityError] = useState(false);
   const router = useRouter();
   const heading = useRef<HTMLHeadingElement>(null);
-  const focusHeading = useRef(false);
+  const focusTarget = useRef<true | PlannerField | null>(null);
+  function focusField(field: PlannerField) {
+    document.querySelector<HTMLElement>(`[aria-describedby="planner-error-${field}"]`)?.focus();
+  }
+
   useEffect(() => {
-    if (!focusHeading.current) return;
-    focusHeading.current = false;
-    heading.current?.focus();
+    const target = focusTarget.current;
+    focusTarget.current = null;
+    if (target === true) heading.current?.focus();
+    else if (target) focusField(target);
   }, [step]);
-  function goToStep(target: number) {
-    if (target === step) return;
-    focusHeading.current = true;
-    setMessage("");
+
+  function goToStep(target: number, field?: PlannerField) {
+    if (target === step) {
+      if (field) focusField(field);
+      return;
+    }
+    focusTarget.current = field ?? true;
     setStep(target);
   }
   // sessionStorage is tab-scoped and only exists after hydration.
@@ -374,56 +384,56 @@ export function Planner({ locale }: { locale: Locale }) {
     field: K,
     value: PlannerDraft[K],
   ) => setDraft((current) => ({ ...current, [field]: value }));
-  const valid = useMemo(
-    () =>
-      step === 1
-        ? !!draft.eventType &&
-          Number.isInteger(draft.guestCount) &&
-          Number(draft.guestCount) >= 1 &&
-          Number(draft.guestCount) <= 100_000 &&
-          !!draft.eventDate &&
-          draft.eventDate >= minimumDate &&
-          !bookedDates.includes(draft.eventDate) &&
-          !!draft.venueName &&
-          !!draft.streetAddress &&
-          !!draft.venueType &&
-          !!draft.budgetRange &&
-          (draft.eventType !== "other" || !!draft.eventTypeOther) &&
-          (draft.venueType !== "other" || !!draft.venueTypeOther)
-        : step === 2
-          ? !!draft.decorMode
-          : step === 4
-            ? !!draft.customerName && !!draft.mobile
-            : true,
-    [bookedDates, draft, minimumDate, step],
+  const submission = useMemo(() => ({
+    ...draft,
+    eventTypeOther: draft.eventType === "other" ? draft.eventTypeOther : "",
+    venueTypeOther: draft.venueType === "other" ? draft.venueTypeOther : "",
+  }), [draft]);
+  const errors = useMemo(
+    () => ({ ...plannerFieldErrors(submission, minimumDate, bookedDates), ...(dateError ? { eventDate: dateError } : {}) }),
+    [bookedDates, dateError, minimumDate, submission],
   );
+
+  function touch(field: PlannerField) {
+    setTouched((current) => current[field] ? current : { ...current, [field]: true });
+  }
+
+  function fieldProps(field: PlannerField) {
+    return {
+      "aria-describedby": `planner-error-${field}`,
+      "aria-invalid": touched[field] && errors[field] ? true : undefined,
+      onBlur(event: FocusEvent<HTMLElement>) {
+        if (!event.currentTarget.contains(event.relatedTarget)) touch(field);
+      },
+    };
+  }
+
+  function fieldError(field: PlannerField) {
+    return <FieldError id={`planner-error-${field}`} message={touched[field] ? errors[field] : undefined} />;
+  }
+
+  function validateStep(target: number) {
+    const fields = fieldsByStep[target - 1];
+    const invalid = fields.find((field) => errors[field]);
+    if (!invalid) return true;
+    setTouched((current) => ({ ...current, ...Object.fromEntries(fields.map((field) => [field, true])) }));
+    goToStep(target, invalid);
+    return false;
+  }
+
   const next = () => {
-    if (!valid) {
-      setMessage(
-        draft.eventDate && bookedDates.includes(draft.eventDate)
-          ? t.unavailable
-          : t.required,
-      );
-      return;
-    }
-    goToStep(step + 1);
+    if (validateStep(step)) goToStep(step + 1);
   };
   const submit = async () => {
-    if (!valid) {
-      setMessage(t.required);
-      return;
-    }
     if (!submissionId || submitting) return;
+    if (![1, 2, 4].every(validateStep)) return;
     setSubmitting(true);
-    setMessage(
-      locale === "ar" ? "جاري إرسال الطلب..." : "Sending your request...",
-    );
     let response;
     try {
-      response = await submitRequestAction(draft, submissionId);
+      response = await submitRequestAction(submission, submissionId);
     } catch {
       setSubmitting(false);
-      setMessage(t.failed);
+      toast.error(t.failed);
       return;
     }
     if (!response.ok) {
@@ -432,15 +442,15 @@ export function Planner({ locale }: { locale: Locale }) {
         router.push(`/${locale}/sign-in?returnTo=/${locale}/plan?review=1`);
         return;
       }
-      setMessage(
-        response.error === "DATE_UNAVAILABLE"
+      if (response.error === "DATE_UNAVAILABLE" || response.error === "DATE_NOTICE") {
+        setDateError(response.error === "DATE_UNAVAILABLE"
           ? t.unavailable
-          : response.error === "DATE_NOTICE"
-            ? locale === "ar"
-              ? "اختر موعدًا بعد 10 أيام على الأقل."
-              : "Choose a date at least 10 days away."
-            : t.failed,
-      );
+          : locale === "ar" ? "اختاروا موعدًا بعد 10 أيام على الأقل." : "Choose a date at least 10 days away.");
+        touch("eventDate");
+        goToStep(1, "eventDate");
+      } else {
+        toast.error(t.failed);
+      }
       return;
     }
     try {
@@ -448,6 +458,7 @@ export function Planner({ locale }: { locale: Locale }) {
     } catch {
       /* storage can be disabled */
     }
+    toast.success(locale === "ar" ? "تم إرسال الطلب." : "Request sent.");
     router.push(`/${locale}/requests/${response.result.requestId}`);
   };
   const eventLabel = draft.eventType
@@ -527,7 +538,9 @@ export function Planner({ locale }: { locale: Locale }) {
       )
     : t.notRequested;
   function selectDate(date: string) {
+    setDateError("");
     update("eventDate", date);
+    touch("eventDate");
     if (date) setVisibleMonth(date.slice(0, 7));
   }
   return (
@@ -620,7 +633,7 @@ export function Planner({ locale }: { locale: Locale }) {
                   <div className={styles.sectionHeading}>
                     <h2>{t.eventType}</h2>
                   </div>
-                  <div className={styles.eventGrid}>
+                  <div className={styles.eventGrid} role="group" aria-label={t.eventType} {...fieldProps("eventType")} tabIndex={-1}>
                     {catalog.eventTypes.map((option) => (
                       <button
                         type="button"
@@ -639,16 +652,19 @@ export function Planner({ locale }: { locale: Locale }) {
                       </button>
                     ))}
                   </div>
+                  {fieldError("eventType")}
                   {draft.eventType === "other" && (
                     <label>
                       {locale === "ar" ? "وصف المناسبة" : "Describe your event"}
                       <input
                         required
+                        {...fieldProps("eventTypeOther")}
                         value={draft.eventTypeOther}
                         onChange={(event) =>
                           update("eventTypeOther", event.target.value)
                         }
                       />
+                      {fieldError("eventTypeOther")}
                     </label>
                   )}
                 </section>
@@ -710,8 +726,11 @@ export function Planner({ locale }: { locale: Locale }) {
                     {t.guests}
                     <input
                       type="number"
+                      aria-label={t.guests}
+                      required
                       min="1"
                       max="100000"
+                      {...fieldProps("guestCount")}
                       value={draft.guestCount}
                       onChange={(event) =>
                         update(
@@ -722,6 +741,7 @@ export function Planner({ locale }: { locale: Locale }) {
                         )
                       }
                     />
+                    {fieldError("guestCount")}
                   </label>
                   <div className={styles.formula}>
                     <div>
@@ -746,7 +766,7 @@ export function Planner({ locale }: { locale: Locale }) {
                   <div className={styles.sectionHeading}>
                     <h2>{t.venueType}</h2>
                   </div>
-                  <div className={styles.venueGrid}>
+                  <div className={styles.venueGrid} role="group" aria-label={t.venueType} {...fieldProps("venueType")} tabIndex={-1}>
                     {venueOptions.map((option) => (
                       <button
                         type="button"
@@ -773,16 +793,19 @@ export function Planner({ locale }: { locale: Locale }) {
                       </button>
                     ))}
                   </div>
+                  {fieldError("venueType")}
                   {draft.venueType === "other" && (
                     <label>
                       {locale === "ar" ? "وصف المكان" : "Describe the venue"}
                       <input
                         required
+                        {...fieldProps("venueTypeOther")}
                         value={draft.venueTypeOther}
                         onChange={(event) =>
                           update("venueTypeOther", event.target.value)
                         }
                       />
+                      {fieldError("venueTypeOther")}
                     </label>
                   )}
                   <div className={styles.fieldGrid}>
@@ -790,6 +813,8 @@ export function Planner({ locale }: { locale: Locale }) {
                       {t.venue}
                       <input
                         aria-label={t.venue}
+                        required
+                        {...fieldProps("venueName")}
                         value={draft.venueName}
                         onChange={(event) =>
                           update("venueName", event.target.value)
@@ -798,11 +823,14 @@ export function Planner({ locale }: { locale: Locale }) {
                           locale === "ar" ? "اسم المكان" : "Venue name"
                         }
                       />
+                      {fieldError("venueName")}
                     </label>
                     <label>
                       {t.address}
                       <input
                         aria-label={t.address}
+                        required
+                        {...fieldProps("streetAddress")}
                         value={draft.streetAddress}
                         onChange={(event) =>
                           update("streetAddress", event.target.value)
@@ -813,6 +841,7 @@ export function Planner({ locale }: { locale: Locale }) {
                             : "Area and street"
                         }
                       />
+                      {fieldError("streetAddress")}
                     </label>
                   </div>
                 </section>
@@ -820,12 +849,15 @@ export function Planner({ locale }: { locale: Locale }) {
                   <div className={styles.sectionHeading}>
                     <h2>{t.budget}</h2>
                   </div>
-                  <Options
-                    group="budgetRanges"
-                    locale={locale}
-                    value={draft.budgetRange}
-                    onChange={(value) => update("budgetRange", value)}
-                  />
+                  <div role="group" aria-label={t.budget} {...fieldProps("budgetRange")} tabIndex={-1}>
+                    <Options
+                      group="budgetRanges"
+                      locale={locale}
+                      value={draft.budgetRange}
+                      onChange={(value) => update("budgetRange", value)}
+                    />
+                  </div>
+                  {fieldError("budgetRange")}
                 </section>
                 <section className={styles.calendarBlock}>
                   <h2>
@@ -843,10 +875,14 @@ export function Planner({ locale }: { locale: Locale }) {
                       {t.date}
                       <input
                         type="date"
+                        aria-label={t.date}
+                        required
+                        {...fieldProps("eventDate")}
                         value={draft.eventDate}
                         min={minimumDate}
                         onChange={(event) => selectDate(event.target.value)}
                       />
+                      {fieldError("eventDate")}
                     </label>
                     {visibleMonth && (
                       <AvailabilityCalendar
@@ -873,7 +909,7 @@ export function Planner({ locale }: { locale: Locale }) {
             )}
             {step === 2 && (
               <>
-                <div className={styles.pathGrid}>
+                <div className={styles.pathGrid} role="group" aria-label={t.design} {...fieldProps("decorMode")} tabIndex={-1}>
                   <button
                     type="button"
                     aria-pressed={draft.decorMode === "curate"}
@@ -909,6 +945,7 @@ export function Planner({ locale }: { locale: Locale }) {
                     </span>
                   </button>
                 </div>
+                {fieldError("decorMode")}
                 {draft.decorMode === "customize" && (
                   <>
                     <MoodboardGallery
@@ -970,6 +1007,7 @@ export function Planner({ locale }: { locale: Locale }) {
                     {t.notes}
                     <textarea
                       aria-label={t.notes}
+                      {...fieldProps("notes")}
                       value={draft.notes}
                       onChange={(event) => update("notes", event.target.value)}
                       placeholder={
@@ -978,17 +1016,20 @@ export function Planner({ locale }: { locale: Locale }) {
                           : "Traditions, motifs, or details you love..."
                       }
                     />
+                    {fieldError("notes")}
                   </label>
                   <label>
                     {t.links}
                     <input
                       aria-label={t.links}
+                      {...fieldProps("inspirationLinks")}
                       value={draft.inspirationLinks}
                       onChange={(event) =>
                         update("inspirationLinks", event.target.value)
                       }
                       placeholder="https://..."
                     />
+                    {fieldError("inspirationLinks")}
                   </label>
                 </div>
               </>
@@ -1101,28 +1142,29 @@ export function Planner({ locale }: { locale: Locale }) {
                     {t.name}
                     <input
                       aria-label={t.name}
+                      required
+                      {...fieldProps("customerName")}
                       value={draft.customerName}
                       onChange={(event) =>
                         update("customerName", event.target.value)
                       }
                     />
+                    {fieldError("customerName")}
                   </label>
                   <label>
                     {t.mobile}
                     <input
                       aria-label={t.mobile}
+                      required
                       type="tel"
+                      {...fieldProps("mobile")}
                       value={draft.mobile}
                       onChange={(event) => update("mobile", event.target.value)}
                     />
+                    {fieldError("mobile")}
                   </label>
                 </div>
               </>
-            )}
-            {message && (
-              <p className={styles.message} role="status">
-                {message}
-              </p>
             )}
             <div className={styles.actions}>
               {step > 1 && (
@@ -1141,7 +1183,7 @@ export function Planner({ locale }: { locale: Locale }) {
                   onClick={submit}
                   disabled={submitting}
                 >
-                  {t.submit} <span aria-hidden="true">→</span>
+                  {submitting ? (locale === "ar" ? "جارٍ الإرسال…" : "Sending…") : t.submit} <span aria-hidden="true">→</span>
                 </button>
               )}
             </div>

@@ -35,7 +35,7 @@ export default async function CustomerRequestPage({ params }: { params: Promise<
         {canWithdraw && <RequestLifecycleActions requestId={requestId} locale={locale} />}
       </section>
       {data.quotes.length > 0 && (
-        <section>
+        <section id="quotes">
           <h2>{ar ? "عروض الأسعار" : "Quotes"}</h2>
           <ul>{data.quotes.map((quote) => (
             <li key={quote.id}>
@@ -55,7 +55,7 @@ export default async function CustomerRequestPage({ params }: { params: Promise<
         const confirmed = booking.status === "confirmed";
         const changes = data.changes.filter((change) => change.bookingId === booking.id);
         return (
-          <section key={booking.id}>
+          <section key={booking.id} id={`booking-${booking.id}`}>
             <h2>{confirmed ? (ar ? "تم تأكيد الحجز" : "Booking confirmed") : (ar ? "أُلغي الحجز" : "Booking cancelled")}</h2>
             <p><time dateTime={booking.eventDate}>{booking.eventDate}</time></p>
             {typeof terms?.services === "string" && <p>{terms.services}</p>}

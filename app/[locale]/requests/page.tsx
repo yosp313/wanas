@@ -1,66 +1,108 @@
+import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCustomerRequests } from "@/lib/server/requests/queries";
+import { Suspense } from "react";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/config";
 import { withPageAccess } from "@/lib/server/auth/page-access";
+import { getCustomerRequests } from "@/lib/server/requests/queries";
+import { cairoDateString } from "@/lib/server/time/cairo";
+import LocaleSwitcher from "../locale-switcher";
+import { requestEntry } from "./request-card";
+import { RequestList } from "./request-list";
+import styles from "./requests.module.css";
 
-const statusLabels = {
-  en: {
-    submitted: "Submitted",
-    quoted: "Quote ready",
-    booked: "Booked",
-    closed: "Closed",
-  },
-  ar: {
-    submitted: "تم الإرسال",
-    quoted: "العرض جاهز",
-    booked: "تم الحجز",
-    closed: "مغلق",
-  },
-} as const;
-
-export default async function RequestsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function RequestsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+  const home = `/${locale}`;
+  const path = `${home}/requests`;
+  const planner = `${home}/plan`;
+  const requests = await withPageAccess(locale, path, getCustomerRequests);
   const dictionary = await getDictionary(locale);
-  const requests = await withPageAccess(
-    locale,
-    `/${locale}/requests`,
-    getCustomerRequests,
-  );
+  const ar = locale === "ar";
+  const t = (en: string, arabic: string) => ar ? arabic : en;
+  const today = cairoDateString(new Date());
+  const entries = requests.map((request) => requestEntry(request, locale, today));
+
   return (
-    <main className="shell" dir={locale === "ar" ? "rtl" : "ltr"}>
-      <section>
-        <h1>{dictionary.myRequests}</h1>
-        {requests.length === 0 ? (
-          <div className="empty-request-list">
-            <p>{dictionary.noRequests}</p>
-            <Link className="button" href={`/${locale}/plan`}>
-              {locale === "ar" ? "خططوا لحفلكم" : "Plan your event"}
+    <div className={styles.portal}>
+      <header className={styles.header}>
+        <div className={`${styles.wrap} ${styles.headerInner}`}>
+          <Link className={styles.brand} href={home}>
+            <span>WANAS</span>
+            <small>{t("Atelier", "أتيليه")}</small>
+          </Link>
+          <nav aria-label={t("Main navigation", "التنقل الرئيسي")}>
+            <Link href={`${home}#ceremonies`}>{t("Ceremonies", "المراسم")}</Link>
+            <Link href={planner}>{t("Planning studio", "استوديو التخطيط")}</Link>
+            <Link href={path} aria-current="page">{dictionary.myRequests}</Link>
+            <a href="#concierge">{t("Concierge support", "دعم وناس")}</a>
+          </nav>
+          <div className={styles.account}>
+            <span className={styles.client}>{t("Private client", "عميل خاص")}</span>
+            <Suspense><LocaleSwitcher locale={locale} label={dictionary.switchLanguage} /></Suspense>
+            <UserButton />
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <section className={styles.hero}>
+          <div className={`${styles.wrap} ${styles.heroInner}`}>
+            <div>
+              <p className={styles.eyebrow}>{t("Private client portal", "بوابة العملاء")}</p>
+              <h1>{t("My Celebration Requests", "طلبات مناسباتي")}</h1>
+              <p>{t("Track your event plans, review proposals, and manage your bookings with WANAS.",
+                "تابعوا خطط مناسباتكم وراجعوا عروض الأسعار وأديروا حجوزاتكم مع وناس.")}</p>
+            </div>
+            <Link className={styles.primary} href={planner}>
+              <span aria-hidden="true">+</span>{t("New celebration inquiry", "طلب مناسبة جديد")}
             </Link>
           </div>
-        ) : (
-          <ul className="request-list">
-            {requests.map((request) => (
-              <li key={request.id}>
-                <Link href={`/${locale}/requests/${request.id}`}>
-                  {request.eventDate}
-                </Link>
-                <span className={`status status-${request.status}`}>
-                  {statusLabels[locale][
-                    request.status as keyof typeof statusLabels.en
-                  ] ?? request.status}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </main>
+        </section>
+
+        <div className={`${styles.wrap} ${styles.workspace}`}>
+          <RequestList entries={entries} locale={locale} emptyMessage={dictionary.noRequests} />
+          <section className={styles.support} id="concierge">
+            <div>
+              <p className={styles.eyebrow}>{t("WANAS dedicated support", "دعم وناس")}</p>
+              <h2>{t("Need help with your celebration?", "هل تحتاجون إلى مساعدة بشأن مناسبتكم؟")}</h2>
+              <p>{t("Keep your request reference handy when you get in touch about your plans.",
+                "احتفظوا بالرقم المرجعي لطلبكم عند التواصل بشأن خطط مناسبتكم.")}</p>
+            </div>
+            <dl>
+              <div>
+                <dt>{t("Request correspondence", "مراسلات الطلب")}</dt>
+                <dd>{t("See your WANAS emails", "راجعوا رسائل وناس")}</dd>
+              </div>
+              <div>
+                <dt>{t("Booking changes", "تعديل الحجوزات")}</dt>
+                <dd><a href="#request-list">{t("Open a booking", "افتحوا أحد الحجوزات")}</a></dd>
+              </div>
+              <div>
+                <dt>{t("Design studio", "استوديو التصميم")}</dt>
+                <dd>{t("Cairo, Egypt", "القاهرة، مصر")}</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+      </main>
+
+      <footer className={styles.footer}>
+        <div className={`${styles.wrap} ${styles.footerInner}`}>
+          <div>
+            <Link className={styles.brand} href={home}>WANAS ATELIER</Link>
+            <p>{t("Celebration design in Cairo", "تصميم وتنسيق المناسبات في القاهرة")}</p>
+          </div>
+          <nav aria-label={t("WANAS links", "روابط وناس")}>
+            <Link href={`${home}#ceremonies`}>{t("Ceremonies", "المراسم")}</Link>
+            <Link href={planner}>{t("Planning studio", "استوديو التخطيط")}</Link>
+            <a href="#concierge">{t("Concierge support", "دعم وناس")}</a>
+          </nav>
+          <p>© WANAS Atelier</p>
+        </div>
+      </footer>
+    </div>
   );
 }

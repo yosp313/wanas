@@ -1,6 +1,6 @@
 import "server-only";
 import { and, eq, sql } from "drizzle-orm";
-import { z } from "zod";
+import { draftSchema, validInspirationLinks } from "@/lib/planner/validation";
 import { requireCustomer } from "@/lib/server/auth/guards";
 import { enqueueNotification } from "@/lib/server/notifications/enqueue";
 import { withMutation, lockDate, readDatabaseClock } from "@/lib/server/db/transactions";
@@ -13,29 +13,6 @@ import type { PlannerDraft } from "@/lib/planner/types";
 export type SubmitResult = { requestId: string; existing: boolean };
 
 function fail(message: string): never { throw new Error(`VALIDATION:${message}`); }
-const text = z.string().trim();
-const draftSchema = z.object({
-  locale: z.enum(["ar", "en"]),
-  eventType: text.min(1),
-  eventTypeOther: text.max(200),
-  guestCount: z.number().int().min(1).max(100_000),
-  eventDate: z.iso.date(),
-  venueName: text.min(1).max(200),
-  streetAddress: text.min(1).max(500),
-  venueType: text.min(1),
-  venueTypeOther: text.max(200),
-  budgetRange: text.min(1),
-  decorMode: z.enum(["curate", "customize"]),
-  moodboard: text.max(100),
-  palette: text.max(100),
-  decorElements: z.array(text).max(20),
-  cateringRequested: z.boolean(),
-  cateringOption: text.max(100),
-  notes: text.max(5000),
-  inspirationLinks: text.max(2000),
-  customerName: text.min(1).max(200),
-  mobile: text.regex(/^\+?[\p{Nd} ()-]{7,25}$/u).refine((value) => (value.match(/\p{Nd}/gu)?.length ?? 0) >= 7),
-});
 
 function validate(input: PlannerDraft) {
   const result = draftSchema.safeParse(input);
@@ -56,10 +33,7 @@ function validate(input: PlannerDraft) {
   if ((draft.cateringRequested || draft.cateringOption) && !isCatalogId("cateringOptions", draft.cateringOption)) {
     fail("INVALID_CATERING");
   }
-  for (const link of draft.inspirationLinks.split(/\s+/).filter(Boolean)) {
-    const url = URL.parse(link);
-    if (!url || !["https:", "http:"].includes(url.protocol)) fail("INVALID_INSPIRATION_LINK");
-  }
+  if (!validInspirationLinks(draft.inspirationLinks)) fail("INVALID_INSPIRATION_LINK");
   return { ...draft, decorElements: [...new Set(draft.decorElements)] };
 }
 
