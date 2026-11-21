@@ -5,6 +5,7 @@ import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { FieldError } from "@/components/forms/field-validation";
+import { WanasWordmark } from "@/components/WanasWordmark";
 import { fieldsByStep, plannerFieldErrors, type PlannerField } from "./field-errors";
 import Image from "next/image";
 import { submitRequestAction } from "@/app/actions/submit-request";
@@ -562,13 +563,7 @@ export function Planner({ locale }: { locale: Locale }) {
     <div className={styles.shell} data-planner data-curation={curationStep || undefined} dir={ar ? "rtl" : "ltr"}>
       <header className={styles.topbar}>
         <div className={styles.content}>
-          <Link className={styles.brand} href={`/${locale}`}>
-            <span className={styles.symbol} aria-hidden="true">spa</span>
-            <span className="brand-lockup">
-              <span>WANAS ATELIER</span>
-              <small>{ar ? "تصميم وتنسيق المناسبات" : "Celebration & spatial design"}</small>
-            </span>
-          </Link>
+          <WanasWordmark locale={locale} />
 
           <nav className={styles.topActions} aria-label={ar ? "التنقل الرئيسي" : "Main navigation"}>
             <Link href={`/${locale}/requests`}>
@@ -1289,7 +1284,7 @@ export function Planner({ locale }: { locale: Locale }) {
       <footer className={styles.footer}>
         <div className={styles.content}>
           <div>
-            <Link className="brand-lockup" href={`/${locale}`}>WANAS ATELIER</Link>
+            <WanasWordmark locale={locale} />
             <p>{ar ? "تصميم وتنسيق المناسبات والضيافة في القاهرة." : "Celebration design, venue styling, and hospitality in Cairo."}</p>
           </div>
           <nav aria-label={ar ? "روابط وناس" : "WANAS links"}>

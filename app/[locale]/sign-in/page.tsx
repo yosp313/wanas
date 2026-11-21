@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
+import { WanasWordmark } from "@/components/WanasWordmark";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { safeReturnTo } from "@/lib/i18n/return-to";
@@ -66,10 +67,7 @@ export default async function SignInPage({
             </Link>
             <Link className={styles.studioLink} href={studio}>{ar ? "اكتشفوا الاستوديو" : "Explore Studio"}</Link>
           </nav>
-          <Link className={styles.brand} href={home}>
-            <span lang="en">WANAS</span>
-            <small>{ar ? "ونس · تصميم الاحتفالات والمساحات" : "ونس · Celebrations & Spatial Design"}</small>
-          </Link>
+          <WanasWordmark locale={locale} />
           <nav aria-label={ar ? "روابط الحساب" : "Account navigation"}>
             <span className={styles.current} aria-current="page">{dictionary.signIn}</span>
             <Link className={styles.headerPlan} href={plan}>{ar ? "خططوا لحفلكم" : "Plan an event"}</Link>
@@ -141,7 +139,7 @@ export default async function SignInPage({
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <div>
-            <Link href={home} className={styles.footerBrand}>{ar ? "أتيليه وناس" : "WANAS Atelier"}</Link>
+            <WanasWordmark locale={locale} />
             <p>{ar ? "تصميم الاحتفالات والمساحات بتفاصيل خاصة بكم" : "Bespoke celebration design & spatial storytelling"}</p>
           </div>
           <nav aria-label={ar ? "روابط وناس" : "WANAS links"}>

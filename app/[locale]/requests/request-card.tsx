@@ -145,10 +145,10 @@ export function requestEntry(request: Request, locale: Locale, today: string): R
           )}
           {group === "confirmed" && <p className={styles.bookingNote}>{t("Your celebration date is reserved.", "تم حجز موعد مناسبتكم.")}</p>}
           <div className={styles.cardActions}>
-            {(quote || group === "confirmed") && <Link className={styles.secondary} href={href}>{t("View request", "عرض الطلب")}</Link>}
-            <Link className={group === "review" || group === "past" ? styles.secondary : styles.primary}
-              href={quote ? `${href}#quotes` : booking ? `${href}#booking-${booking.id}` : href}>
-              {quote ? t("Review proposal", "مراجعة العرض") : booking ? t("View booking", "عرض الحجز") : t("View request", "عرض الطلب")}
+            {quote && <Link className={styles.secondary} href={href}>{t("View request", "عرض الطلب")}</Link>}
+            <Link className={quote ? styles.primary : styles.secondary}
+              href={quote ? `${href}#quotes` : href}>
+              {quote ? t("Review proposal", "مراجعة العرض") : t("View request", "عرض الطلب")}
             </Link>
           </div>
         </footer>

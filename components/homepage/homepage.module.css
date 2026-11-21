@@ -68,33 +68,6 @@
   padding-block: 12px;
 }
 
-.brand {
-  display: inline-grid;
-  gap: 5px;
-  flex: none;
-  width: fit-content;
-  max-width: 100%;
-  color: var(--ink);
-}
-.brand > span {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font: 700 28px/1 "EB Garamond", Georgia, serif;
-  letter-spacing: .09em;
-}
-.brand > span::before {
-  content: "";
-  order: 1;
-  height: 20px;
-  border-inline-start: 1px solid var(--accent);
-}
-.brand bdi {
-  order: 2;
-  color: var(--accent);
-  font: 500 16px/1.4 "Noto Sans Arabic", sans-serif;
-  letter-spacing: 0;
-}
 .headerActions {
   flex-wrap: wrap;
   gap: 4px 14px;
@@ -436,7 +409,7 @@
   letter-spacing: .15em;
   text-transform: uppercase;
 }
-.site .footerGrid :is(.brand, p) { margin-block-end: 14px; }
+.site .footerGrid :is(p, a:has(bdi)) { margin-block-end: 14px; }
 .footer .secondary { width: 100%; background: var(--tint); }
 .footer .secondary:hover { background: #efd6c8; }
 .footer nav { display: grid; gap: 6px; }

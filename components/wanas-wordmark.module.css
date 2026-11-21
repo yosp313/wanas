@@ -1,0 +1,27 @@
+.wordmark {
+  display: inline-grid;
+  flex: none;
+  width: fit-content;
+  max-width: 100%;
+  text-decoration: none;
+}
+.wordmark > span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #261b16;
+  font: 700 28px/1 "EB Garamond", Georgia, serif;
+  letter-spacing: .09em;
+}
+.wordmark > span::before {
+  content: "";
+  order: 1;
+  height: 20px;
+  border-inline-start: 1px solid #98440e;
+}
+.wordmark bdi {
+  order: 2;
+  color: #98440e;
+  font: 500 16px/1.4 "Noto Sans Arabic", sans-serif;
+  letter-spacing: 0;
+}

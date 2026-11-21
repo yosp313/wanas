@@ -4,6 +4,7 @@ import { ClerkProvider, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { Toaster } from "sonner";
 import { notFound } from "next/navigation";
+import { WanasWordmark } from "@/components/WanasWordmark";
 import { isLocale, locales } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import LocaleSwitcher from "./locale-switcher";
@@ -34,10 +35,7 @@ export default async function LocaleLayout({
       <body>
         <ClerkProvider signInUrl={`/${locale}/sign-in`} signUpUrl={`/${locale}/sign-in`} afterSignOutUrl={`/${locale}`}>
           <header className="locale-header">
-            <Link className="brand-lockup" href={`/${locale}`}>
-              <span>WANAS</span>
-              <small>{locale === "ar" ? "أتيليه · القاهرة" : "Atelier · Cairo"}</small>
-            </Link>
+            <WanasWordmark locale={locale} />
             <nav aria-label={locale === "ar" ? "التنقل الرئيسي" : "Main navigation"}>
               <Link href={`/${locale}/plan`}>
                 {locale === "ar" ? "خططوا لحفلكم" : "Plan an event"}
@@ -59,10 +57,7 @@ export default async function LocaleLayout({
           />
           {children}
           <footer className="atelier-footer">
-            <Link className="brand-lockup" href={`/${locale}`}>
-              <span>WANAS</span>
-              <small>{locale === "ar" ? "القاهرة · مصر" : "Cairo · Egypt"}</small>
-            </Link>
+            <WanasWordmark locale={locale} />
             <nav aria-label={locale === "ar" ? "روابط وناس" : "WANAS links"}>
               <Link href={`/${locale}/plan`}>
                 {locale === "ar" ? "خططوا لحفلكم" : "Plan an event"}

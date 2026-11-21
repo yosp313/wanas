@@ -1145,14 +1145,6 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
   flex-wrap: wrap;
 }
 .topbar > .content { min-height: 84px; padding-block: 12px; }
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-}
-.brand :global(.brand-lockup) { font-weight: 600; }
-.brand :global(.brand-lockup) small { color: var(--muted); }
 .topActions,
 .footer nav {
   display: flex;

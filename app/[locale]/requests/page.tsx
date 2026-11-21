@@ -2,6 +2,7 @@ import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { WanasWordmark } from "@/components/WanasWordmark";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/config";
 import { withPageAccess } from "@/lib/server/auth/page-access";
@@ -29,10 +30,7 @@ export default async function RequestsPage({ params }: { params: Promise<{ local
     <div className={styles.portal}>
       <header className={styles.header}>
         <div className={`${styles.wrap} ${styles.headerInner}`}>
-          <Link className={styles.brand} href={home}>
-            <span>WANAS</span>
-            <small>{t("Atelier", "أتيليه")}</small>
-          </Link>
+          <WanasWordmark locale={locale} />
           <nav aria-label={t("Main navigation", "التنقل الرئيسي")}>
             <Link href={`${home}#ceremonies`}>{t("Ceremonies", "المراسم")}</Link>
             <Link href={planner}>{t("Planning studio", "استوديو التخطيط")}</Link>
@@ -92,7 +90,7 @@ export default async function RequestsPage({ params }: { params: Promise<{ local
       <footer className={styles.footer}>
         <div className={`${styles.wrap} ${styles.footerInner}`}>
           <div>
-            <Link className={styles.brand} href={home}>WANAS ATELIER</Link>
+            <WanasWordmark locale={locale} />
             <p>{t("Celebration design in Cairo", "تصميم وتنسيق المناسبات في القاهرة")}</p>
           </div>
           <nav aria-label={t("WANAS links", "روابط وناس")}>

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import LocaleSwitcher from "@/app/[locale]/locale-switcher";
+import { WanasWordmark } from "@/components/WanasWordmark";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import { ceremonies, dining, highlights, principles, studioSteps, venues } from "./content";
@@ -24,19 +25,11 @@ export async function Homepage({ locale }: { locale: Locale }) {
     { href: "#concierge", label: t(["Concierge", "استفسارات"]) },
   ];
 
-  function brand() {
-    return (
-      <Link className={styles.brand} href={home}>
-        <span dir="ltr">WANAS <bdi lang="ar">وَنَس</bdi></span>
-      </Link>
-    );
-  }
-
   return (
     <div className={styles.site}>
       <header className={styles.header}>
         <div className={`${styles.wrap} ${styles.headerInner}`}>
-          {brand()}
+          <WanasWordmark locale={locale} />
           <nav className={styles.headerActions} aria-label={t(["Main navigation", "التنقل الرئيسي"])}>
             <a href="#ceremonies">{t(["Portfolio", "أعمالنا"])}</a>
             <Link href={requests}>{dictionary.myRequests}</Link>
@@ -244,7 +237,7 @@ export async function Homepage({ locale }: { locale: Locale }) {
         <div className={styles.wrap}>
           <div className={styles.footerGrid}>
             <div>
-              {brand()}
+              <WanasWordmark locale={locale} />
               <p>{t(["WANAS designs decor and optional catering for celebrations in Cairo.", "تنسّق وناس ديكور المناسبات والضيافة الاختيارية في القاهرة."])}</p>
             </div>
             <div>

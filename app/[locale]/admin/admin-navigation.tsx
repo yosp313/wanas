@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { WanasWordmark } from "@/components/WanasWordmark";
 import type { Locale } from "@/lib/i18n/config";
 import LocaleSwitcher from "../locale-switcher";
 import { CalendarIcon } from "./calendar/icons";
@@ -25,7 +26,7 @@ export function AdminNavigation({ locale }: { locale: Locale }) {
     >
       {workspace ? (
         <div className={styles.brand}>
-          <bdi>WANAS <i aria-hidden="true">|</i> <em lang="ar">وَنَس</em></bdi>
+          <WanasWordmark locale={locale} />
           <small>{ar ? "إدارة الأتيليه" : "Atelier admin"}</small>
         </div>
       ) : <span>{ar ? "إدارة وناس" : "Wanas Studio"}</span>}

@@ -45,22 +45,6 @@
 }
 
 .headerInner { min-height: 80px; }
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 16px;
-  white-space: nowrap;
-  font: 500 26px/1 "EB Garamond", Georgia, serif;
-  letter-spacing: .17em;
-}
-
-.brand small {
-  color: var(--portal-muted);
-  font: 600 10px/1.4 var(--body);
-  letter-spacing: .22em;
-  text-transform: uppercase;
-}
-
 .header nav,
 .footer nav,
 .account {
@@ -400,7 +384,6 @@
 .empty { color: var(--portal-text); text-align: center; }
 
 .footer { padding-block: 36px; background: var(--portal-blush); }
-.footer .brand { font-size: 21px; }
 .footer p { margin-block-start: 5px; color: var(--portal-muted); font-size: 12px; }
 .footer nav { font-size: 12px; text-transform: uppercase; }
 

@@ -136,23 +136,6 @@ a { color: var(--accent); }
 }
 body:has([data-planner]) .locale-header { display: none; }
 body:has([data-client-sign-in]) > :is(.locale-header, .atelier-footer) { display: none; }
-.brand-lockup {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 4px;
-  width: fit-content;
-  color: var(--ink);
-  font: 500 28px/1 "EB Garamond", Georgia, serif;
-  letter-spacing: 0.06em;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.brand-lockup small {
-  color: var(--muted);
-  font: 500 12px/1.4 var(--body);
-  letter-spacing: 0;
-}
-[dir="rtl"] .brand-lockup small { font-size: 13px; }
 .atelier-footer {
   flex-wrap: wrap;
   margin-block-start: auto;
@@ -404,7 +387,6 @@ body:has([data-client-sign-in]) > :is(.locale-header, .atelier-footer) { display
   .locale-header { flex-wrap: wrap; }
   .locale-header a,
   .atelier-footer nav a { display: inline-flex; align-items: center; min-height: 44px; }
-  .locale-header .brand-lockup { align-items: flex-start; }
   .shell { padding-block: 24px 48px; }
   .shell dl { grid-template-columns: minmax(0, 1fr); }
 }

@@ -37,22 +37,6 @@
   padding-inline: 8px;
 }
 
-.brand bdi {
-  font: 700 22px/1.2 "EB Garamond", Georgia, serif;
-}
-
-.brand i {
-  margin-inline: 5px;
-  color: var(--calendar-text);
-  font-weight: 400;
-  font-style: normal;
-}
-
-.brand em {
-  color: var(--calendar-accent);
-  font-style: normal;
-}
-
 .brand small,
 .count,
 .weekday,
