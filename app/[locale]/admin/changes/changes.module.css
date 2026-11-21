@@ -178,6 +178,7 @@
   border-block-end: 1.5px solid;
   border-inline-end: 1.5px solid;
   transform: translateY(-2px) rotate(45deg);
+  transition: transform var(--motion);
 }
 .review[aria-expanded="true"] span { transform: translateY(2px) rotate(225deg); }
 :global([dir="rtl"]) .review span { border-inline: 0; border-right: 1.5px solid; }
@@ -189,6 +190,10 @@
   padding: var(--card-inset);
   border-radius: 0 0 12px 12px;
   background: #fff4ef;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .drawer:not([hidden]) { animation: var(--motion-rise); }
 }
 
 .terms,

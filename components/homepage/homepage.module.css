@@ -148,6 +148,29 @@
 }
 .heroPhoto { aspect-ratio: 1.5; }
 .heroPhoto img, .photo img { object-fit: cover; }
+
+@keyframes settlePhoto {
+  from { scale: 1.045; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .heroPhoto img {
+    animation: settlePhoto 650ms var(--motion-ease);
+  }
+  .menu[open] nav {
+    animation: var(--motion-rise);
+  }
+  @supports (view-timeline-name: --atelier-photo) and (animation-range: entry 0% entry 75%) {
+    .band .photo {
+      view-timeline-name: --atelier-photo;
+    }
+    .band .photo img {
+      animation: settlePhoto linear both;
+      animation-timeline: --atelier-photo;
+      animation-range: entry 0% entry 75%;
+    }
+  }
+}
 .heroFigure figcaption {
   display: flex;
   flex-wrap: wrap;

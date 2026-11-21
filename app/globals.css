@@ -62,7 +62,10 @@
   --content-width: min(80rem, 100% - 2 * var(--gutter));
   --radius: 12px;
   --control-radius: 8px;
-  --motion: 150ms cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion: 150ms var(--motion-ease);
+  --motion-enter: 320ms var(--motion-ease);
+  --motion-rise: atelier-rise-in var(--motion-enter);
 }
 html[dir="rtl"] {
   --display: "Noto Sans Arabic", Manrope, sans-serif;
@@ -88,8 +91,8 @@ a { color: var(--accent); }
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
-:where(a, button) {
-  transition: background-color var(--motion), border-color var(--motion), color var(--motion);
+:where(a, button, input, textarea, select, summary) {
+  transition: background-color var(--motion), border-color var(--motion), color var(--motion), scale var(--motion);
 }
 [dir="rtl"] input:is([type="email"], [type="tel"], [type="url"])[dir="ltr"] {
   text-align: end;
@@ -402,8 +405,31 @@ body:has([data-client-sign-in]) > :is(.locale-header, .atelier-footer) { display
   .shell { padding-block: 24px 48px; }
   .shell dl { grid-template-columns: minmax(0, 1fr); }
 }
+@keyframes atelier-fade-in {
+  from { opacity: 0.65; }
+}
+
+@keyframes atelier-rise-in {
+  from { opacity: 0.65; translate: 0 8px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  main:not([aria-busy="true"]) {
+    animation: atelier-fade-in var(--motion-enter);
+  }
+  main :where([role="alert"], [role="status"]) {
+    animation: atelier-fade-in var(--motion);
+  }
+  :where(button:not(:disabled), a.button):active {
+    scale: 0.98;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  :root { --motion: 0ms; }
+  :root {
+    --motion: 0ms;
+    --motion-enter: 0ms;
+  }
 }
 
 .status-unavailable { color: var(--negative); }

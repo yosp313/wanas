@@ -199,7 +199,7 @@
   padding: 12px 16px;
   cursor: pointer;
   font: 500 14px var(--body);
-  transition: background-color var(--motion), border-color var(--motion), color var(--motion);
+  transition: background-color var(--motion), border-color var(--motion), color var(--motion), scale var(--motion);
 }
 .options button:hover {
   border-color: var(--accent);
@@ -228,7 +228,7 @@
   color: var(--ink);
   text-align: start;
   cursor: pointer;
-  transition: background-color var(--motion), border-color var(--motion);
+  transition: background-color var(--motion), border-color var(--motion), scale var(--motion);
 }
 .eventCard:hover {
   background: var(--soft);
@@ -1243,3 +1243,14 @@ button.moodTile:hover,
   .calendar { padding: 8px; }
 }
 .palette span { overflow-wrap: anywhere; }
+
+.progressStep > span:first-child {
+  transition: background-color var(--motion), border-color var(--motion), color var(--motion);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel > :not(.actions),
+  .moodPreview figure {
+    animation: var(--motion-rise);
+  }
+}

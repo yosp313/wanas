@@ -168,7 +168,7 @@ export function MoodboardGallery({
           )}
         </div>
         <div>
-          <figure>
+          <figure key={preview.image}>
             <div className={styles.previewHero}>
               <Image
                 src={`/atelier/${terracotta ? "kosha" : preview.image}.webp`}
