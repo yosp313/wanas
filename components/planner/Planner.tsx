@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState, type FocusEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { FieldError } from "@/components/forms/field-validation";
 import { fieldsByStep, plannerFieldErrors, type PlannerField } from "./field-errors";
@@ -11,6 +12,26 @@ import { MoodboardGallery } from "./MoodboardGallery";
 import { catalog, catalogLabel, type Locale } from "@/lib/catalog/catalog";
 import { emptyDraft, type PlannerDraft } from "@/lib/planner/types";
 import styles from "./planner.module.css";
+
+const curationColors = [
+  { hex: "#c2652a", en: "Warm terracotta", ar: "تيراكوتا دافئة" },
+  { hex: "#7a6e4d", en: "Sage & olive", ar: "مريمي وزيتوني" },
+  { hex: "#c9a050", en: "Champagne", ar: "شامبانيا" },
+  { hex: "#d9a291", en: "Blush sand", ar: "وردي رملي" },
+  { hex: "#f8f6f0", en: "Ivory", ar: "عاجي" },
+];
+
+const featuredEvents: Record<string, string> = {
+  wedding: "favorite",
+  "katb-el-ketab": "auto_stories",
+  birthday: "celebration",
+  "private-dinner": "villa",
+};
+
+const eventOptions = [
+  ...Object.keys(featuredEvents).flatMap((id) => catalog.eventTypes.filter((event) => event.id === id)),
+  ...catalog.eventTypes.filter(({ id }) => !featuredEvents[id]),
+];
 
 const venueImages: Record<string, string> = {
   villa: "courtyard",
@@ -275,9 +296,12 @@ function AvailabilityCalendar({
 
 export function Planner({ locale }: { locale: Locale }) {
   const t = copy[locale];
+  const ar = locale === "ar";
   const [draft, setDraft] = useState<PlannerDraft>(() => emptyDraft(locale));
+  const conciergeSelected = draft.decorMode === "curate";
   const [submissionId, setSubmissionId] = useState("");
   const [step, setStep] = useState(1);
+  const curationStep = step === 2;
   const [touched, setTouched] = useState<Partial<Record<PlannerField, boolean>>>({});
   const [dateError, setDateError] = useState("");
   const [bookedDates, setBookedDates] = useState<string[]>([]);
@@ -412,8 +436,7 @@ export function Planner({ locale }: { locale: Locale }) {
     return <FieldError id={`planner-error-${field}`} message={touched[field] ? errors[field] : undefined} />;
   }
 
-  function validateStep(target: number) {
-    const fields = fieldsByStep[target - 1];
+  function validateStep(target: number, fields: readonly PlannerField[] = fieldsByStep[target - 1]) {
     const invalid = fields.find((field) => errors[field]);
     if (!invalid) return true;
     setTouched((current) => ({ ...current, ...Object.fromEntries(fields.map((field) => [field, true])) }));
@@ -426,7 +449,7 @@ export function Planner({ locale }: { locale: Locale }) {
   };
   const submit = async () => {
     if (!submissionId || submitting) return;
-    if (![1, 2, 4].every(validateStep)) return;
+    if (![1, 2, 4].every((target) => validateStep(target))) return;
     setSubmitting(true);
     let response;
     try {
@@ -464,21 +487,20 @@ export function Planner({ locale }: { locale: Locale }) {
   const eventLabel = draft.eventType
     ? catalogLabel("eventTypes", draft.eventType, locale)
     : "-";
-  const steps =
-    locale === "ar"
-      ? ["التفاصيل", "الديكور", "الضيافة", "المراجعة"]
-      : ["Details", "Decor", "Catering", "Review"];
+  const steps = ar
+    ? ["تفاصيل المناسبة", "الديكور والألوان", "الضيافة", "مراجعة الطلب"]
+    : ["Scope & venue", "Decor & moodboards", "Catering", "Review & request"];
   const title =
     locale === "ar"
       ? [
           "تفاصيل المناسبة",
-          "اختاروا الديكور",
+          "نسّقوا لوحة الإلهام لمناسبتكم",
           "اختاروا أسلوب الضيافة",
           "راجعوا تفاصيل الحفل",
         ]
       : [
-          "Plan your event",
-          "Choose your decor",
+          "Define your",
+          "Curate your aesthetic moodboard",
           "Choose your catering",
           "Review your request",
         ];
@@ -501,22 +523,14 @@ export function Planner({ locale }: { locale: Locale }) {
       ? {
           wedding: "تجربة متكاملة ليوم مميز",
           "katb-el-ketab": "احتفال حميم وتنسيق الكوشة",
-          engagement: "احتفال دافئ وبسيط",
           birthday: "جلسة أنيقة لمناسبة خاصة",
-          anniversary: "احتفال بذكرى لا تُنسى",
           "private-dinner": "عشاء خاص بتفاصيل مدروسة",
-          corporate: "تصميم راقٍ للقاءات العمل",
-          other: "مناسبة بتصميم خاص",
         }
       : {
           wedding: "A full day of considered details",
           "katb-el-ketab": "An intimate ceremony with signature styling",
-          engagement: "A warm gathering for two families",
           birthday: "A thoughtful setting for a milestone",
-          anniversary: "A beautiful way to mark the years",
           "private-dinner": "An intimate dinner, made memorable",
-          corporate: "A polished setting for your gathering",
-          other: "A celebration shaped around your idea",
         };
   const guestPresets = [
     { value: 40, en: "Intimate", ar: "حميمي", range: "20–60" },
@@ -527,6 +541,7 @@ export function Planner({ locale }: { locale: Locale }) {
   const budgetLabel = draft.budgetRange
     ? catalogLabel("budgetRanges", draft.budgetRange, locale)
     : "—";
+  const seatingTables = errors.guestCount ? 0 : Math.ceil(Number(draft.guestCount) / 10);
   const venueLabel = draft.venueType
     ? catalogLabel("venueTypes", draft.venueType, locale)
     : "—";
@@ -544,86 +559,88 @@ export function Planner({ locale }: { locale: Locale }) {
     if (date) setVisibleMonth(date.slice(0, 7));
   }
   return (
-    <main
-      className={styles.shell}
-      data-planner
-      dir={locale === "ar" ? "rtl" : "ltr"}
-    >
-      <div className={styles.topbar}>
-        <Link className="brand-lockup" href={`/${locale}`}>
-          <span>WANAS</span>
-          <small>{locale === "ar" ? "أتيليه · القاهرة" : "Atelier · Cairo"}</small>
-        </Link>
+    <div className={styles.shell} data-planner data-curation={curationStep || undefined} dir={ar ? "rtl" : "ltr"}>
+      <header className={styles.topbar}>
+        <div className={styles.content}>
+          <Link className={styles.brand} href={`/${locale}`}>
+            <span className={styles.symbol} aria-hidden="true">spa</span>
+            <span className="brand-lockup">
+              <span>WANAS ATELIER</span>
+              <small>{ar ? "تصميم وتنسيق المناسبات" : "Celebration & spatial design"}</small>
+            </span>
+          </Link>
 
-        <div className={styles.topActions}>
-          <span>
-            {locale === "ar"
-              ? "طلبكم محفوظ في هذه الصفحة"
-              : "Draft saved in this tab"}
-          </span>
-          <Link href={`/${locale}/requests`}>
-            {locale === "ar" ? "طلباتي" : "My requests"}
-          </Link>
-          <Link href={`/${locale === "ar" ? "en" : "ar"}/plan`}>
-            {locale === "ar" ? "English" : "العربية"}
-          </Link>
+          <nav className={styles.topActions} aria-label={ar ? "التنقل الرئيسي" : "Main navigation"}>
+            <Link href={`/${locale}/requests`}>
+              {ar ? "طلباتي" : "My requests"}
+            </Link>
+            <Link href={`/${ar ? "en" : "ar"}/plan`} hrefLang={ar ? "en" : "ar"}>
+              {ar ? "English" : "العربية"}
+            </Link>
+            <UserButton />
+          </nav>
         </div>
-      </div>
-      <div className={styles.content}>
-        <nav
-          className={styles.progress}
-          aria-label={locale === "ar" ? "تقدم التخطيط" : "Planner progress"}
-        >
+      </header>
+      <main className={styles.content}>
+        <nav className={styles.progress} aria-label={ar ? "تقدم التخطيط" : "Planner progress"}>
           {steps.map((label, index) => (
             <button
               type="button"
-              className={`${styles.progressStep} ${step === index + 1 ? styles.progressCurrent : ""} ${step > index + 1 ? styles.progressDone : ""}`}
+              className={styles.progressStep}
+              data-complete={step > index + 1 || undefined}
               key={label}
               aria-current={step === index + 1 ? "step" : undefined}
               disabled={index + 1 > step}
               onClick={() => goToStep(index + 1)}
             >
-              <span aria-hidden="true">
-                {step > index + 1 ? "✓" : index + 1}
+              <span className={styles.stepMarker} aria-hidden="true">{step > index + 1 ? "✓" : index + 1}</span>
+              <span className={styles.stepIndex} aria-hidden="true">
+                {index + 1 === step
+                  ? ar ? "الخطوة الحالية" : "Active"
+                  : `${ar ? "الخطوة" : "Step"} ${String(index + 1).padStart(2, "0")}`}
               </span>
-              <span className={styles.stepText}>
-                <strong>{label}</strong>
-                {step === index + 1 && (
-                  <small>
-                    {locale === "ar" ? "الخطوة الحالية" : "Current step"}
-                  </small>
-                )}
-              </span>
+              <strong>{label}</strong>
             </button>
           ))}
         </nav>
         {step > 1 && (
-          <dl className={styles.scopeStrip}>
-            <div>
-              <dt>{t.eventType}</dt>
-              <dd>{eventLabel}</dd>
-            </div>
-            <div>
-              <dt>{t.guests}</dt>
-              <dd>{draft.guestCount || "—"}</dd>
-            </div>
-            <div>
-              <dt>{t.venueType}</dt>
-              <dd>{venueLabel}</dd>
-            </div>
-            <div>
-              <dt>{t.budget}</dt>
-              <dd>{budgetLabel}</dd>
-            </div>
-          </dl>
+          <div className={styles.scopeStrip}>
+            {curationStep && <span className={styles.scopeBadge}>{ar ? "نطاق المناسبة" : "Event scope"}</span>}
+            <dl className={styles.scopeDetails}>
+              <div>
+                <dt>{t.eventType}</dt>
+                <dd>{eventLabel}</dd>
+              </div>
+              <div>
+                <dt>{t.guests}</dt>
+                <dd>{draft.guestCount || "—"}</dd>
+              </div>
+              <div>
+                <dt>{t.venueType}</dt>
+                <dd>{curationStep ? draft.venueName || venueLabel : venueLabel}</dd>
+              </div>
+              <div>
+                <dt>{t.budget}</dt>
+                <dd>{budgetLabel}</dd>
+              </div>
+            </dl>
+            {curationStep && (
+              <button className={styles.scopeEdit} type="button" onClick={() => goToStep(1)}>
+                {ar ? "تعديل النطاق" : "Modify scope"}
+              </button>
+            )}
+          </div>
         )}
         <header className={styles.intro}>
           <div>
+            {step === 1 && <span className={styles.eyebrow}>{ar ? "استوديو تخطيط المناسبات" : "Event planning studio"}</span>}
+            {curationStep && <span className={styles.eyebrow}>{ar ? "التنسيق ولوحات الإلهام" : "Curation & moodboards"}</span>}
             <h1 ref={heading} tabIndex={-1}>
-              {title[step - 1]}
+              {title[step - 1]}{step === 1 && !ar && <> <em>celebration</em></>}
             </h1>
-            <p>{captions[step - 1]}</p>
+            {!curationStep && <p>{captions[step - 1]}</p>}
           </div>
+          <span className={styles.draftNote}>{t.saved}</span>
         </header>
         <div className={step === 2 ? styles.fullLayout : styles.layout}>
           <section className={styles.panel} key={step}>
@@ -631,24 +648,29 @@ export function Planner({ locale }: { locale: Locale }) {
               <>
                 <section className={styles.formSection}>
                   <div className={styles.sectionHeading}>
-                    <h2>{t.eventType}</h2>
+                    <h2>{ar ? "اختاروا نوع المناسبة" : "Select event type"}</h2>
+                    <small>{ar ? "اختاروا نوعًا واحدًا" : "Choose one event type"}</small>
                   </div>
                   <div className={styles.eventGrid} role="group" aria-label={t.eventType} {...fieldProps("eventType")} tabIndex={-1}>
-                    {catalog.eventTypes.map((option) => (
+                    {eventOptions.map((option) => (
                       <button
                         type="button"
                         key={option.id}
                         onClick={() => update("eventType", option.id)}
                         aria-label={option.labels[locale]}
                         aria-pressed={draft.eventType === option.id}
-                        className={`${styles.eventCard} ${draft.eventType === option.id ? styles.cardSelected : ""}`}
+                        className={`${styles.eventCard} ${featuredEvents[option.id] ? styles.featuredEvent : ""}`}
                       >
-                        <span className={styles.eventType}>
-                          {option.labels[locale]}
-                        </span>
-                        <span className={styles.eventDescription}>
-                          {eventDescriptions[option.id] ?? ""}
-                        </span>
+                        {featuredEvents[option.id] && (
+                          <span className={styles.symbol} aria-hidden="true">{featuredEvents[option.id]}</span>
+                        )}
+                        {featuredEvents[option.id] && draft.eventType === option.id && (
+                          <span className={styles.eventSelection} aria-hidden="true">{ar ? "تم الاختيار" : "Selected"}</span>
+                        )}
+                        <span className={styles.eventType}>{option.labels[locale]}</span>
+                        {featuredEvents[option.id] && (
+                          <span className={styles.eventDescription}>{eventDescriptions[option.id]}</span>
+                        )}
                       </button>
                     ))}
                   </div>
@@ -670,11 +692,7 @@ export function Planner({ locale }: { locale: Locale }) {
                 </section>
                 <section className={styles.scale}>
                   <div className={styles.sectionHeading}>
-                    <h2>
-                        {locale === "ar"
-                          ? "عدد الضيوف"
-                          : "Guest count"}
-                      </h2>
+                    <h2>{ar ? "عدد الضيوف والسعة" : "Guest count & capacity"}</h2>
                     <strong className={styles.guestNumber}>
                       {draft.guestCount || "—"}{" "}
                       <small>{locale === "ar" ? "ضيفًا" : "guests"}</small>
@@ -722,142 +740,127 @@ export function Planner({ locale }: { locale: Locale }) {
                       <b><bdi dir="ltr">400+</bdi> {locale === "ar" ? "ضيف" : "guests"}</b>
                     </span>
                   </label>
-                  <label className={styles.exactCount}>
-                    {t.guests}
-                    <input
-                      type="number"
-                      aria-label={t.guests}
-                      required
-                      min="1"
-                      max="100000"
-                      {...fieldProps("guestCount")}
-                      value={draft.guestCount}
-                      onChange={(event) =>
-                        update(
-                          "guestCount",
-                          event.target.value === ""
-                            ? ""
-                            : Number(event.target.value),
-                        )
-                      }
-                    />
-                    {fieldError("guestCount")}
-                  </label>
                   <div className={styles.formula}>
+                    <span className={styles.symbol} aria-hidden="true">table_restaurant</span>
                     <div>
-                      <small>
-                        {locale === "ar"
-                          ? "تخطيط المساحة"
-                          : "Seating"}
-                      </small>
-                      <p>
-                        {draft.guestCount
-                          ? locale === "ar"
-                            ? `نساعدكم في تهيئة المكان لاستقبال ${draft.guestCount} ضيفًا.`
-                            : `We’ll help shape a comfortable layout for ${draft.guestCount} guests.`
-                          : locale === "ar"
-                            ? "اختاروا عدد الضيوف لمعرفة احتياجات المساحة."
-                            : "Choose a guest count to plan the right setting."}
-                      </p>
+                      <small>{ar ? "تخطيط الجلوس" : "Seating guide"}</small>
+                      <p>{seatingTables
+                        ? ar
+                          ? `حوالي ${seatingTables} طاولة، بمعدل 10 ضيوف لكل طاولة.`
+                          : `About ${seatingTables} ${seatingTables === 1 ? "table" : "tables"} at 10 guests per table.`
+                        : ar
+                          ? "احسبوا طاولة لكل 10 ضيوف تقريبًا."
+                          : "Allow roughly one table per 10 guests."}</p>
+                    </div>
+                    <label className={styles.exactCount}>
+                      {t.guests}
+                      <input
+                        type="number"
+                        aria-label={t.guests}
+                        required
+                        min="1"
+                        max="100000"
+                        {...fieldProps("guestCount")}
+                        value={draft.guestCount}
+                        onChange={(event) =>
+                          update(
+                            "guestCount",
+                            event.target.value === ""
+                              ? ""
+                              : Number(event.target.value),
+                          )
+                        }
+                      />
+                      {fieldError("guestCount")}
+                    </label>
+                  </div>
+                </section>
+                <section className={styles.formSection}>
+                  <div className={styles.sectionHeading}>
+                    <h2>{ar ? "اختيار المكان" : "Venue selection"}</h2>
+                    <small>{ar ? "أضيفوا تفاصيل المكان المؤكد" : "Add your confirmed venue"}</small>
+                  </div>
+                  <div className={styles.venuePanel}>
+                    <h3>{t.venueType}</h3>
+                    <div className={styles.venueGrid} role="group" aria-label={t.venueType} {...fieldProps("venueType")} tabIndex={-1}>
+                      {venueOptions.map((option) => (
+                        <button
+                          type="button"
+                          key={option.id}
+                          aria-label={option.labels[locale]}
+                          aria-pressed={draft.venueType === option.id}
+                          onClick={() => update("venueType", option.id)}
+                          className={styles.venueOption}
+                        >
+                          {venueImages[option.id] && (
+                            <span className={styles.venueImage}>
+                              <Image
+                                src={`/atelier/${venueImages[option.id]}.webp`}
+                                alt=""
+                                fill
+                                sizes="(max-width: 480px) 40vw, (max-width: 900px) 45vw, 30vw"
+                              />
+                            </span>
+                          )}
+                          <span className={styles.venueName}>
+                            <span aria-hidden="true" />
+                            <b>{option.labels[locale]}</b>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                    {fieldError("venueType")}
+                    {draft.venueType === "other" && (
+                      <label>
+                        {locale === "ar" ? "وصف المكان" : "Describe the venue"}
+                        <input
+                          required
+                          {...fieldProps("venueTypeOther")}
+                          value={draft.venueTypeOther}
+                          onChange={(event) =>
+                            update("venueTypeOther", event.target.value)
+                          }
+                        />
+                        {fieldError("venueTypeOther")}
+                      </label>
+                    )}
+                    <div className={styles.fieldGrid}>
+                      <label>
+                        {t.venue}
+                        <input
+                          aria-label={t.venue}
+                          required
+                          {...fieldProps("venueName")}
+                          value={draft.venueName}
+                          onChange={(event) =>
+                            update("venueName", event.target.value)
+                          }
+                          placeholder={
+                            locale === "ar" ? "اسم المكان" : "Venue name"
+                          }
+                        />
+                        {fieldError("venueName")}
+                      </label>
+                      <label>
+                        {t.address}
+                        <input
+                          aria-label={t.address}
+                          required
+                          {...fieldProps("streetAddress")}
+                          value={draft.streetAddress}
+                          onChange={(event) =>
+                            update("streetAddress", event.target.value)
+                          }
+                          placeholder={
+                            locale === "ar"
+                              ? "المنطقة والشارع"
+                              : "Area and street"
+                          }
+                        />
+                        {fieldError("streetAddress")}
+                      </label>
                     </div>
                   </div>
-                </section>
-                <section className={styles.formSection}>
-                  <div className={styles.sectionHeading}>
-                    <h2>{t.venueType}</h2>
-                  </div>
-                  <div className={styles.venueGrid} role="group" aria-label={t.venueType} {...fieldProps("venueType")} tabIndex={-1}>
-                    {venueOptions.map((option) => (
-                      <button
-                        type="button"
-                        key={option.id}
-                        aria-label={option.labels[locale]}
-                        aria-pressed={draft.venueType === option.id}
-                        onClick={() => update("venueType", option.id)}
-                        className={`${styles.venueOption} ${draft.venueType === option.id ? styles.cardSelected : ""}`}
-                      >
-                        {venueImages[option.id] && (
-                          <span className={styles.venueImage}>
-                            <Image
-                              src={`/atelier/${venueImages[option.id]}.webp`}
-                              alt=""
-                              fill
-                              sizes="(max-width: 760px) 45vw, 30vw"
-                            />
-                          </span>
-                        )}
-                        <span className={styles.venueName}>
-                          <span aria-hidden="true" />
-                          <b>{option.labels[locale]}</b>
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                  {fieldError("venueType")}
-                  {draft.venueType === "other" && (
-                    <label>
-                      {locale === "ar" ? "وصف المكان" : "Describe the venue"}
-                      <input
-                        required
-                        {...fieldProps("venueTypeOther")}
-                        value={draft.venueTypeOther}
-                        onChange={(event) =>
-                          update("venueTypeOther", event.target.value)
-                        }
-                      />
-                      {fieldError("venueTypeOther")}
-                    </label>
-                  )}
-                  <div className={styles.fieldGrid}>
-                    <label>
-                      {t.venue}
-                      <input
-                        aria-label={t.venue}
-                        required
-                        {...fieldProps("venueName")}
-                        value={draft.venueName}
-                        onChange={(event) =>
-                          update("venueName", event.target.value)
-                        }
-                        placeholder={
-                          locale === "ar" ? "اسم المكان" : "Venue name"
-                        }
-                      />
-                      {fieldError("venueName")}
-                    </label>
-                    <label>
-                      {t.address}
-                      <input
-                        aria-label={t.address}
-                        required
-                        {...fieldProps("streetAddress")}
-                        value={draft.streetAddress}
-                        onChange={(event) =>
-                          update("streetAddress", event.target.value)
-                        }
-                        placeholder={
-                          locale === "ar"
-                            ? "المنطقة والشارع"
-                            : "Area and street"
-                        }
-                      />
-                      {fieldError("streetAddress")}
-                    </label>
-                  </div>
-                </section>
-                <section className={styles.formSection}>
-                  <div className={styles.sectionHeading}>
-                    <h2>{t.budget}</h2>
-                  </div>
-                  <div role="group" aria-label={t.budget} {...fieldProps("budgetRange")} tabIndex={-1}>
-                    <Options
-                      group="budgetRanges"
-                      locale={locale}
-                      value={draft.budgetRange}
-                      onChange={(value) => update("budgetRange", value)}
-                    />
-                  </div>
-                  {fieldError("budgetRange")}
                 </section>
                 <section className={styles.calendarBlock}>
                   <h2>
@@ -909,50 +912,101 @@ export function Planner({ locale }: { locale: Locale }) {
             )}
             {step === 2 && (
               <>
-                <div className={styles.pathGrid} role="group" aria-label={t.design} {...fieldProps("decorMode")} tabIndex={-1}>
-                  <button
-                    type="button"
-                    aria-pressed={draft.decorMode === "curate"}
-                    className={`${styles.pathCard} ${draft.decorMode === "curate" ? styles.cardSelected : ""}`}
-                    onClick={() => update("decorMode", "curate")}
-                  >
-                    <span>
-                      <strong>
-                        {catalogLabel("decorModes", "curate", locale)}
-                      </strong>
-                      <small>
-                        {locale === "ar"
-                          ? "يتولى فريقنا تنسيق الرؤية كاملة."
-                          : "Wanas chooses the palette and decor details."}
-                      </small>
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    aria-pressed={draft.decorMode === "customize"}
-                    className={`${styles.pathCard} ${draft.decorMode === "customize" ? styles.cardSelected : ""}`}
-                    onClick={() => update("decorMode", "customize")}
-                  >
-                    <span>
-                      <strong>
-                        {catalogLabel("decorModes", "customize", locale)}
-                      </strong>
-                      <small>
-                        {locale === "ar"
-                          ? "اختاروا لوحة ألوان وعناصر قريبة منكم."
-                          : "Choose a moodboard, palette, and decor details."}
-                      </small>
-                    </span>
-                  </button>
+                <div className={styles.pathGrid} data-concierge={conciergeSelected || undefined} role="group" aria-label={t.design} {...fieldProps("decorMode")} tabIndex={-1}>
+                  <section className={styles.curationCard} data-active={conciergeSelected || undefined}>
+                    <h2>
+                      <button type="button" className={styles.pathCard}
+                        aria-label={ar ? undefined : "Curate it for me, full concierge curation"}
+                        aria-pressed={conciergeSelected}
+                        onClick={() => update("decorMode", "curate")}
+                      >
+                        <span className={styles.curationIcon} aria-hidden="true">✧</span>
+                        <span>
+                          <strong>{ar ? "نسّقوا الحفل لي" : "Full concierge curation"}</strong>
+                          <small>{ar ? "يتولى فريق وناس اختيار الألوان وتنسيق التفاصيل." : "Wanas chooses the palette and decor details for you."}</small>
+                        </span>
+                      </button>
+                    </h2>
+                    <div className={styles.curationFields}>
+                      <label>
+                        <span>{ar ? "الرؤية الإبداعية وتفاصيل المناسبة" : "Creative vision & ceremony notes"}</span>
+                        <textarea aria-label={t.notes} {...fieldProps("notes")} value={draft.notes}
+                          onChange={(event) => update("notes", event.target.value)}
+                          placeholder={ar ? "ألوان أو طقوس أو تفاصيل تحبونها..." : "Traditions, motifs, or details you love…"}
+                        />
+                        {fieldError("notes")}
+                      </label>
+                      <fieldset className={styles.colorChips}>
+                        <legend>{ar ? "أضيفوا ألوانكم المفضلة إلى الملاحظات" : "Add preferred colors to your notes"}</legend>
+                        <div>
+                          {curationColors.map(({ hex, ...label }) => (
+                            <button key={hex} type="button" disabled={draft.notes.includes(hex)}
+                              onClick={() => update("notes", [draft.notes.trimEnd(), `${label[locale]} (${hex})`].filter(Boolean).join("\n"))}
+                            >
+                              <i style={{ background: hex }} aria-hidden="true" />{label[locale]}
+                            </button>
+                          ))}
+                        </div>
+                      </fieldset>
+                      <label>
+                        <span>{ar ? "روابط الصور المرجعية" : "Reference image links"}</span>
+                        <span className={styles.referenceField}>
+                          <span className={styles.curationIcon} aria-hidden="true">↗</span>
+                          <span>{ar ? "أضيفوا رابط لوحة أو صورة ملهمة" : "Share a moodboard or inspiration photo"}</span>
+                          <input aria-label={t.links} {...fieldProps("inspirationLinks")} value={draft.inspirationLinks}
+                            onChange={(event) => update("inspirationLinks", event.target.value)} placeholder="https://..." dir="ltr"
+                          />
+                        </span>
+                        {fieldError("inspirationLinks")}
+                      </label>
+                      <button type="button" className={styles.curationPrimary} onClick={() => {
+                        update("decorMode", "curate");
+                        if (validateStep(2, ["notes", "inspirationLinks"])) goToStep(3);
+                      }}>
+                        {ar ? "تأكيد التنسيق والمتابعة" : "Confirm curation & proceed"} <span aria-hidden="true">→</span>
+                      </button>
+                    </div>
+                  </section>
+                  <section className={styles.curationCard} data-active={draft.decorMode === "customize" || undefined}>
+                    <h2>
+                      <button type="button" className={styles.pathCard}
+                        aria-label={ar ? undefined : "Customize my decor, curate from signature moodboards"}
+                        aria-pressed={draft.decorMode === "customize"}
+                        onClick={() => update("decorMode", "customize")}
+                      >
+                        <span className={styles.curationIcon} aria-hidden="true">▤</span>
+                        <span>
+                          <strong>{ar ? "أصمّم الديكور بنفسي" : "Curate from signature moodboards"}</strong>
+                          <small>{ar ? "استكشفوا الألوان والخامات واختروا ما يناسب مناسبتكم." : "Explore palettes, materials, and styling for your celebration."}</small>
+                        </span>
+                      </button>
+                    </h2>
+                    {!conciergeSelected && <div className={styles.curationExplore}>
+                      <div>
+                        <strong>{ar ? "ما تتضمنه لوحات الإلهام" : "Explore the styling details"}</strong>
+                        <ul>
+                          {(ar
+                            ? ["لوحات الألوان", "خامات الديكور", "تنسيق الكوشة", "الطاولات والإضاءة"]
+                            : ["Color palettes", "Decor materials", "Ceremony backdrop", "Tablescape & lighting"]
+                          ).map((item) => <li key={item}>{item}</li>)}
+                        </ul>
+                      </div>
+                      <a href="#moodboard-title" onClick={() => update("decorMode", "customize")}>
+                        {ar ? "استكشفوا لوحات الإلهام" : "Explore signature moodboards"} <span aria-hidden="true">↓</span>
+                      </a>
+                    </div>}
+                  </section>
                 </div>
                 {fieldError("decorMode")}
+                <div hidden={conciergeSelected}>
+                  <MoodboardGallery
+                    locale={locale}
+                    value={draft.decorMode === "customize" ? draft.moodboard : ""}
+                    onChange={(value) => setDraft((current) => ({ ...current, decorMode: "customize", moodboard: value }))}
+                  />
+                </div>
                 {draft.decorMode === "customize" && (
                   <>
-                    <MoodboardGallery
-                      locale={locale}
-                      value={draft.moodboard}
-                      onChange={(value) => update("moodboard", value)}
-                    />
                     {catalog.palettes.length > 0 && (
                       <fieldset className={styles.choiceSection}>
                         <legend>
@@ -1002,36 +1056,6 @@ export function Planner({ locale }: { locale: Locale }) {
                     )}
                   </>
                 )}
-                <div className={styles.fieldGrid}>
-                  <label>
-                    {t.notes}
-                    <textarea
-                      aria-label={t.notes}
-                      {...fieldProps("notes")}
-                      value={draft.notes}
-                      onChange={(event) => update("notes", event.target.value)}
-                      placeholder={
-                        locale === "ar"
-                          ? "ألوان أو طقوس أو تفاصيل تحبونها..."
-                          : "Traditions, motifs, or details you love..."
-                      }
-                    />
-                    {fieldError("notes")}
-                  </label>
-                  <label>
-                    {t.links}
-                    <input
-                      aria-label={t.links}
-                      {...fieldProps("inspirationLinks")}
-                      value={draft.inspirationLinks}
-                      onChange={(event) =>
-                        update("inspirationLinks", event.target.value)
-                      }
-                      placeholder="https://..."
-                    />
-                    {fieldError("inspirationLinks")}
-                  </label>
-                </div>
               </>
             )}
             {step === 3 && (
@@ -1166,34 +1190,41 @@ export function Planner({ locale }: { locale: Locale }) {
                 </div>
               </>
             )}
-            <div className={styles.actions}>
-              {step > 1 && (
+            {step > 1 && !(curationStep && conciergeSelected) && (
+              <div className={styles.actions}>
                 <button type="button" onClick={() => goToStep(step - 1)}>
-                  <span aria-hidden="true">←</span> {t.back}
+                  <span aria-hidden="true">←</span> {curationStep ? ar ? "العودة إلى نطاق المناسبة" : "Back to scope & venue" : t.back}
                 </button>
-              )}
-              {step < 4 ? (
-                <button type="button" className={styles.primary} onClick={next}>
-                  {t.next} <span aria-hidden="true">→</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className={styles.primary}
-                  onClick={submit}
-                  disabled={submitting}
-                >
-                  {submitting ? (locale === "ar" ? "جارٍ الإرسال…" : "Sending…") : t.submit} <span aria-hidden="true">→</span>
-                </button>
-              )}
-            </div>
+                {curationStep && (
+                  <div className={styles.curationBudget}>
+                    <small>{ar ? "الميزانية المختارة" : "Selected budget"}</small>
+                    <strong>{budgetLabel}</strong>
+                  </div>
+                )}
+                {step < 4 ? (
+                  <button type="button" className={styles.primary} onClick={next} aria-label={curationStep ? t.next : undefined}>
+                    {curationStep ? ar ? "المتابعة إلى الضيافة" : "Continue to catering" : t.next} <span aria-hidden="true">→</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.primary}
+                    onClick={submit}
+                    disabled={submitting}
+                  >
+                    {submitting ? (locale === "ar" ? "جارٍ الإرسال…" : "Sending…") : t.submit} <span aria-hidden="true">→</span>
+                  </button>
+                )}
+              </div>
+            )}
           </section>
           {step !== 2 && (
             <aside className={styles.aside}>
-              <h2>
-                {locale === "ar" ? "ملخص المناسبة" : "Event summary"}
-              </h2>
-              <div className={styles.estimate}>
+              <div className={styles.asideHeading}>
+                <h2>{ar ? "ملخص المناسبة" : "Event summary"}</h2>
+                <span className={styles.symbol} aria-hidden="true">account_balance_wallet</span>
+              </div>
+              <div className={styles.estimate} aria-live="polite">
                 <small>
                   {locale === "ar"
                     ? "ميزانيتكم المختارة"
@@ -1201,6 +1232,20 @@ export function Planner({ locale }: { locale: Locale }) {
                 </small>
                 <strong>{budgetLabel}</strong>
               </div>
+              {step === 1 && (
+                <div className={styles.budget}>
+                  <h3>{t.budget}</h3>
+                  <div role="group" aria-label={t.budget} {...fieldProps("budgetRange")} tabIndex={-1}>
+                    <Options
+                      group="budgetRanges"
+                      locale={locale}
+                      value={draft.budgetRange}
+                      onChange={(value) => update("budgetRange", value)}
+                    />
+                  </div>
+                  {fieldError("budgetRange")}
+                </div>
+              )}
               <dl className={styles.asideDetails}>
                 <div>
                   <dt>{t.eventType}</dt>
@@ -1230,10 +1275,29 @@ export function Planner({ locale }: { locale: Locale }) {
                   ? "يرسل فريق وناس عرض السعر بعد مراجعة طلبكم."
                   : "WANAS will send a quote after reviewing your request."}
               </p>
+              {step === 1 && (
+                <div className={styles.actions}>
+                  <button type="button" className={styles.primary} onClick={next}>
+                    {t.next} <span aria-hidden="true">→</span>
+                  </button>
+                </div>
+              )}
             </aside>
           )}
         </div>
-      </div>
-    </main>
+      </main>
+      <footer className={styles.footer}>
+        <div className={styles.content}>
+          <div>
+            <Link className="brand-lockup" href={`/${locale}`}>WANAS ATELIER</Link>
+            <p>{ar ? "تصميم وتنسيق المناسبات والضيافة في القاهرة." : "Celebration design, venue styling, and hospitality in Cairo."}</p>
+          </div>
+          <nav aria-label={ar ? "روابط وناس" : "WANAS links"}>
+            <Link href={`/${locale}`}>{ar ? "الأتيليه" : "The atelier"}</Link>
+            <Link href={`/${locale}/requests`}>{ar ? "طلباتي" : "My requests"}</Link>
+          </nav>
+        </div>
+      </footer>
+    </div>
   );
 }

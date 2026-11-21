@@ -104,7 +104,9 @@ accounts("delivers a quote and confirms and reschedules the booking through the 
     await customer.getByRole("button", { name: "Under EGP 50,000" }).click();
     await customer.getByRole("button", { name: "Continue" }).click();
     await customer.getByRole("button", { name: "Curate it for me" }).click();
-    await customer.getByRole("button", { name: "Continue" }).click();
+    await expect(customer.getByRole("region", { name: "Signature moodboards" })).toBeHidden();
+    await expect(customer.getByRole("button", { name: "Continue", exact: true })).toBeHidden();
+    await customer.getByRole("button", { name: "Confirm curation & proceed" }).click();
     await customer.getByLabel("Include catering").check();
     await customer.getByRole("button", { name: "Buffet", exact: true }).click();
     await customer.getByRole("button", { name: "Continue" }).click();

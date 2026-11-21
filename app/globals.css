@@ -94,6 +94,9 @@ a { color: var(--accent); }
 :where(a, button, input, textarea, select, summary) {
   transition: background-color var(--motion), border-color var(--motion), color var(--motion), scale var(--motion);
 }
+:where(a, button, input, textarea, select, summary):focus-visible {
+  transition-duration: 0ms;
+}
 [dir="rtl"] input:is([type="email"], [type="tel"], [type="url"])[dir="ltr"] {
   text-align: end;
 }

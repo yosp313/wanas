@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProvider, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { Toaster } from "sonner";
 import { notFound } from "next/navigation";
 import { isLocale, locales } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import LocaleSwitcher from "./locale-switcher";
-import AccountControl from "./account-control";
 import "../globals.css";
 
 type Params = { params: Promise<{ locale: string }> };
@@ -44,10 +43,10 @@ export default async function LocaleLayout({
                 {locale === "ar" ? "خططوا لحفلكم" : "Plan an event"}
               </Link>
               <Link href={`/${locale}/requests`}>{dictionary.myRequests}</Link>
-              <AccountControl locale={locale} />
               <Suspense>
                 <LocaleSwitcher locale={locale} label={dictionary.switchLanguage} />
               </Suspense>
+              <UserButton />
             </nav>
           </header>
           <Toaster

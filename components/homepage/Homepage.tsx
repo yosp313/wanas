@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import AccountControl from "@/app/[locale]/account-control";
+import { UserButton } from "@clerk/nextjs";
 import LocaleSwitcher from "@/app/[locale]/locale-switcher";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
@@ -24,15 +24,10 @@ export async function Homepage({ locale }: { locale: Locale }) {
     { href: "#concierge", label: t(["Concierge", "استفسارات"]) },
   ];
 
-  const navigation = nav.map(({ href, label }) => href === home
-    ? <Link key={href} href={href} aria-current="page">{label}</Link>
-    : <a key={href} href={href}>{label}</a>);
-
-  function brand(showTagline = true) {
+  function brand() {
     return (
       <Link className={styles.brand} href={home}>
         <span dir="ltr">WANAS <bdi lang="ar">وَنَس</bdi></span>
-        {showTagline && <small>{t(["Bespoke celebrations & spatial design", "تصميم وتنسيق المناسبات"])}</small>}
       </Link>
     );
   }
@@ -42,21 +37,15 @@ export async function Homepage({ locale }: { locale: Locale }) {
       <header className={styles.header}>
         <div className={`${styles.wrap} ${styles.headerInner}`}>
           {brand()}
-          <nav className={styles.mainNav} aria-label={t(["Main navigation", "التنقل الرئيسي"])}>
-            {navigation}
-          </nav>
-          <details className={styles.menu}>
-            <summary>{t(["Menu", "القائمة"])}</summary>
-            <nav aria-label={t(["Main navigation", "التنقل الرئيسي"])}>{navigation}</nav>
-          </details>
-          <div className={styles.headerActions}>
+          <nav className={styles.headerActions} aria-label={t(["Main navigation", "التنقل الرئيسي"])}>
+            <a href="#ceremonies">{t(["Portfolio", "أعمالنا"])}</a>
             <Link href={requests}>{dictionary.myRequests}</Link>
-            <Link className={styles.primary} href={planner} data-press>{t(["Define your celebration", "خطّطوا لمناسبتكم"])}</Link>
+            <Link className={styles.primary} href={planner} data-press>{t(["Plan an event", "خطّطوا لمناسبتكم"])}</Link>
             <Suspense>
               <LocaleSwitcher locale={locale} label={dictionary.switchLanguage} />
             </Suspense>
-            <AccountControl locale={locale} />
-          </div>
+            <UserButton />
+          </nav>
         </div>
       </header>
 
@@ -255,7 +244,7 @@ export async function Homepage({ locale }: { locale: Locale }) {
         <div className={styles.wrap}>
           <div className={styles.footerGrid}>
             <div>
-              {brand(false)}
+              {brand()}
               <p>{t(["WANAS designs decor and optional catering for celebrations in Cairo.", "تنسّق وناس ديكور المناسبات والضيافة الاختيارية في القاهرة."])}</p>
             </div>
             <div>

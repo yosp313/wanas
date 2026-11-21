@@ -268,6 +268,10 @@
 }
 
 .card { display: grid; gap: clamp(18px, 2.45vw, 32px); }
+@media (hover: hover) and (pointer: fine) {
+  .card { transition: background-color var(--motion); }
+  .card:has(:is(h2, .cardActions) a:hover) { background-color: #fffaf7; }
+}
 .cardHeader,
 .cardFooter,
 .inspirationHeading,

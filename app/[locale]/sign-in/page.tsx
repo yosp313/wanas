@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
+import { UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -75,6 +76,7 @@ export default async function SignInPage({
             <Suspense>
               <LocaleSwitcher locale={locale} label={dictionary.switchLanguage} />
             </Suspense>
+            <UserButton />
           </nav>
         </div>
       </header>

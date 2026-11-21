@@ -56,8 +56,7 @@
 }
 
 .headerInner,
-.headerActions,
-.mainNav {
+.headerActions {
   display: flex;
   align-items: center;
 }
@@ -65,7 +64,7 @@
 .headerInner {
   justify-content: space-between;
   gap: clamp(16px, 2vw, 32px);
-  min-height: 84px;
+  min-height: 72px;
   padding-block: 12px;
 }
 
@@ -96,32 +95,21 @@
   font: 500 16px/1.4 "Noto Sans Arabic", sans-serif;
   letter-spacing: 0;
 }
-.brand small {
-  color: var(--secondary);
-  font-size: .67rem;
-  font-weight: 650;
-  letter-spacing: .15em;
-  text-transform: uppercase;
+.headerActions {
+  flex-wrap: wrap;
+  gap: 4px 14px;
 }
 
-.mainNav { gap: clamp(12px, 1.6vw, 26px); }
-.headerActions { gap: 8px 14px; }
-.menu { display: none; }
-
-.header :is(a, button, summary) {
+.headerActions > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--secondary);
   font-size: .8125rem;
   line-height: 1.35;
+  white-space: nowrap;
 }
-.mainNav a {
-  letter-spacing: .045em;
-  text-transform: uppercase;
-}
-.header .brand { color: var(--ink); }
-.mainNav [aria-current] { color: var(--accent); font-weight: 750; }
-.headerActions > :not(.primary) { white-space: nowrap; }
-.headerActions button { background: none; border: 0; padding: 0; cursor: pointer; }
-.header .primary { min-height: 40px; padding: 8px 16px; color: white; }
+.headerActions > .primary { padding: 8px 16px; color: white; }
 
 .primary,
 .secondary {
@@ -198,7 +186,7 @@
   font-size: .875rem;
   font-weight: 650;
 }
-.site :is(.textLink, .cardLink, .mainNav a, .menu nav a, .headerActions > :not(.primary), .footer nav a, .footerEnd a):hover {
+.site :is(.textLink, .cardLink, .headerActions > a:not(.primary), .footer nav a, .footerEnd a):hover {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -252,14 +240,41 @@
   from { opacity: 0.75; translate: 0 8px; }
 }
 
-@media (prefers-reduced-motion: no-preference) {
+.intro,
+.highlights > article {
+  animation: hero-enter var(--motion-hero) backwards;
+}
+.highlights > article:first-child { animation-delay: 60ms; }
+.highlights > article:nth-child(2) { animation-delay: 110ms; }
+.highlights > article:nth-child(3) { animation-delay: 160ms; }
+
+@keyframes hero-fade {
+  from { opacity: 0.9; }
+}
+
+@media (prefers-reduced-motion: reduce) {
   .intro,
   .highlights > article {
-    animation: hero-enter var(--motion-hero) backwards;
+    animation: hero-fade var(--motion-enter) backwards;
   }
-  .highlights > article:first-child { animation-delay: 60ms; }
-  .highlights > article:nth-child(2) { animation-delay: 110ms; }
-  .highlights > article:nth-child(3) { animation-delay: 160ms; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .band :is(.photo, .venue) {
+      view-timeline-name: --portfolio-photo;
+    }
+    .band :is(.photo, .venue) > img {
+      animation: portfolio-photo linear both;
+      animation-timeline: --portfolio-photo;
+      animation-range: entry 0% entry 90%;
+    }
+  }
+}
+
+@keyframes portfolio-photo {
+  from { transform: scale(1.1); }
+  to { transform: scale(1); }
 }
 
 @media (max-width: 700px) and (prefers-reduced-motion: no-preference) {
@@ -269,7 +284,7 @@
 
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .card:has(.cardLink) .photo img { transition: scale var(--motion-hero); }
-  .card:has(.cardLink:hover) .photo img { scale: 1.04; }
+  .card:has(.cardLink:hover:not(:focus-visible)) .photo img { scale: 1.04; }
 }
 
 .site .facts {
@@ -440,52 +455,11 @@
 :global([dir="rtl"]) .intro h1 { max-width: 24ch; font-size: clamp(32px, 4.1vw, 60px); }
 :global([dir="rtl"]) .intro em { font-style: normal; }
 :global([dir="rtl"]) .site :is(.primary, .secondary, .textLink, .cardLink) > span { transform: scaleX(-1); }
-:global([dir="rtl"]) .site :is(.eyebrow, .brand small, .mainNav a, .primary, .secondary, .footerGrid h2) { letter-spacing: 0; }
-
-@media (min-width: 1400px) {
-  .header .primary { white-space: nowrap; }
-}
+:global([dir="rtl"]) .site :is(.eyebrow, .primary, .secondary, .footerGrid h2) { letter-spacing: 0; }
 
 @media (max-width: 1279px) {
-  .mainNav { display: none; }
   .site [id] { scroll-margin-block-start: 24px; }
   .header { position: relative; }
-  .headerInner { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; }
-  .headerActions { grid-column: 2; grid-row: 1; justify-self: end; }
-  .menu { display: block; grid-column: 3; grid-row: 1; }
-  .menu summary { display: list-item; cursor: pointer; padding-block: 12px; }
-  .menu nav {
-    position: absolute;
-    inset-block-start: 100%;
-    inset-inline-end: var(--gutter);
-    display: grid;
-    min-inline-size: 192px;
-    padding: 8px;
-    border: 1px solid var(--line);
-    border-radius: var(--control-radius);
-    background: var(--surface);
-  }
-  .menu nav a { display: flex; align-items: center; min-height: 44px; padding-inline: 12px; }
-
-  @supports selector(::details-content) and (interactivity: inert) {
-    .menu::details-content { transition: content-visibility var(--motion-enter) allow-discrete; }
-    .menu nav {
-      opacity: 0;
-      transition: opacity var(--motion-enter);
-    }
-    .menu:not([open]) nav { interactivity: inert; }
-    .menu[open] nav { opacity: 1; }
-
-    @media (prefers-reduced-motion: no-preference) {
-      .menu nav {
-        scale: 0.97;
-        transform-origin: top right;
-        transition: opacity var(--motion-enter), scale var(--motion-enter);
-      }
-      :global([dir="rtl"]) .menu nav { transform-origin: top left; }
-      .menu[open] nav { scale: 1; }
-    }
-  }
 }
 
 @media (max-width: 960px) {
@@ -493,10 +467,7 @@
 }
 
 @media (max-width: 700px) {
-  .headerInner { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; }
-  .menu { grid-column: 2; justify-self: end; }
-  .headerActions { grid-column: 1 / -1; grid-row: 2; justify-self: start; flex-wrap: wrap; }
-  .headerActions > :is(a, button) { display: inline-flex; align-items: center; min-height: 44px; }
+  .headerInner { flex-wrap: wrap; gap: 4px 14px; }
   .intro h1 { text-wrap: balance; }
   .highlights { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .highlights article:nth-child(2) { grid-column: 1 / -1; grid-row: 1; min-height: clamp(280px, 60vw, 420px); }
@@ -505,7 +476,6 @@
 }
 
 @media (max-width: 480px) {
-  .brand small { letter-spacing: .08em; }
   .highlights, .four, .footerGrid { grid-template-columns: minmax(0, 1fr); }
   .site .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .studioAction { align-items: start; flex-direction: column; }
