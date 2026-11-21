@@ -29,10 +29,10 @@ export const venueTypes: CatalogOption[] = [
 ].map(([id, en, ar]) => ({ id, labels: { en, ar } }));
 
 export const budgetRanges: CatalogOption[] = [
-  ["under-50000", "Under EGP 50,000", "أقل من ٥٠٬٠٠٠ جنيه"],
-  ["50000-100000", "EGP 50,000–100,000", "٥٠٬٠٠٠–١٠٠٬٠٠٠ جنيه"],
-  ["100000-200000", "EGP 100,000–200,000", "١٠٠٬٠٠٠–٢٠٠٬٠٠٠ جنيه"],
-  ["over-200000", "Over EGP 200,000", "أكثر من ٢٠٠٬٠٠٠ جنيه"],
+  ["under-50000", "Under EGP 50,000", "أقل من 50,000 جنيه"],
+  ["50000-100000", "EGP 50,000–100,000", "50,000–100,000 جنيه"],
+  ["100000-200000", "EGP 100,000–200,000", "100,000–200,000 جنيه"],
+  ["over-200000", "Over EGP 200,000", "أكثر من 200,000 جنيه"],
 ].map(([id, en, ar]) => ({ id, labels: { en, ar } }));
 
 export const decorModes: CatalogOption[] = [

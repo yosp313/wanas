@@ -12,20 +12,15 @@ Use three environments with the same application build and migration set:
 | Environment | Database and services | Purpose |
 | --- | --- | --- |
 | Unit and integration | Disposable PostgreSQL 16 on localhost | Transactions, authorization, dates, outbox, and worker behavior |
-| Staging | A dedicated Supabase project, a test Resend sender, and Mailpit or another test mailbox | Full browser flow with real email-code authentication where available |
-| Production | The approved host, production Supabase project, and verified Resend sender | Release smoke checks and scheduled worker |
+| Staging | A dedicated Supabase project, Clerk development instance, test Resend sender, and a controlled inbox | Delivered magic links, Google sign-in, and imported account checks |
+| Production | The approved host, Clerk production instance, production Supabase project, and verified Resend sender | Release smoke checks and scheduled worker |
 
 The local database must be disposable. The current Phase 8 database is
 `postgres://wanas:wanas_local@127.0.0.1:55432/wanas_phase8`. Tests must fail when
 `DATABASE_URL` points at a non-local host unless an explicit staging or
 production command is being run.
 
-Keep service access behind small adapters. Integration tests can use the real
-Supabase Auth and Mailpit services when they are running. A deterministic test
-Auth adapter and an in-memory or HTTP mail adapter may be used when those
-services are unavailable. The adapter must expose the same operations as the
-real service, and the test must record which adapter ran. Do not mix real Auth
-with a fake database or fake email in one result without naming that boundary.
+Browser tests use Clerk development credentials, disposable test users, and a local notification capture. Staging uses a controlled inbox to verify real email delivery and an approved Google account to verify OAuth.
 
 ## Fixture-independent test harness
 
@@ -113,11 +108,7 @@ recommended by the Next.js testing guide. Keep the base URL configurable and
 never hard-code a production host. The browser project should run the same
 flow in Chromium for pull requests, then all supported browsers in staging.
 
-Each E2E test creates a run-owned customer and admin account through the test
-service adapter. The test signs in with an email code captured from Mailpit or
-the Auth adapter, rather than using a shared account. A test-only setup route
-or server-side helper may issue identities, but it must be disabled unless a
-test environment flag is set and must reject non-local origins.
+Each full-flow test provisions disposable users in the designated Clerk development instance and signs them in with Clerk's Playwright helper. The helper creates a session through a test ticket. Use a separate staging check for real provider flows.
 
 The primary scenario is:
 
@@ -125,7 +116,7 @@ The primary scenario is:
    equivalent draft survives the language change and a refresh.
 2. Exercise both decor modes, optional catering, the `Other` descriptions,
    budget, venue, date, notes, and inspiration link fields.
-3. Submit after email-code sign-in. Verify the request page, ownership, and
+3. Sign in and resume the saved review, then submit it. Verify the request page, ownership, and
    submission email in the selected language.
 4. Sign in as the invited admin, open the request, send a quote, and verify the
    quote email link and total.
@@ -142,11 +133,9 @@ on failure. Clean up by run ID even when a test fails.
 
 ## Run the browser flow locally
 
-Use two disposable Postgres databases, one for WANAS migrations and the other
-behind local Supabase Auth. Start Supabase Auth with Mailpit and configure both
-the magic-link and confirmation email templates to include `{{ .Token }}`.
-The app uses the Supabase API URL and publishable key from the local stack.
-[Supabase email templates](https://supabase.com/docs/guides/local-development/customizing-email-templates)
+Use disposable local Postgres and set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` for an approved development instance.
+
+For GitHub Actions, set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` as a repository variable and `CLERK_SECRET_KEY` as a repository secret. When either value is unavailable, CI still runs the build, lint, and Postgres tests and skips browser smoke tests.
 
 1. Set `DATABASE_URL` to the disposable WANAS database and run `npm run db:migrate`.
 2. Start the loopback mail capture with `node tests/fixtures/mail-capture.mjs`.
@@ -156,14 +145,14 @@ The app uses the Supabase API URL and publishable key from the local stack.
    `NOTIFICATION_TEST_URL=http://127.0.0.1:3109/emails`,
    `APP_ORIGIN`, `EMAIL_FROM`, a dummy `RESEND_API_KEY`, and a local
    `NOTIFICATION_CRON_SECRET`. Use the same origin for the browser test.
-4. Set `E2E_FULL_FLOW=1`, `PLAYWRIGHT_BASE_URL`, `MAILPIT_URL`,
-   `SUPABASE_LOCAL_DATABASE_URL`, `DATABASE_URL`, `NOTIFICATION_TEST_URL`,
-   and `NOTIFICATION_CRON_SECRET` for the test process. Run
+4. Set `E2E_FULL_FLOW=1`, `PLAYWRIGHT_BASE_URL`, `DATABASE_URL`,
+   `NOTIFICATION_TEST_URL`, `NOTIFICATION_CRON_SECRET`, and the Clerk development keys
+   for the test process. Run
    `npm run test:e2e -- --workers=1`. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`
    if you want to use an installed Chromium executable.
 
 The browser suite submits an English curated request and an Arabic custom
-request. It uses Supabase email codes, opens a quote from the local delivery
+request. It signs in with Clerk, opens a quote from the local delivery
 capture, confirms the booking, checks the calendar, reschedules the booking,
 and verifies admin revocation. Hosted staging uses the live Resend integration
 with a test sender. The loopback delivery transport is unavailable in production.
@@ -176,15 +165,14 @@ with a test sender. The loopback delivery transport is unavailable in production
    database and record the migration version.
 3. Load the approved bilingual catalog and images. Confirm that option IDs and
    labels match the committed catalog manifest.
-4. Configure server-only secrets: database URL, Supabase server credentials,
+4. Configure server-only secrets: database URL, Clerk secret key,
    Resend key and sender, worker secret, and the stable Next.js server action
-   encryption key when more than one app instance runs. Keep these out of the
-   browser bundle and logs.
-5. Deploy the app and run the browser flow above. Confirm the worker endpoint
-   rejects missing or wrong secrets, then run it with the configured secret.
-6. Verify an Arabic and an English quote email, booking acceptance, the admin
+   encryption key when more than one app instance runs. Set the Clerk publishable key before building and keep server secrets out of the browser bundle and logs.
+5. Rehearse the Clerk import and reconcile the account and ownership counts. Verify that a new and a returning customer can open a delivered magic link in a second tab and resume the original review. Verify Google completion, cancellation, and sign-in through both methods for an imported account. Confirm the mapped UUID and check staff revocation during an active session.
+6. Deploy the app and run the browser flow above. Confirm the worker endpoint rejects missing or wrong secrets, then run it with the configured secret.
+7. Verify an Arabic and an English quote email, booking acceptance, the admin
    calendar, availability, and a worker retry in the test mailbox.
-7. Record build ID, deployment ID, migration version, catalog revision, smoke
+8. Record build ID, deployment ID, migration version, catalog revision, smoke
    results, and rollback target.
 
 Next.js reads server environment values at request time for dynamic App Router
@@ -196,30 +184,16 @@ single instance.
 
 ## Production release and rollback
 
-Production release is blocked until the host, Supabase project, sender, admin
-identity, approved catalog, and credentials have been supplied and verified by
-the operator.
+Before release, confirm the owned domain, production host, Clerk and Supabase instances, sender, initial staff identities, catalog, and credentials. Follow the Clerk migration plan for production OAuth and domain setup.
 
 1. Freeze the release commit and record its build, migration, and catalog
    revisions.
 2. Back up the production database according to the chosen host's procedure.
-3. Apply migrations once, before the app deploy. Check that each migration is
-   compatible with the previous app version.
-4. Deploy the built app, grant the invited admin role with the restricted
-   operator command, and configure Supabase Cron to call the secret-protected
-   worker every five minutes.
-5. Run smoke checks for both locale links, one submission, one quote email,
-   acceptance, the admin calendar, public availability, and one authenticated
-   cron call. Use a controlled test request and delete or cancel it according
-   to the production data policy.
+3. Apply the additive migration and rehearse the mapping against staging. Pause production registrations, business writes, and staff grants for the cutover. Reconcile the final Supabase account changes before deploying Clerk.
+4. Deploy the Clerk build with production keys. Grant staff access with `npm run admin:access -- grant <clerk-user-id> <operator-uuid>` and verify the existing Supabase Cron call using its Vault secret.
+5. Verify localized redirects, imported owner and staff access, and quote deep links before reopening writes and registrations. Check the worker rejects an unauthorized call with 401.
 
-If smoke checks fail, stop new traffic if the host supports it, preserve logs
-and the deployment record, and roll back the app to the previous build. Do not
-roll back migrations blindly. First verify that the previous build can read
-the new schema and that no destructive migration ran. If compatibility is not
-proven, restore through the approved database recovery procedure and involve
-the operator. After rollback, re-run the worker authentication and read-only
-calendar checks.
+Before reopening writes, roll back a failed cutover by redeploying the previous build with its Supabase Auth environment. Leave the identity migration in place and verify the previous build reads the same business data. After reopening writes, repair forward unless the rollback preserves Clerk-only accounts and their data. Record the staging rollback rehearsal before releasing.
 
 ## Evidence and exit criteria
 

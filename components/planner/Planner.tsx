@@ -1,35 +1,1191 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import { submitRequestAction } from "@/app/actions/submit-request";
+import { MoodboardGallery } from "./MoodboardGallery";
 import { catalog, catalogLabel, type Locale } from "@/lib/catalog/catalog";
 import { emptyDraft, type PlannerDraft } from "@/lib/planner/types";
 import styles from "./planner.module.css";
 
-const storageKey = "wanas-planner-draft-v1";
-const copy = { en: { title: "Plan your event", intro: "Tell us what you are imagining. You can change any answer before you submit.", next: "Continue", back: "Back", submit: "Submit request", review: "Review your request", details: "Event details", design: "Decor direction", catering: "Optional catering", saved: "Your progress is saved in this tab.", eventType: "Event type", guests: "Estimated guests", date: "Event date", venue: "Venue name", address: "Street address", venueType: "Venue type", budget: "Budget for decor and catering", notes: "Notes", links: "Inspiration links", name: "Name", mobile: "Mobile number", includeCatering: "Include catering", delegated: "Leave an element unselected and WANAS will choose it for you.", choose: "WANAS chooses", booked: "Booked", held: "Held", unavailable: "This date is already booked.", required: "Please complete the required fields.", failed: "We could not submit the request. Check the details and try again.", notRequested: "Not requested" }, ar: { title: "خططوا حفلكم", intro: "أخبرونا بما تتخيلونه. يمكنكم تعديل أي إجابة قبل الإرسال.", next: "التالي", back: "رجوع", submit: "إرسال الطلب", review: "مراجعة الطلب", details: "تفاصيل الحفل", design: "اتجاه الديكور", catering: "ضيافة اختيارية", saved: "يُحفظ تقدمكم في هذه الصفحة.", eventType: "نوع المناسبة", guests: "عدد الضيوف المتوقع", date: "تاريخ المناسبة", venue: "اسم المكان", address: "العنوان بالتفصيل", venueType: "نوع المكان", budget: "ميزانية الديكور والضيافة", notes: "ملاحظات", links: "روابط للإلهام", name: "الاسم", mobile: "رقم الهاتف", includeCatering: "أرغب في الضيافة", delegated: "اتركوا العنصر دون اختيار ليقترح فريق وناس المناسب.", choose: "يختار فريق وناس", booked: "محجوز", held: "معلّق", unavailable: "هذا التاريخ محجوز بالفعل.", required: "يرجى إكمال الحقول المطلوبة.", failed: "تعذر إرسال الطلب. تحققوا من البيانات وحاولوا مرة أخرى.", notRequested: "لا توجد ضيافة" } } as const;
+const venueImages: Record<string, string> = {
+  villa: "courtyard",
+  garden: "greenhouse",
+  hall: "ballroom",
+  hotel: "pavilion",
+};
 
-function Options({ group, value, onChange, locale, allowDelegation = false }: { group: keyof typeof catalog; value: string; onChange: (value: string) => void; locale: Locale; allowDelegation?: boolean }) { const t = copy[locale]; return <div className={styles.options}>{allowDelegation && <button type="button" className={!value ? styles.selected : ""} onClick={() => onChange("")}>{t.choose}</button>}{catalog[group].map((option) => <button type="button" key={option.id} className={value === option.id ? styles.selected : ""} aria-pressed={value === option.id} onClick={() => onChange(option.id)}>{option.labels[locale]}</button>)}</div>; }
-function monthDates(month: string) { const [year, monthNumber] = month.split("-").map(Number); const count = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate(); return Array.from({ length: count }, (_, index) => `${month}-${String(index + 1).padStart(2, "0")}`); }
-function cairoToday() { return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Cairo", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); }
-function minimumCairoDate() { const [year, month, day] = cairoToday().split("-").map(Number); return new Date(Date.UTC(year, month - 1, day + 10)).toISOString().slice(0, 10); }
-function AvailabilityCalendar({ month, selected, booked, held, minimum, onMonthChange, onSelect, locale }: { month: string; selected: string; booked: string[]; held: string[]; minimum: string; onMonthChange: (month: string) => void; onSelect: (date: string) => void; locale: Locale }) { const t = copy[locale]; const shift = (amount: number) => { const date = new Date(`${month}-01T00:00:00Z`); date.setUTCMonth(date.getUTCMonth() + amount); onMonthChange(date.toISOString().slice(0, 7)); }; return <div className={styles.calendar} aria-label={t.date}><div className={styles.calendarHeader}><button type="button" onClick={() => shift(-1)} aria-label={locale === "ar" ? "الشهر السابق" : "Previous month"}>‹</button><strong>{month}</strong><button type="button" onClick={() => shift(1)} aria-label={locale === "ar" ? "الشهر التالي" : "Next month"}>›</button></div><div className={styles.calendarLegend}><span><i className={styles.legendAvailable} />{locale === "ar" ? "متاح" : "Available"}</span><span><i className={styles.legendHeld} />{t.held}</span><span><i className={styles.legendBooked} />{t.booked}</span></div><div className={styles.calendarDays}>{monthDates(month).map((date) => { const isBooked = booked.includes(date); const isPast = date < minimum; const isHeld = held.includes(date); return <button type="button" key={date} disabled={isBooked || isPast} aria-label={`${t.date} ${date}${isBooked ? `, ${t.booked}` : isHeld ? `, ${t.held}` : ""}`} className={`${selected === date ? styles.dateSelected : ""} ${isHeld ? styles.dateHeld : ""}`} onClick={() => onSelect(date)}>{date.slice(-2)}</button>; })}</div></div>; }
+const venueOptions = [
+  ...catalog.venueTypes.filter(({ id }) => venueImages[id]),
+  ...catalog.venueTypes.filter(({ id }) => !venueImages[id]),
+];
+
+const cateringDetails: Record<string, Record<Locale, string>> = {
+  canapes: {
+    en: "Small bites for a standing reception",
+    ar: "لقيمات خفيفة لاستقبال الضيوف",
+  },
+  buffet: {
+    en: "Guests choose from a shared spread",
+    ar: "تشكيلة أطباق يختار منها الضيوف",
+  },
+  plated: {
+    en: "Individual courses served at the table",
+    ar: "أطباق فردية تُقدّم على الطاولة",
+  },
+  recommend: {
+    en: "We’ll suggest a format for your venue and guest count",
+    ar: "نقترح أسلوبًا يناسب المكان وعدد الضيوف",
+  },
+};
+
+const storageKey = "wanas-planner-draft-v1";
+const copy = {
+  en: {
+    title: "Plan your event",
+    intro:
+      "Tell us what you are imagining. You can change any answer before you submit.",
+    next: "Continue",
+    back: "Back",
+    submit: "Submit request",
+    review: "Review your request",
+    details: "Event details",
+    design: "Decor direction",
+    catering: "Optional catering",
+    saved: "Your progress is saved in this tab.",
+    eventType: "Event type",
+    guests: "Estimated guests",
+    date: "Event date",
+    venue: "Venue name",
+    address: "Street address",
+    venueType: "Venue type",
+    budget: "Budget for decor and catering",
+    notes: "Notes",
+    links: "Inspiration links",
+    name: "Name",
+    mobile: "Mobile number",
+    includeCatering: "Include catering",
+    delegated: "Leave an element unselected and WANAS will choose it for you.",
+    choose: "WANAS chooses",
+    booked: "Booked",
+    held: "Held",
+    unavailable: "This date is already booked.",
+    required: "Please complete the required fields.",
+    failed: "We could not submit the request. Check the details and try again.",
+    notRequested: "Not requested",
+  },
+  ar: {
+    title: "خططوا حفلكم",
+    intro: "يمكنكم تعديل أي إجابة قبل الإرسال.",
+    next: "التالي",
+    back: "رجوع",
+    submit: "إرسال الطلب",
+    review: "مراجعة الطلب",
+    details: "تفاصيل الحفل",
+    design: "اتجاه الديكور",
+    catering: "ضيافة اختيارية",
+    saved: "يُحفظ تقدمكم في هذه الصفحة.",
+    eventType: "نوع المناسبة",
+    guests: "عدد الضيوف المتوقع",
+    date: "تاريخ المناسبة",
+    venue: "اسم المكان",
+    address: "العنوان بالتفصيل",
+    venueType: "نوع المكان",
+    budget: "ميزانية الديكور والضيافة",
+    notes: "ملاحظات",
+    links: "روابط للإلهام",
+    name: "الاسم",
+    mobile: "رقم الهاتف",
+    includeCatering: "أرغب في الضيافة",
+    delegated: "اتركوا العنصر دون اختيار ليقترح فريق وناس المناسب.",
+    choose: "يختار فريق وناس",
+    booked: "محجوز",
+    held: "معلّق",
+    unavailable: "هذا التاريخ محجوز بالفعل.",
+    required: "يرجى إكمال الحقول المطلوبة.",
+    failed: "تعذر إرسال الطلب. تحققوا من البيانات وحاولوا مرة أخرى.",
+    notRequested: "لا توجد ضيافة",
+  },
+} as const;
+
+function Options({
+  group,
+  value,
+  onChange,
+  locale,
+  allowDelegation = false,
+}: {
+  group: keyof typeof catalog;
+  value: string;
+  onChange: (value: string) => void;
+  locale: Locale;
+  allowDelegation?: boolean;
+}) {
+  const t = copy[locale];
+  return (
+    <div className={styles.options}>
+      {allowDelegation && (
+        <button
+          type="button"
+          className={!value ? styles.selected : ""}
+          aria-pressed={!value}
+          onClick={() => onChange("")}
+        >
+          {t.choose}
+        </button>
+      )}
+      {catalog[group].map((option) => (
+        <button
+          type="button"
+          key={option.id}
+          className={value === option.id ? styles.selected : ""}
+          aria-pressed={value === option.id}
+          onClick={() => onChange(option.id)}
+        >
+          {option.labels[locale]}
+        </button>
+      ))}
+    </div>
+  );
+}
+function monthDates(month: string) {
+  const [year, monthNumber] = month.split("-").map(Number);
+  const count = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
+  return Array.from(
+    { length: count },
+    (_, index) => `${month}-${String(index + 1).padStart(2, "0")}`,
+  );
+}
+function cairoToday() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Cairo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+function minimumCairoDate() {
+  const [year, month, day] = cairoToday().split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day + 10))
+    .toISOString()
+    .slice(0, 10);
+}
+function AvailabilityCalendar({
+  month,
+  selected,
+  booked,
+  held,
+  minimum,
+  onMonthChange,
+  onSelect,
+  locale,
+}: {
+  month: string;
+  selected: string;
+  booked: string[];
+  held: string[];
+  minimum: string;
+  onMonthChange: (month: string) => void;
+  onSelect: (date: string) => void;
+  locale: Locale;
+}) {
+  const t = copy[locale];
+  const monthStart = new Date(`${month}-01T00:00:00Z`);
+  const monthLabel = new Intl.DateTimeFormat(locale, {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+    numberingSystem: "latn",
+  }).format(monthStart);
+  const weekdays = new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    timeZone: "UTC",
+  });
+  const shift = (amount: number) => {
+    const date = new Date(monthStart);
+    date.setUTCMonth(date.getUTCMonth() + amount);
+    onMonthChange(date.toISOString().slice(0, 7));
+  };
+  return (
+    <div className={styles.calendar} aria-label={t.date}>
+      <div className={styles.calendarHeader}>
+        <button
+          type="button"
+          onClick={() => shift(-1)}
+          aria-label={locale === "ar" ? "الشهر السابق" : "Previous month"}
+        >
+          ‹
+        </button>
+        <strong>{monthLabel}</strong>
+        <button
+          type="button"
+          onClick={() => shift(1)}
+          aria-label={locale === "ar" ? "الشهر التالي" : "Next month"}
+        >
+          ›
+        </button>
+      </div>
+      <div className={styles.calendarLegend}>
+        <span>
+          <i className={styles.legendAvailable} />
+          {locale === "ar" ? "متاح" : "Available"}
+        </span>
+        <span>
+          <i className={styles.legendHeld} />
+          {t.held}
+        </span>
+        <span>
+          <i className={styles.legendBooked} />
+          {t.booked}
+        </span>
+      </div>
+      <div className={styles.calendarDays}>
+        {Array.from({ length: 7 }, (_, index) =>
+          weekdays.format(new Date(Date.UTC(2024, 0, 7 + index))),
+        ).map((day) => (
+          <span key={day}>{day}</span>
+        ))}
+        {Array.from({ length: monthStart.getUTCDay() }, (_, index) => (
+          <span key={index} aria-hidden="true" />
+        ))}
+        {monthDates(month).map((date) => {
+          const isBooked = booked.includes(date);
+          const isPast = date < minimum;
+          const isHeld = held.includes(date);
+          return (
+            <button
+              type="button"
+              key={date}
+              disabled={isBooked || isPast}
+              aria-pressed={selected === date}
+              aria-label={`${t.date} ${date}${isBooked ? `, ${t.booked}` : isHeld ? `, ${t.held}` : ""}`}
+              className={`${selected === date ? styles.dateSelected : ""} ${isHeld ? styles.dateHeld : ""}`}
+              onClick={() => onSelect(date)}
+            >
+              {Number(date.slice(-2))}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export function Planner({ locale }: { locale: Locale }) {
-  const t = copy[locale]; const [draft, setDraft] = useState<PlannerDraft>(() => emptyDraft(locale)); const [submissionId, setSubmissionId] = useState(""); const [step, setStep] = useState(1); const [message, setMessage] = useState(""); const [bookedDates, setBookedDates] = useState<string[]>([]); const [heldDates, setHeldDates] = useState<string[]>([]); const [visibleMonth, setVisibleMonth] = useState(""); const [minimumDate, setMinimumDate] = useState(""); const [availabilityError, setAvailabilityError] = useState(false); const router = useRouter();
+  const t = copy[locale];
+  const [draft, setDraft] = useState<PlannerDraft>(() => emptyDraft(locale));
+  const [submissionId, setSubmissionId] = useState("");
+  const [step, setStep] = useState(1);
+  const [message, setMessage] = useState("");
+  const [bookedDates, setBookedDates] = useState<string[]>([]);
+  const [heldDates, setHeldDates] = useState<string[]>([]);
+  const [visibleMonth, setVisibleMonth] = useState("");
+  const [minimumDate, setMinimumDate] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState(false);
+  const router = useRouter();
+  const heading = useRef<HTMLHeadingElement>(null);
+  const focusHeading = useRef(false);
+  useEffect(() => {
+    if (!focusHeading.current) return;
+    focusHeading.current = false;
+    heading.current?.focus();
+  }, [step]);
+  function goToStep(target: number) {
+    if (target === step) return;
+    focusHeading.current = true;
+    setMessage("");
+    setStep(target);
+  }
   // sessionStorage is tab-scoped and only exists after hydration.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setMinimumDate(minimumCairoDate()); try { const raw = sessionStorage.getItem(storageKey); if (raw) { const saved = JSON.parse(raw); setDraft({ ...emptyDraft(locale), ...saved.draft, locale }); setSubmissionId(saved.submissionId || crypto.randomUUID()); setStep(saved.step || 1); setVisibleMonth(saved.visibleMonth || cairoToday().slice(0, 7)); } else { setSubmissionId(crypto.randomUUID()); setVisibleMonth(cairoToday().slice(0, 7)); } } catch { setSubmissionId(crypto.randomUUID()); setVisibleMonth(cairoToday().slice(0, 7)); } }, [locale]);
-  useEffect(() => { try { if (submissionId) sessionStorage.setItem(storageKey, JSON.stringify({ draft, submissionId, step, visibleMonth, locale })); } catch { /* storage can be disabled */ } }, [draft, locale, step, submissionId, visibleMonth]);
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { if (!visibleMonth) return; const controller = new AbortController(); setAvailabilityError(false); fetch(`/api/availability?month=${visibleMonth}`, { cache: "no-store", signal: controller.signal }).then((response) => { if (!response.ok) throw new Error("availability"); return response.json(); }).then((data: { dates?: Array<{ date: string; status: string }> }) => { const dates = data.dates ?? []; setBookedDates(dates.filter((date) => date.status === "booked").map((date) => date.date)); setHeldDates(dates.filter((date) => date.status === "held").map((date) => date.date)); }).catch((error) => { if (error.name !== "AbortError") { setAvailabilityError(true); setBookedDates([]); setHeldDates([]); } }); return () => controller.abort(); }, [visibleMonth]);
-  const update = <K extends keyof PlannerDraft>(field: K, value: PlannerDraft[K]) => setDraft((current) => ({ ...current, [field]: value })); const valid = useMemo(() => step === 1 ? !!draft.eventType && !!draft.guestCount && !!draft.eventDate && draft.eventDate >= minimumDate && !bookedDates.includes(draft.eventDate) && !!draft.venueName && !!draft.streetAddress && !!draft.venueType && !!draft.budgetRange && (draft.eventType !== "other" || !!draft.eventTypeOther) && (draft.venueType !== "other" || !!draft.venueTypeOther) : step === 2 ? !!draft.decorMode : step === 4 ? !!draft.customerName && !!draft.mobile : true, [bookedDates, draft, minimumDate, step]);
-  const next = () => { if (!valid) { setMessage(draft.eventDate && bookedDates.includes(draft.eventDate) ? t.unavailable : t.required); return; } setMessage(""); setStep((current) => Math.min(4, current + 1)); }; const submit = async () => { if (!valid || !submissionId) return; setMessage(locale === "ar" ? "جاري إرسال الطلب..." : "Sending your request..."); let response; try { response = await submitRequestAction(draft, submissionId); } catch { setMessage(t.failed); return; } if (!response.ok) { if (response.error === "AUTH_REQUIRED") { router.push(`/${locale}/sign-in?returnTo=/${locale}/plan?review=1`); return; } setMessage(response.error === "DATE_UNAVAILABLE" ? t.unavailable : response.error === "DATE_NOTICE" ? (locale === "ar" ? "اختر موعدًا بعد ١٠ أيام على الأقل." : "Choose a date at least 10 days away.") : t.failed); return; } try { sessionStorage.removeItem(storageKey); } catch { /* storage can be disabled */ } router.push(`/${locale}/requests/${response.result.requestId}`); };
-  const eventLabel = draft.eventType ? catalogLabel("eventTypes", draft.eventType, locale) : "-";
-  return <main className={styles.shell} dir={locale === "ar" ? "rtl" : "ltr"}><header><h1>{t.title}</h1><p>{t.intro}</p><small>{t.saved}</small></header><div className={styles.progress} aria-label={locale === "ar" ? "تقدم التخطيط" : "Planner progress"}>{[1, 2, 3, 4].map((number) => <span key={number} className={number <= step ? styles.progressActive : ""}>{number}</span>)}</div><section className={styles.panel}>
-    {step === 1 && <>{visibleMonth && <AvailabilityCalendar month={visibleMonth} selected={draft.eventDate} booked={bookedDates} held={heldDates} minimum={minimumDate} onMonthChange={setVisibleMonth} onSelect={(date) => update("eventDate", date)} locale={locale} />}{availabilityError && <p className={styles.message} role="status">{locale === "ar" ? "تعذر تحميل المواعيد المتاحة الآن." : "Availability could not be loaded right now."}</p>}<h2>{t.details}</h2><fieldset><legend>{t.eventType}</legend><Options group="eventTypes" locale={locale} value={draft.eventType} onChange={(value) => update("eventType", value)} /></fieldset>{draft.eventType === "other" && <input required aria-label={locale === "ar" ? "وصف المناسبة" : "Describe your event"} placeholder={locale === "ar" ? "اكتبوا وصف المناسبة" : "Describe your event"} value={draft.eventTypeOther} onChange={(event) => update("eventTypeOther", event.target.value)} />}<label>{t.guests}<input aria-label={t.guests} type="number" min="1" value={draft.guestCount} onChange={(event) => update("guestCount", event.target.value ? Number(event.target.value) : "")} /></label><label>{t.date}<input aria-label={t.date} type="date" min={minimumDate} value={draft.eventDate} onChange={(event) => { update("eventDate", event.target.value); if (event.target.value) setVisibleMonth(event.target.value.slice(0, 7)); }} />{bookedDates.includes(draft.eventDate) && <small className={styles.message}>{t.unavailable}</small>}</label><label>{t.venue}<input aria-label={t.venue} value={draft.venueName} onChange={(event) => update("venueName", event.target.value)} /></label><label>{t.address}<input aria-label={t.address} value={draft.streetAddress} onChange={(event) => update("streetAddress", event.target.value)} /></label><fieldset><legend>{t.venueType}</legend><Options group="venueTypes" locale={locale} value={draft.venueType} onChange={(value) => update("venueType", value)} /></fieldset>{draft.venueType === "other" && <input required aria-label={locale === "ar" ? "وصف المكان" : "Describe the venue"} placeholder={locale === "ar" ? "اكتبوا وصف المكان" : "Describe the venue"} value={draft.venueTypeOther} onChange={(event) => update("venueTypeOther", event.target.value)} />}<fieldset><legend>{t.budget}</legend><Options group="budgetRanges" locale={locale} value={draft.budgetRange} onChange={(value) => update("budgetRange", value)} /></fieldset></>}
-    {step === 2 && <><h2>{t.design}</h2><Options group="decorModes" locale={locale} value={draft.decorMode} onChange={(value) => update("decorMode", value as PlannerDraft["decorMode"])} />{draft.decorMode === "customize" && <><fieldset><legend>{locale === "ar" ? "لوحة الإلهام" : "Moodboard"}</legend><Options group="moodboards" locale={locale} value={draft.moodboard} allowDelegation onChange={(value) => update("moodboard", value)} /></fieldset><fieldset><legend>{locale === "ar" ? "الألوان" : "Palette"}</legend><Options group="palettes" locale={locale} value={draft.palette} allowDelegation onChange={(value) => update("palette", value)} /></fieldset><fieldset><legend>{locale === "ar" ? "عناصر الديكور" : "Decor elements"}</legend><div className={styles.checks}>{catalog.decorElements.map((option) => <label key={option.id}><input type="checkbox" checked={draft.decorElements.includes(option.id)} onChange={(event) => update("decorElements", event.target.checked ? [...draft.decorElements, option.id] : draft.decorElements.filter((id) => id !== option.id))} />{option.labels[locale]}</label>)}</div><small>{t.delegated}</small></fieldset></>}<label>{t.notes}<textarea aria-label={t.notes} value={draft.notes} onChange={(event) => update("notes", event.target.value)} /></label><label>{t.links}<input aria-label={t.links} value={draft.inspirationLinks} onChange={(event) => update("inspirationLinks", event.target.value)} placeholder="https://..." /></label></>}
-    {step === 3 && <><h2>{t.catering}</h2><label className={styles.toggle}><input type="checkbox" checked={draft.cateringRequested} onChange={(event) => setDraft((current) => ({ ...current, cateringRequested: event.target.checked, cateringOption: event.target.checked ? (current.cateringOption || "recommend") : "" }))} />{t.includeCatering}</label>{draft.cateringRequested && <Options group="cateringOptions" locale={locale} value={draft.cateringOption} onChange={(value) => update("cateringOption", value)} />}</>}
-    {step === 4 && <><h2>{t.review}</h2><dl className={styles.summary}><div><dt>{t.eventType}</dt><dd>{eventLabel}{draft.eventType === "other" ? `: ${draft.eventTypeOther}` : ""}</dd></div><div><dt>{t.guests}</dt><dd>{draft.guestCount}</dd></div><div><dt>{t.date}</dt><dd>{draft.eventDate}</dd></div><div><dt>{t.venue}</dt><dd>{draft.venueName}</dd></div><div><dt>{t.address}</dt><dd>{draft.streetAddress}</dd></div><div><dt>{t.venueType}</dt><dd>{catalogLabel("venueTypes", draft.venueType, locale)}{draft.venueType === "other" ? `: ${draft.venueTypeOther}` : ""}</dd></div><div><dt>{t.budget}</dt><dd>{catalogLabel("budgetRanges", draft.budgetRange, locale)}</dd></div><div><dt>{t.design}</dt><dd>{draft.decorMode === "curate" ? catalogLabel("decorModes", "curate", locale) : `${draft.moodboard ? catalogLabel("moodboards", draft.moodboard, locale) : t.choose}, ${draft.palette ? catalogLabel("palettes", draft.palette, locale) : t.choose}`}</dd></div><div><dt>{t.catering}</dt><dd>{draft.cateringRequested ? (draft.cateringOption ? catalogLabel("cateringOptions", draft.cateringOption, locale) : t.choose) : t.notRequested}</dd></div></dl><label>{t.name}<input aria-label={t.name} value={draft.customerName} onChange={(event) => update("customerName", event.target.value)} /></label><label>{t.mobile}<input aria-label={t.mobile} type="tel" value={draft.mobile} onChange={(event) => update("mobile", event.target.value)} /></label></>}
-    {message && <p className={styles.message} role="status">{message}</p>}<div className={styles.actions}>{step > 1 && <button type="button" onClick={() => setStep((current) => current - 1)}>{t.back}</button>}{step < 4 ? <button type="button" className={styles.primary} onClick={next}>{t.next}</button> : <button type="button" className={styles.primary} onClick={submit}>{t.submit}</button>}</div></section></main>;
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMinimumDate(minimumCairoDate());
+    try {
+      const raw = sessionStorage.getItem(storageKey);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        setDraft({ ...emptyDraft(locale), ...saved.draft, locale });
+        setSubmissionId(saved.submissionId || crypto.randomUUID());
+        setStep([1, 2, 3, 4].includes(saved.step) ? saved.step : 1);
+        setVisibleMonth(saved.visibleMonth || minimumCairoDate().slice(0, 7));
+      } else {
+        setSubmissionId(crypto.randomUUID());
+        setVisibleMonth(minimumCairoDate().slice(0, 7));
+      }
+    } catch {
+      setSubmissionId(crypto.randomUUID());
+      setVisibleMonth(minimumCairoDate().slice(0, 7));
+    }
+  }, [locale]);
+  useEffect(() => {
+    try {
+      if (submissionId)
+        sessionStorage.setItem(
+          storageKey,
+          JSON.stringify({ draft, submissionId, step, visibleMonth, locale }),
+        );
+    } catch {
+      /* storage can be disabled */
+    }
+  }, [draft, locale, step, submissionId, visibleMonth]);
+  useEffect(() => {
+    if (!visibleMonth) return;
+    const controller = new AbortController();
+    fetch(`/api/availability?month=${visibleMonth}`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("availability");
+        return response.json();
+      })
+      .then((data: { dates?: Array<{ date: string; status: string }> }) => {
+        setAvailabilityError(false);
+        const dates = data.dates ?? [];
+        setBookedDates(
+          dates
+            .filter((date) => date.status === "booked")
+            .map((date) => date.date),
+        );
+        setHeldDates(
+          dates
+            .filter((date) => date.status === "held")
+            .map((date) => date.date),
+        );
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          setAvailabilityError(true);
+          setBookedDates([]);
+          setHeldDates([]);
+        }
+      });
+    return () => controller.abort();
+  }, [visibleMonth]);
+  const update = <K extends keyof PlannerDraft>(
+    field: K,
+    value: PlannerDraft[K],
+  ) => setDraft((current) => ({ ...current, [field]: value }));
+  const valid = useMemo(
+    () =>
+      step === 1
+        ? !!draft.eventType &&
+          Number.isInteger(draft.guestCount) &&
+          Number(draft.guestCount) >= 1 &&
+          Number(draft.guestCount) <= 100_000 &&
+          !!draft.eventDate &&
+          draft.eventDate >= minimumDate &&
+          !bookedDates.includes(draft.eventDate) &&
+          !!draft.venueName &&
+          !!draft.streetAddress &&
+          !!draft.venueType &&
+          !!draft.budgetRange &&
+          (draft.eventType !== "other" || !!draft.eventTypeOther) &&
+          (draft.venueType !== "other" || !!draft.venueTypeOther)
+        : step === 2
+          ? !!draft.decorMode
+          : step === 4
+            ? !!draft.customerName && !!draft.mobile
+            : true,
+    [bookedDates, draft, minimumDate, step],
+  );
+  const next = () => {
+    if (!valid) {
+      setMessage(
+        draft.eventDate && bookedDates.includes(draft.eventDate)
+          ? t.unavailable
+          : t.required,
+      );
+      return;
+    }
+    goToStep(step + 1);
+  };
+  const submit = async () => {
+    if (!valid) {
+      setMessage(t.required);
+      return;
+    }
+    if (!submissionId || submitting) return;
+    setSubmitting(true);
+    setMessage(
+      locale === "ar" ? "جاري إرسال الطلب..." : "Sending your request...",
+    );
+    let response;
+    try {
+      response = await submitRequestAction(draft, submissionId);
+    } catch {
+      setSubmitting(false);
+      setMessage(t.failed);
+      return;
+    }
+    if (!response.ok) {
+      setSubmitting(false);
+      if (response.error === "AUTH_REQUIRED") {
+        router.push(`/${locale}/sign-in?returnTo=/${locale}/plan?review=1`);
+        return;
+      }
+      setMessage(
+        response.error === "DATE_UNAVAILABLE"
+          ? t.unavailable
+          : response.error === "DATE_NOTICE"
+            ? locale === "ar"
+              ? "اختر موعدًا بعد 10 أيام على الأقل."
+              : "Choose a date at least 10 days away."
+            : t.failed,
+      );
+      return;
+    }
+    try {
+      sessionStorage.removeItem(storageKey);
+    } catch {
+      /* storage can be disabled */
+    }
+    router.push(`/${locale}/requests/${response.result.requestId}`);
+  };
+  const eventLabel = draft.eventType
+    ? catalogLabel("eventTypes", draft.eventType, locale)
+    : "-";
+  const steps =
+    locale === "ar"
+      ? ["التفاصيل", "الديكور", "الضيافة", "المراجعة"]
+      : ["Details", "Decor", "Catering", "Review"];
+  const title =
+    locale === "ar"
+      ? [
+          "تفاصيل المناسبة",
+          "اختاروا الديكور",
+          "اختاروا أسلوب الضيافة",
+          "راجعوا تفاصيل الحفل",
+        ]
+      : [
+          "Plan your event",
+          "Choose your decor",
+          "Choose your catering",
+          "Review your request",
+        ];
+  const captions =
+    locale === "ar"
+      ? [
+          "اختاروا ما يناسب مناسبتكم ومكانها.",
+          "اتركوا لنا ملامح رؤيتكم لننسّق التفاصيل.",
+          "ضيافة اختيارية تناسب عدد ضيوفكم.",
+          "أضيفوا بيانات التواصل لإرسال طلبكم.",
+        ]
+      : [
+          "Start with your occasion, guest count, venue, and date.",
+          "Pick a palette and decor details, or ask Wanas to choose.",
+          "Add catering and choose how you’d like it served.",
+          "Check your event details and add your contact information.",
+        ];
+  const eventDescriptions: Record<string, string> =
+    locale === "ar"
+      ? {
+          wedding: "تجربة متكاملة ليوم مميز",
+          "katb-el-ketab": "احتفال حميم وتنسيق الكوشة",
+          engagement: "احتفال دافئ وبسيط",
+          birthday: "جلسة أنيقة لمناسبة خاصة",
+          anniversary: "احتفال بذكرى لا تُنسى",
+          "private-dinner": "عشاء خاص بتفاصيل مدروسة",
+          corporate: "تصميم راقٍ للقاءات العمل",
+          other: "مناسبة بتصميم خاص",
+        }
+      : {
+          wedding: "A full day of considered details",
+          "katb-el-ketab": "An intimate ceremony with signature styling",
+          engagement: "A warm gathering for two families",
+          birthday: "A thoughtful setting for a milestone",
+          anniversary: "A beautiful way to mark the years",
+          "private-dinner": "An intimate dinner, made memorable",
+          corporate: "A polished setting for your gathering",
+          other: "A celebration shaped around your idea",
+        };
+  const guestPresets = [
+    { value: 40, en: "Intimate", ar: "حميمي", range: "20–60" },
+    { value: 90, en: "Medium", ar: "متوسط", range: "60–150" },
+    { value: 200, en: "Grand", ar: "كبير", range: "150–300" },
+    { value: 350, en: "Extra large", ar: "كبير جدًا", range: "300+" },
+  ];
+  const budgetLabel = draft.budgetRange
+    ? catalogLabel("budgetRanges", draft.budgetRange, locale)
+    : "—";
+  const venueLabel = draft.venueType
+    ? catalogLabel("venueTypes", draft.venueType, locale)
+    : "—";
+  const cateringLabel = draft.cateringRequested
+    ? catalogLabel(
+        "cateringOptions",
+        draft.cateringOption || "recommend",
+        locale,
+      )
+    : t.notRequested;
+  function selectDate(date: string) {
+    update("eventDate", date);
+    if (date) setVisibleMonth(date.slice(0, 7));
+  }
+  return (
+    <main
+      className={styles.shell}
+      data-planner
+      dir={locale === "ar" ? "rtl" : "ltr"}
+    >
+      <div className={styles.topbar}>
+        <Link className="brand-lockup" href={`/${locale}`}>
+          <span>WANAS</span>
+          <small>{locale === "ar" ? "أتيليه · القاهرة" : "Atelier · Cairo"}</small>
+        </Link>
+
+        <div className={styles.topActions}>
+          <span>
+            {locale === "ar"
+              ? "طلبكم محفوظ في هذه الصفحة"
+              : "Draft saved in this tab"}
+          </span>
+          <Link href={`/${locale}/requests`}>
+            {locale === "ar" ? "طلباتي" : "My requests"}
+          </Link>
+          <Link href={`/${locale === "ar" ? "en" : "ar"}/plan`}>
+            {locale === "ar" ? "English" : "العربية"}
+          </Link>
+        </div>
+      </div>
+      <div className={styles.content}>
+        <nav
+          className={styles.progress}
+          aria-label={locale === "ar" ? "تقدم التخطيط" : "Planner progress"}
+        >
+          {steps.map((label, index) => (
+            <button
+              type="button"
+              className={`${styles.progressStep} ${step === index + 1 ? styles.progressCurrent : ""} ${step > index + 1 ? styles.progressDone : ""}`}
+              key={label}
+              aria-current={step === index + 1 ? "step" : undefined}
+              disabled={index + 1 > step}
+              onClick={() => goToStep(index + 1)}
+            >
+              <span aria-hidden="true">
+                {step > index + 1 ? "✓" : index + 1}
+              </span>
+              <span className={styles.stepText}>
+                <strong>{label}</strong>
+                {step === index + 1 && (
+                  <small>
+                    {locale === "ar" ? "الخطوة الحالية" : "Current step"}
+                  </small>
+                )}
+              </span>
+            </button>
+          ))}
+        </nav>
+        {step > 1 && (
+          <dl className={styles.scopeStrip}>
+            <div>
+              <dt>{t.eventType}</dt>
+              <dd>{eventLabel}</dd>
+            </div>
+            <div>
+              <dt>{t.guests}</dt>
+              <dd>{draft.guestCount || "—"}</dd>
+            </div>
+            <div>
+              <dt>{t.venueType}</dt>
+              <dd>{venueLabel}</dd>
+            </div>
+            <div>
+              <dt>{t.budget}</dt>
+              <dd>{budgetLabel}</dd>
+            </div>
+          </dl>
+        )}
+        <header className={styles.intro}>
+          <div>
+            <h1 ref={heading} tabIndex={-1}>
+              {title[step - 1]}
+            </h1>
+            <p>{captions[step - 1]}</p>
+          </div>
+        </header>
+        <div className={step === 2 ? styles.fullLayout : styles.layout}>
+          <section className={styles.panel}>
+            {step === 1 && (
+              <>
+                <section className={styles.formSection}>
+                  <div className={styles.sectionHeading}>
+                    <h2>{t.eventType}</h2>
+                  </div>
+                  <div className={styles.eventGrid}>
+                    {catalog.eventTypes.map((option) => (
+                      <button
+                        type="button"
+                        key={option.id}
+                        onClick={() => update("eventType", option.id)}
+                        aria-label={option.labels[locale]}
+                        aria-pressed={draft.eventType === option.id}
+                        className={`${styles.eventCard} ${draft.eventType === option.id ? styles.cardSelected : ""}`}
+                      >
+                        <span className={styles.eventType}>
+                          {option.labels[locale]}
+                        </span>
+                        <span className={styles.eventDescription}>
+                          {eventDescriptions[option.id] ?? ""}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  {draft.eventType === "other" && (
+                    <label>
+                      {locale === "ar" ? "وصف المناسبة" : "Describe your event"}
+                      <input
+                        required
+                        value={draft.eventTypeOther}
+                        onChange={(event) =>
+                          update("eventTypeOther", event.target.value)
+                        }
+                      />
+                    </label>
+                  )}
+                </section>
+                <section className={styles.scale}>
+                  <div className={styles.sectionHeading}>
+                    <h2>
+                        {locale === "ar"
+                          ? "عدد الضيوف"
+                          : "Guest count"}
+                      </h2>
+                    <strong className={styles.guestNumber}>
+                      {draft.guestCount || "—"}{" "}
+                      <small>{locale === "ar" ? "ضيفًا" : "guests"}</small>
+                    </strong>
+                  </div>
+                  <div className={styles.presetGrid}>
+                    {guestPresets.map((preset) => (
+                      <button
+                        type="button"
+                        key={preset.value}
+                        aria-pressed={draft.guestCount === preset.value}
+                        className={
+                          draft.guestCount === preset.value
+                            ? styles.presetActive
+                            : ""
+                        }
+                        onClick={() => update("guestCount", preset.value)}
+                      >
+                        <b>{locale === "ar" ? preset.ar : preset.en}</b>
+                        <small dir="ltr">{preset.range}</small>
+                      </button>
+                    ))}
+                  </div>
+                  <label className={styles.rangeLabel}>
+                    <input
+                      aria-label={
+                        locale === "ar"
+                          ? "شريط عدد الضيوف"
+                          : "Guest count slider"
+                      }
+                      type="range"
+                      min="20"
+                      max="400"
+                      step="5"
+                      value={Math.min(
+                        400,
+                        Math.max(20, Number(draft.guestCount) || 90),
+                      )}
+                      onChange={(event) =>
+                        update("guestCount", Number(event.target.value))
+                      }
+                    />
+                    <span>
+                      {locale === "ar" ? "20 ضيفًا" : "20 guests"}
+                      <b><bdi dir="ltr">400+</bdi> {locale === "ar" ? "ضيف" : "guests"}</b>
+                    </span>
+                  </label>
+                  <label className={styles.exactCount}>
+                    {t.guests}
+                    <input
+                      type="number"
+                      min="1"
+                      max="100000"
+                      value={draft.guestCount}
+                      onChange={(event) =>
+                        update(
+                          "guestCount",
+                          event.target.value === ""
+                            ? ""
+                            : Number(event.target.value),
+                        )
+                      }
+                    />
+                  </label>
+                  <div className={styles.formula}>
+                    <div>
+                      <small>
+                        {locale === "ar"
+                          ? "تخطيط المساحة"
+                          : "Seating"}
+                      </small>
+                      <p>
+                        {draft.guestCount
+                          ? locale === "ar"
+                            ? `نساعدكم في تهيئة المكان لاستقبال ${draft.guestCount} ضيفًا.`
+                            : `We’ll help shape a comfortable layout for ${draft.guestCount} guests.`
+                          : locale === "ar"
+                            ? "اختاروا عدد الضيوف لمعرفة احتياجات المساحة."
+                            : "Choose a guest count to plan the right setting."}
+                      </p>
+                    </div>
+                  </div>
+                </section>
+                <section className={styles.formSection}>
+                  <div className={styles.sectionHeading}>
+                    <h2>{t.venueType}</h2>
+                  </div>
+                  <div className={styles.venueGrid}>
+                    {venueOptions.map((option) => (
+                      <button
+                        type="button"
+                        key={option.id}
+                        aria-label={option.labels[locale]}
+                        aria-pressed={draft.venueType === option.id}
+                        onClick={() => update("venueType", option.id)}
+                        className={`${styles.venueOption} ${draft.venueType === option.id ? styles.cardSelected : ""}`}
+                      >
+                        {venueImages[option.id] && (
+                          <span className={styles.venueImage}>
+                            <Image
+                              src={`/atelier/${venueImages[option.id]}.webp`}
+                              alt=""
+                              fill
+                              sizes="(max-width: 760px) 45vw, 30vw"
+                            />
+                          </span>
+                        )}
+                        <span className={styles.venueName}>
+                          <span aria-hidden="true" />
+                          <b>{option.labels[locale]}</b>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  {draft.venueType === "other" && (
+                    <label>
+                      {locale === "ar" ? "وصف المكان" : "Describe the venue"}
+                      <input
+                        required
+                        value={draft.venueTypeOther}
+                        onChange={(event) =>
+                          update("venueTypeOther", event.target.value)
+                        }
+                      />
+                    </label>
+                  )}
+                  <div className={styles.fieldGrid}>
+                    <label>
+                      {t.venue}
+                      <input
+                        aria-label={t.venue}
+                        value={draft.venueName}
+                        onChange={(event) =>
+                          update("venueName", event.target.value)
+                        }
+                        placeholder={
+                          locale === "ar" ? "اسم المكان" : "Venue name"
+                        }
+                      />
+                    </label>
+                    <label>
+                      {t.address}
+                      <input
+                        aria-label={t.address}
+                        value={draft.streetAddress}
+                        onChange={(event) =>
+                          update("streetAddress", event.target.value)
+                        }
+                        placeholder={
+                          locale === "ar"
+                            ? "المنطقة والشارع"
+                            : "Area and street"
+                        }
+                      />
+                    </label>
+                  </div>
+                </section>
+                <section className={styles.formSection}>
+                  <div className={styles.sectionHeading}>
+                    <h2>{t.budget}</h2>
+                  </div>
+                  <Options
+                    group="budgetRanges"
+                    locale={locale}
+                    value={draft.budgetRange}
+                    onChange={(value) => update("budgetRange", value)}
+                  />
+                </section>
+                <section className={styles.calendarBlock}>
+                  <h2>
+                    {locale === "ar"
+                      ? "تاريخ المناسبة"
+                      : "Event date"}
+                  </h2>
+                  <p>
+                    {locale === "ar"
+                      ? "اختاروا موعدًا متاحًا قبل 10 أيام على الأقل."
+                      : "Choose a date at least 10 days away."}
+                  </p>
+                  <div className={styles.calendarLayout}>
+                    <label>
+                      {t.date}
+                      <input
+                        type="date"
+                        value={draft.eventDate}
+                        min={minimumDate}
+                        onChange={(event) => selectDate(event.target.value)}
+                      />
+                    </label>
+                    {visibleMonth && (
+                      <AvailabilityCalendar
+                        month={visibleMonth}
+                        selected={draft.eventDate}
+                        booked={bookedDates}
+                        held={heldDates}
+                        minimum={minimumDate}
+                        onMonthChange={setVisibleMonth}
+                        onSelect={selectDate}
+                        locale={locale}
+                      />
+                    )}
+                  </div>
+                  {availabilityError && (
+                    <p className={styles.message} role="status">
+                      {locale === "ar"
+                        ? "تعذر تحميل المواعيد المتاحة الآن."
+                        : "Availability could not be loaded right now."}
+                    </p>
+                  )}
+                </section>
+              </>
+            )}
+            {step === 2 && (
+              <>
+                <div className={styles.pathGrid}>
+                  <button
+                    type="button"
+                    aria-pressed={draft.decorMode === "curate"}
+                    className={`${styles.pathCard} ${draft.decorMode === "curate" ? styles.cardSelected : ""}`}
+                    onClick={() => update("decorMode", "curate")}
+                  >
+                    <span>
+                      <strong>
+                        {catalogLabel("decorModes", "curate", locale)}
+                      </strong>
+                      <small>
+                        {locale === "ar"
+                          ? "يتولى فريقنا تنسيق الرؤية كاملة."
+                          : "Wanas chooses the palette and decor details."}
+                      </small>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={draft.decorMode === "customize"}
+                    className={`${styles.pathCard} ${draft.decorMode === "customize" ? styles.cardSelected : ""}`}
+                    onClick={() => update("decorMode", "customize")}
+                  >
+                    <span>
+                      <strong>
+                        {catalogLabel("decorModes", "customize", locale)}
+                      </strong>
+                      <small>
+                        {locale === "ar"
+                          ? "اختاروا لوحة ألوان وعناصر قريبة منكم."
+                          : "Choose a moodboard, palette, and decor details."}
+                      </small>
+                    </span>
+                  </button>
+                </div>
+                {draft.decorMode === "customize" && (
+                  <>
+                    <MoodboardGallery
+                      locale={locale}
+                      value={draft.moodboard}
+                      onChange={(value) => update("moodboard", value)}
+                    />
+                    {catalog.palettes.length > 0 && (
+                      <fieldset className={styles.choiceSection}>
+                        <legend>
+                          {locale === "ar"
+                            ? "الألوان المفضلة"
+                            : "Preferred colors"}
+                        </legend>
+                        <Options
+                          group="palettes"
+                          locale={locale}
+                          value={draft.palette}
+                          allowDelegation
+                          onChange={(value) => update("palette", value)}
+                        />
+                      </fieldset>
+                    )}
+                    {catalog.decorElements.length > 0 && (
+                      <fieldset className={styles.choiceSection}>
+                        <legend>
+                          {locale === "ar" ? "عناصر الديكور" : "Decor elements"}
+                        </legend>
+                        <div className={styles.checks}>
+                          {catalog.decorElements.map((option) => (
+                            <label key={option.id}>
+                              <input
+                                type="checkbox"
+                                checked={draft.decorElements.includes(
+                                  option.id,
+                                )}
+                                onChange={(event) =>
+                                  update(
+                                    "decorElements",
+                                    event.target.checked
+                                      ? [...draft.decorElements, option.id]
+                                      : draft.decorElements.filter(
+                                          (id) => id !== option.id,
+                                        ),
+                                  )
+                                }
+                              />
+                              {option.labels[locale]}
+                            </label>
+                          ))}
+                        </div>
+                        <small>{t.delegated}</small>
+                      </fieldset>
+                    )}
+                  </>
+                )}
+                <div className={styles.fieldGrid}>
+                  <label>
+                    {t.notes}
+                    <textarea
+                      aria-label={t.notes}
+                      value={draft.notes}
+                      onChange={(event) => update("notes", event.target.value)}
+                      placeholder={
+                        locale === "ar"
+                          ? "ألوان أو طقوس أو تفاصيل تحبونها..."
+                          : "Traditions, motifs, or details you love..."
+                      }
+                    />
+                  </label>
+                  <label>
+                    {t.links}
+                    <input
+                      aria-label={t.links}
+                      value={draft.inspirationLinks}
+                      onChange={(event) =>
+                        update("inspirationLinks", event.target.value)
+                      }
+                      placeholder="https://..."
+                    />
+                  </label>
+                </div>
+              </>
+            )}
+            {step === 3 && (
+              <>
+                <label className={styles.toggle}>
+                  <input
+                    type="checkbox"
+                    checked={draft.cateringRequested}
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        cateringRequested: event.target.checked,
+                        cateringOption: event.target.checked
+                          ? current.cateringOption || "recommend"
+                          : "",
+                      }))
+                    }
+                  />
+                  {t.includeCatering}
+                </label>
+                {draft.cateringRequested && (
+                  <div className={styles.cateringGrid}>
+                    {catalog.cateringOptions.map((option) => (
+                      <button
+                        type="button"
+                        key={option.id}
+                        aria-label={option.labels[locale]}
+                        aria-pressed={draft.cateringOption === option.id}
+                        onClick={() => update("cateringOption", option.id)}
+                        className={`${styles.cateringCard} ${draft.cateringOption === option.id ? styles.cardSelected : ""}`}
+                      >
+                        <strong>{option.labels[locale]}</strong>
+                        <small>{cateringDetails[option.id]?.[locale]}</small>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+            {step === 4 && (
+              <>
+                <dl className={styles.summary}>
+                  <div>
+                    <dt>{t.eventType}</dt>
+                    <dd>
+                      {eventLabel}
+                      {draft.eventType === "other"
+                        ? `: ${draft.eventTypeOther}`
+                        : ""}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{t.guests}</dt>
+                    <dd>{draft.guestCount}</dd>
+                  </div>
+                  <div>
+                    <dt>{t.date}</dt>
+                    <dd>{draft.eventDate}</dd>
+                  </div>
+                  <div>
+                    <dt>{t.venue}</dt>
+                    <dd>{draft.venueName}</dd>
+                  </div>
+                  <div>
+                    <dt>{t.address}</dt>
+                    <dd>{draft.streetAddress}</dd>
+                  </div>
+                  <div>
+                    <dt>{t.venueType}</dt>
+                    <dd>
+                      {catalogLabel("venueTypes", draft.venueType, locale)}
+                      {draft.venueType === "other"
+                        ? `: ${draft.venueTypeOther}`
+                        : ""}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{t.budget}</dt>
+                    <dd>
+                      {catalogLabel("budgetRanges", draft.budgetRange, locale)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{t.design}</dt>
+                    <dd>
+                      {draft.decorMode === "curate"
+                        ? catalogLabel("decorModes", "curate", locale)
+                        : `${draft.moodboard ? catalogLabel("moodboards", draft.moodboard, locale) : t.choose}, ${draft.palette ? catalogLabel("palettes", draft.palette, locale) : t.choose}`}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{t.catering}</dt>
+                    <dd>
+                      {draft.cateringRequested
+                        ? draft.cateringOption
+                          ? catalogLabel(
+                              "cateringOptions",
+                              draft.cateringOption,
+                              locale,
+                            )
+                          : t.choose
+                        : t.notRequested}
+                    </dd>
+                  </div>
+                </dl>
+                <div className={styles.fieldGrid}>
+                  <label>
+                    {t.name}
+                    <input
+                      aria-label={t.name}
+                      value={draft.customerName}
+                      onChange={(event) =>
+                        update("customerName", event.target.value)
+                      }
+                    />
+                  </label>
+                  <label>
+                    {t.mobile}
+                    <input
+                      aria-label={t.mobile}
+                      type="tel"
+                      value={draft.mobile}
+                      onChange={(event) => update("mobile", event.target.value)}
+                    />
+                  </label>
+                </div>
+              </>
+            )}
+            {message && (
+              <p className={styles.message} role="status">
+                {message}
+              </p>
+            )}
+            <div className={styles.actions}>
+              {step > 1 && (
+                <button type="button" onClick={() => goToStep(step - 1)}>
+                  <span aria-hidden="true">←</span> {t.back}
+                </button>
+              )}
+              {step < 4 ? (
+                <button type="button" className={styles.primary} onClick={next}>
+                  {t.next} <span aria-hidden="true">→</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.primary}
+                  onClick={submit}
+                  disabled={submitting}
+                >
+                  {t.submit} <span aria-hidden="true">→</span>
+                </button>
+              )}
+            </div>
+          </section>
+          {step !== 2 && (
+            <aside className={styles.aside}>
+              <h2>
+                {locale === "ar" ? "ملخص المناسبة" : "Event summary"}
+              </h2>
+              <div className={styles.estimate}>
+                <small>
+                  {locale === "ar"
+                    ? "ميزانيتكم المختارة"
+                    : "Selected budget"}
+                </small>
+                <strong>{budgetLabel}</strong>
+              </div>
+              <dl className={styles.asideDetails}>
+                <div>
+                  <dt>{t.eventType}</dt>
+                  <dd>{eventLabel}</dd>
+                </div>
+                <div>
+                  <dt>{t.guests}</dt>
+                  <dd>{draft.guestCount || "—"}</dd>
+                </div>
+                <div>
+                  <dt>{t.date}</dt>
+                  <dd>{draft.eventDate || "—"}</dd>
+                </div>
+                <div>
+                  <dt>{t.venueType}</dt>
+                  <dd>{venueLabel}</dd>
+                </div>
+                {step >= 3 && (
+                  <div>
+                    <dt>{t.catering}</dt>
+                    <dd>{cateringLabel}</dd>
+                  </div>
+                )}
+              </dl>
+              <p className={styles.asideNote}>
+                {locale === "ar"
+                  ? "يرسل فريق وناس عرض السعر بعد مراجعة طلبكم."
+                  : "WANAS will send a quote after reviewing your request."}
+              </p>
+            </aside>
+          )}
+        </div>
+      </div>
+    </main>
+  );
 }

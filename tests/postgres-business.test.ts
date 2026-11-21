@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { after, afterEach, describe, it } from "node:test";
+import type { User } from "@clerk/nextjs/server";
+import { drizzle } from "drizzle-orm/postgres-js";
 import postgres, { type Sql, type TransactionSql } from "postgres";
+import { findIdentity, importIdentity, resolveIdentity } from "../lib/server/db/clerk-identities";
 
 const databaseUrl = process.env.DATABASE_URL ?? process.env.TEST_DATABASE_URL;
 if (!databaseUrl) throw new Error("DATABASE_URL is required for PostgreSQL integration tests");
@@ -16,6 +19,40 @@ const isoDate = (daysFromNow: number) => {
 };
 const testRun = () => { const runId = randomUUID(); activeRuns.add(runId); return runId; };
 const customer = () => randomUUID();
+
+it("preserves imported Clerk mappings and assigns one UUID under concurrent first access", async () => {
+  const identitySql = postgres(databaseUrl, { max: 6 });
+  const db = drizzle(identitySql);
+  const imported = `user_${randomUUID()}`;
+  const fresh = `user_${randomUUID()}`;
+  const unmapped = `user_${randomUUID()}`;
+  const unverified = `user_${randomUUID()}`;
+  const legacyId = randomUUID();
+  const email = { emailAddress: "customer@example.com", verification: { status: "verified" } };
+  try {
+    await db.transaction((tx) => importIdentity(tx, imported, legacyId));
+    await db.transaction((tx) => importIdentity(tx, imported, legacyId));
+    await assert.rejects(db.transaction(async (tx) => {
+      await importIdentity(tx, fresh, randomUUID());
+      await importIdentity(tx, imported, randomUUID());
+    }), /CLERK_IDENTITY_CONFLICT/);
+    assert.equal(await findIdentity(db, fresh), undefined);
+    assert.equal(await findIdentity(db, imported), legacyId);
+    await assert.rejects(db.transaction((tx) => importIdentity(tx, fresh, legacyId)));
+    await assert.rejects(resolveIdentity(db, { id: unmapped, externalId: legacyId, primaryEmailAddress: email } as User), /CLERK_IDENTITY_IMPORT_REQUIRED/);
+    await assert.rejects(resolveIdentity(db, { id: unverified, externalId: null, primaryEmailAddress: null } as User), /AUTH_EMAIL_REQUIRED/);
+    const user = { id: fresh, externalId: null, primaryEmailAddress: email } as User;
+    const ids = await Promise.all(Array.from({ length: 6 }, () => resolveIdentity(db, user)));
+    assert.equal(new Set(ids).size, 1);
+    assert.equal(await findIdentity(db, fresh), ids[0]);
+  } finally {
+    try {
+      await identitySql`delete from clerk_identities where clerk_user_id = any(${[imported, fresh, unmapped, unverified]}::text[])`;
+    } finally {
+      await identitySql.end();
+    }
+  }
+});
 
 async function insertRequest(db: Sql, runId: string, eventDate: string, customerId = customer()) {
   const submissionId = randomUUID();

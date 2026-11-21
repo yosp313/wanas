@@ -9,7 +9,7 @@ WANAS offers event decor and optional catering in Cairo. Prices and customer bud
 - Start with Wedding, Katb El-Ketab, Engagement, Birthday, Anniversary, Private Dinner, Corporate Event, and Other. Venue types are Apartment, Villa, Garden, Hall, Hotel, and Other. Require a written description when the customer selects Other in either list.
 - Offer **Curate it for me** and **Customize my decor**. In the second mode, let the customer choose a moodboard, palette, and decor elements such as the backdrop, florals, and table styling. Customers can leave individual choices to WANAS. Both modes accept optional notes and inspiration links.
 - Catering is optional in both modes. Customers can choose canapés, buffet, or plated dining, or ask WANAS to recommend a format. Launch with a fixed catalog of WANAS-approved options.
-- Customers can complete the planner as guests. Final review collects a name and mobile number. Before submission, customers sign in with a Supabase email code and return to their completed review. **My requests** shows their requests, quotes, bookings, and booking change requests.
+- Customers can complete the planner as guests. Final review collects a name and mobile number. Before submission, customers sign in with an email magic link or Google through Clerk and return to their completed review. **My requests** shows their requests, quotes, bookings, and booking change requests.
 
 ## Review and booking
 

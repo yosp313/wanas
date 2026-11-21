@@ -17,7 +17,7 @@ export function RequestScope({ details, locale }: { details: RequestSnapshot; lo
     [ar ? "لوحة الإلهام" : "Moodboard", custom ? labels?.moodboard?.[locale] || details.moodboard || delegated : null],
     [ar ? "الألوان" : "Palette", custom ? labels?.palette?.[locale] || details.palette || delegated : null],
     [ar ? "عناصر الديكور" : "Decor elements", custom ?
-      labels?.decorElements.map((label) => label[locale]).join(", ") || details.decorElements?.join(", ") || delegated : null],
+      labels?.decorElements.map((label) => label[locale]).join(ar ? "، " : ", ") || details.decorElements?.join(ar ? "، " : ", ") || delegated : null],
     [ar ? "الضيافة" : "Catering", details.cateringRequested ? labels?.cateringOption?.[locale] || details.cateringOption :
       ar ? "غير مطلوبة" : "Not requested"],
     [ar ? "ملاحظات" : "Notes", details.notes],
@@ -26,7 +26,7 @@ export function RequestScope({ details, locale }: { details: RequestSnapshot; lo
   return (
     <dl>
       {fields.filter(([, value]) => value != null && value !== "").map(([label, value]) => (
-        <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
+        <div key={label}><dt>{label}</dt><dd><bdi>{value}</bdi></dd></div>
       ))}
     </dl>
   );

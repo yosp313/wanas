@@ -20,8 +20,8 @@ export default async function AdminRequestPage({ params }: { params: Promise<{ l
     <main className="shell">
       <Link href={`/${locale}/admin/inbox`}>{ar ? "صندوق الطلبات" : "Request inbox"}</Link>
       <section>
-        <h1>{request.customerName}</h1>
-        <p><span dir="ltr">{request.customerEmail}</span> · <span dir="ltr">{request.customerMobile}</span></p>
+        <h1><bdi>{request.customerName}</bdi></h1>
+        <p><bdi dir="ltr">{request.customerEmail}</bdi> · <bdi dir="ltr">{request.customerMobile}</bdi></p>
         <p><time dateTime={request.eventDate}>{request.eventDate}</time></p>
         <p>{ar ? "لغة الطلب" : "Request language"} · {request.language === "ar" ? "العربية" : "English"}</p>
         <RequestScope details={request.details as RequestSnapshot} locale={locale} />

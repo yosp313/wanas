@@ -29,7 +29,7 @@ export default async function CustomerRequestPage({ params }: { params: Promise<
     <main className="shell">
       <Link href={`/${locale}/requests`}>{ar ? "طلباتي" : "My requests"}</Link>
       <section>
-        <h1>{request.customerName}</h1>
+        <h1><bdi>{request.customerName}</bdi></h1>
         <p>{ar ? "تاريخ طلبك" : "Requested date"} · <time dateTime={request.eventDate}>{request.eventDate}</time></p>
         <RequestScope details={request.details as RequestSnapshot} locale={locale} />
         {canWithdraw && <RequestLifecycleActions requestId={requestId} locale={locale} />}
@@ -59,7 +59,7 @@ export default async function CustomerRequestPage({ params }: { params: Promise<
             <h2>{confirmed ? (ar ? "تم تأكيد الحجز" : "Booking confirmed") : (ar ? "أُلغي الحجز" : "Booking cancelled")}</h2>
             <p><time dateTime={booking.eventDate}>{booking.eventDate}</time></p>
             {typeof terms?.services === "string" && <p>{terms.services}</p>}
-            {typeof terms?.totalEgp === "number" && <p>{new Intl.NumberFormat(locale, { style: "currency", currency: "EGP" }).format(terms.totalEgp)}</p>}
+            {typeof terms?.totalEgp === "number" && <p>{new Intl.NumberFormat(locale, { style: "currency", currency: "EGP", numberingSystem: "latn" }).format(terms.totalEgp)}</p>}
             {confirmed && <BookingChangeForm bookingId={booking.id} revision={booking.revision} locale={locale} />}
             {changes.length > 0 && (
               <ul>{changes.map((change) => {

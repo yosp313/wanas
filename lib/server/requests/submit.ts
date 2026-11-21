@@ -64,7 +64,7 @@ function validate(input: PlannerDraft) {
 }
 
 export async function submitRequest(input: PlannerDraft, submissionId: string): Promise<SubmitResult> {
-  const customer = await requireCustomer();
+  const customer = await requireCustomer(true);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(submissionId)) fail("INVALID_SUBMISSION_ID");
   if (!customer.email) throw new Error("AUTH_EMAIL_REQUIRED");
   const customerEmail = customer.email;

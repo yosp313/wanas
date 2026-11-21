@@ -21,11 +21,11 @@ export function QuoteTerms({ quote, locale }: {
   locale: Locale;
 }) {
   const ar = locale === "ar";
-  const total = new Intl.NumberFormat(ar ? "ar-EG" : "en-EG", { style: "currency", currency: "EGP" }).format(quote.totalEgp);
+  const total = new Intl.NumberFormat(ar ? "ar-EG" : "en-EG", { style: "currency", currency: "EGP", numberingSystem: "latn" }).format(quote.totalEgp);
   const services = typeof quote.services === "string" ? quote.services : "";
   return (
     <div>
-      <p><time dateTime={quote.offeredDate}>{quote.offeredDate}</time> · {total} · {quoteStatuses[quote.status]?.[ar ? 1 : 0]}</p>
+      <p><time dateTime={quote.offeredDate}>{quote.offeredDate}</time> · <bdi>{total}</bdi> · {quoteStatuses[quote.status]?.[ar ? 1 : 0]}</p>
       {services && <p>{services}</p>}
       {quote.scopeExplanation && <p>{quote.scopeExplanation}</p>}
     </div>

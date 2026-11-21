@@ -1,25 +1,31 @@
 import "server-only";
 
-import { and, gte, inArray, lt, eq } from "drizzle-orm";
+import { and, eq, gte, inArray, lt } from "drizzle-orm";
 import { requireAdmin } from "../auth/guards";
 import { requireDb } from "../db";
 import { bookings, eventRequests } from "../db/schema";
 
-function monthBounds(month: string) {
-  if (!/^\d{4}-\d{2}$/.test(month)) throw new Error("INVALID_MONTH");
-  const [year, monthNumber] = month.split("-").map(Number);
-  if (monthNumber < 1 || monthNumber > 12) throw new Error("INVALID_MONTH");
-  const start = `${year.toString().padStart(4, "0")}-${monthNumber.toString().padStart(2, "0")}-01`;
-  const endDate = new Date(Date.UTC(year, monthNumber, 1));
-  const end = `${endDate.getUTCFullYear()}-${String(endDate.getUTCMonth() + 1).padStart(2, "0")}-01`;
-  return { start, end };
-}
-
-export async function getAdminCalendar(month: string, includePending = false) {
+export async function getAdminCalendar(start: string, end: string, includePending: boolean) {
   await requireAdmin();
   const db = requireDb();
-  const bounds = monthBounds(month);
-  const confirmed = await db.select().from(bookings).where(and(eq(bookings.status, "confirmed"), gte(bookings.eventDate, bounds.start), lt(bookings.eventDate, bounds.end)));
-  const pending = includePending ? await db.select().from(eventRequests).where(and(inArray(eventRequests.status, ["submitted", "quoted"]), gte(eventRequests.eventDate, bounds.start), lt(eventRequests.eventDate, bounds.end))) : [];
-  return { month, confirmed, pending };
+
+  const [confirmed, pending] = await Promise.all([
+    db.select({
+      requestId: bookings.requestId,
+      date: bookings.eventDate,
+      name: eventRequests.customerName,
+      details: eventRequests.details,
+    }).from(bookings)
+      .innerJoin(eventRequests, eq(bookings.requestId, eventRequests.id))
+      .where(and(eq(bookings.status, "confirmed"), gte(bookings.eventDate, start), lt(bookings.eventDate, end))),
+    includePending ? db.select({
+      requestId: eventRequests.id,
+      date: eventRequests.eventDate,
+      name: eventRequests.customerName,
+      details: eventRequests.details,
+    }).from(eventRequests)
+      .where(and(inArray(eventRequests.status, ["submitted", "quoted"]), gte(eventRequests.eventDate, start), lt(eventRequests.eventDate, end))) : [],
+  ]);
+
+  return { confirmed, pending };
 }

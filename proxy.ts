@@ -1,4 +1,14 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 import { isLocale } from "@/lib/i18n/config";
-export function proxy(request: NextRequest) { const { pathname } = request.nextUrl; if (pathname.startsWith("/_next") || pathname.includes(".")) return NextResponse.next(); if (pathname === "/") return NextResponse.next(); const locale = pathname.split("/")[1]; if (!isLocale(locale)) return NextResponse.next(); const response = NextResponse.next(); response.cookies.set("w_locale", locale, { maxAge: 31536000, path: "/", sameSite: "lax" }); return response; }
-export const config = { matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"] };
+
+export default clerkMiddleware((_auth, request) => {
+  const response = NextResponse.next();
+  const locale = request.nextUrl.pathname.split("/")[1];
+  if (isLocale(locale)) {
+    response.cookies.set("w_locale", locale, { maxAge: 31536000, path: "/", sameSite: "lax" });
+  }
+  return response;
+});
+
+export const config = { matcher: ["/ar/:path*", "/en/:path*", "/__clerk/:path*"] };

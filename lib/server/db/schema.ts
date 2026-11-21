@@ -3,6 +3,11 @@ import { uniqueIndex, boolean, date, integer, jsonb, pgTable, text, timestamp, u
 
 const timestamps = { createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(), updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull() };
 
+export const clerkIdentities = pgTable("clerk_identities", {
+  clerkUserId: text("clerk_user_id").primaryKey(),
+  appUserId: uuid("app_user_id").defaultRandom().notNull().unique(),
+}).enableRLS();
+
 export const adminAccess = pgTable("admin_access", { userId: uuid("user_id").primaryKey(), isAdmin: boolean("is_admin").default(true).notNull(), grantedBy: uuid("granted_by"), revokedAt: timestamp("revoked_at", { withTimezone: true }), ...timestamps });
 export const eventRequests = pgTable("event_requests", { id: uuid("id").defaultRandom().primaryKey(), customerId: uuid("customer_id").notNull(), submissionId: uuid("submission_id").notNull(), language: varchar("language", { length: 2 }).notNull(), customerEmail: text("customer_email").notNull(), customerName: text("customer_name").notNull(), customerMobile: text("customer_mobile").notNull(), eventDate: date("event_date").notNull(), details: jsonb("details").notNull(), status: varchar("status", { length: 32 }).default("submitted").notNull(), ...timestamps }, (table) => [unique("event_requests_customer_submission_key").on(table.customerId, table.submissionId)]);
 export const quotes = pgTable("quotes", { id: uuid("id").defaultRandom().primaryKey(), requestId: uuid("request_id").notNull().references(() => eventRequests.id), offeredDate: date("offered_date").notNull(), services: jsonb("services").notNull(), totalEgp: integer("total_egp").notNull(), scopeExplanation: text("scope_explanation"), status: varchar("status", { length: 32 }).default("current").notNull(), expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(), ...timestamps }, (table) => [

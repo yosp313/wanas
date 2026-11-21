@@ -7,8 +7,8 @@ import type { Locale } from "@/lib/i18n/config";
 
 const errors = {
   DATE_UNAVAILABLE: ["That date is no longer available.", "هذا التاريخ غير متاح الآن."],
-  OFFERED_DATE_TOO_SOON: ["Offer a date at least 10 days away.", "اختر موعدًا بعد ١٠ أيام على الأقل."],
-  ORIGINAL_DATE_HOLD_TOO_LATE: ["The 48-hour hold must end before the event day.", "يجب أن تنتهي مهلة ٤٨ ساعة قبل يوم المناسبة."],
+  OFFERED_DATE_TOO_SOON: ["Offer a date at least 10 days away.", "اختر موعدًا بعد 10 أيام على الأقل."],
+  ORIGINAL_DATE_HOLD_TOO_LATE: ["The 48-hour hold must end before the event day.", "يجب أن تنتهي مهلة 48 ساعة قبل يوم المناسبة."],
   REQUEST_NOT_ACTIONABLE: ["The request is closed.", "تم إغلاق الطلب."],
   AUTH_REQUIRED: ["Sign in to continue.", "سجّل الدخول للمتابعة."],
   ADMIN_REQUIRED: ["Admin access is required.", "تتطلب العملية صلاحية الإدارة."],
