@@ -1,5 +1,23 @@
 import { expect, test } from "@playwright/test";
 
+test("missing pages keep their language and link back home", async ({ page }) => {
+  const english = await page.goto("/en/missing-page/example");
+  expect(english?.status()).toBe(404);
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to home" })).toHaveAttribute("href", "/en");
+
+  const arabic = await page.goto("/ar/missing-page/example");
+  expect(arabic?.status()).toBe(404);
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(page.getByRole("heading", { name: "الصفحة غير موجودة" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "العودة إلى الرئيسية" })).toHaveAttribute("href", "/ar");
+
+  const response = await page.goto("/fr/missing-page/example");
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole("heading", { name: "الصفحة غير موجودة" })).toBeVisible();
+});
+
 test("defaults to Arabic and remembers a route-preserving language switch", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/ar$/);

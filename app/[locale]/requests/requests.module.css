@@ -152,7 +152,7 @@
 .portal .secondary { background: var(--portal-soft); }
 .portal .secondary:hover { background: #f5d7ca; }
 .hero .primary { flex-shrink: 0; min-height: 48px; padding-inline: 24px; }
-.hero .primary span { font-size: 21px; line-height: 1; }
+.hero .primary svg { flex: none; }
 
 .workspace {
   display: grid;
@@ -190,31 +190,14 @@
 .filters button:hover { background: #f5d7ca; }
 .filters button[aria-pressed="true"] { background: var(--portal-active); color: #59321f; font-weight: 800; }
 .search { position: relative; width: 15.5rem; max-width: 100%; }
-.search::before {
-  content: "";
+.search svg {
   position: absolute;
-  inset-inline-start: 13px;
-  top: 11px;
-  width: 12px;
-  height: 12px;
-  border: 1.5px solid currentColor;
-  border-radius: 50%;
+  inset-inline-start: 12px;
+  inset-block-start: 50%;
+  translate: 0 -50%;
   color: var(--portal-muted);
   pointer-events: none;
 }
-
-.search::after {
-  content: "";
-  position: absolute;
-  inset-inline-start: 22px;
-  top: 22px;
-  width: 6px;
-  height: 1.5px;
-  background: var(--portal-muted);
-  transform: rotate(45deg);
-  pointer-events: none;
-}
-:global([dir="rtl"]) .search::after { transform: rotate(-45deg); }
 
 .search input {
   width: 100%;

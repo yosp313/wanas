@@ -172,18 +172,12 @@
 }
 
 .review:hover { background: #773200; }
-.review span {
-  width: 6px;
-  height: 6px;
-  border-block-end: 1.5px solid;
-  border-inline-end: 1.5px solid;
-  transform: translateY(-2px) rotate(45deg);
-}
+.review svg { flex: none; }
 @media (prefers-reduced-motion: no-preference) {
-  .review:not(:focus-visible) span { transition: transform var(--motion); }
+  .review:not(:focus-visible) svg { transition: transform var(--motion); }
 }
-.review[aria-expanded="true"] span { transform: translateY(2px) rotate(225deg); }
-:global([dir="rtl"]) .review span { border-inline: 0; border-right: 1.5px solid; }
+.review[aria-expanded="true"] svg { transform: rotate(180deg); }
+:global([dir="rtl"]) .dateArrow { transform: scaleX(-1); }
 
 .drawer {
   display: grid;

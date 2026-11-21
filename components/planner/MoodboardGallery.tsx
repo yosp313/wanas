@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
+import { LuCheck, LuCircle, LuDiamond } from "react-icons/lu";
 import { catalog, type Locale } from "@/lib/catalog/catalog";
 import styles from "./planner.module.css";
 
@@ -118,7 +119,12 @@ export function MoodboardGallery({
               <span className={styles.moodImage}>
                 <Image src={`/atelier/${direction.image}.webp`} alt="" fill sizes="(max-width: 680px) 45vw, 25vw" />
                 <span className={styles.moodCheck} aria-hidden="true">
-                  {selected ? options.length ? (ar ? "✓ مختارة" : "✓ Selected") : (ar ? "✓ معاينة" : "✓ Previewing") : "○"}
+                  {selected ? (
+                    <>
+                      <LuCheck size={14} />
+                      {options.length ? (ar ? "مختارة" : "Selected") : (ar ? "معاينة" : "Previewing")}
+                    </>
+                  ) : <LuCircle size={12} />}
                 </span>
                 <span className={styles.moodImageMeta} aria-hidden="true">
                   <span>{ar ? "لوحة" : "Direction"} {String(index + 1).padStart(2, "0")}</span>
@@ -168,7 +174,7 @@ export function MoodboardGallery({
                 <ul className={styles.materials}>
                   {(ar ? ["حجر ترافرتين", "كتان خام", "طين مشغول يدويًا", "شمع طبيعي"]
                     : ["Fluted travertine", "Raw linen", "Hand-thrown clay", "Taper candles"]
-                  ).map((material) => <li key={material}>{material}</li>)}
+                  ).map((material) => <li key={material}><LuDiamond size={12} aria-hidden="true" />{material}</li>)}
                 </ul>
               </section>
             )}

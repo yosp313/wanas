@@ -309,13 +309,14 @@
   margin-bottom: 12px;
 }
 .calendarHeader button {
+  display: grid;
+  place-items: center;
   width: 36px;
   height: 36px;
   border: 1px solid var(--line);
   border-radius: var(--control-radius);
   background: var(--soft);
   color: var(--accent);
-  font-size: 1.3rem;
   cursor: pointer;
 }
 .calendarHeader strong {
@@ -576,9 +577,7 @@
 .actions .primary:hover {
   background: var(--accent-dark);
 }
-.actions .primary span {
-  font-size: 1.1rem;
-}
+.actions button > svg { flex: none; vertical-align: middle; }
 .message {
   color: var(--accent);
   font-size: 0.86rem;
@@ -799,8 +798,10 @@
   inset-inline-end: clamp(8px, 1.05vw, 16px);
 }
 .moodCheck {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   inset-block-start: clamp(8px, 1.05vw, 16px);
   min-width: 30px;
   min-height: 30px;
@@ -941,7 +942,7 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
   border-radius: 8px;
   background: var(--soft);
 }
-.materials li::before { color: var(--accent); content: "◇"; }
+.materials svg { flex: none; color: var(--accent); }
 .previewHero {
   position: relative;
   isolation: isolate;
@@ -996,9 +997,8 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
 .pathCard:hover {
   border-color: var(--accent);
 }
-.shell[dir="rtl"] .actions button span,
-.shell[dir="rtl"] .calendarHeader button {
-  display: inline-block;
+.shell[dir="rtl"] .actions button > svg,
+.shell[dir="rtl"] .calendarHeader button > svg {
   transform: scaleX(-1);
 }
 @media (max-width: 900px) {
@@ -1128,12 +1128,6 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
   src: url(/fonts/eb-garamond-italic.woff2) format("woff2");
 }
 
-@font-face {
-  font-family: "Planner Symbols";
-  font-display: block;
-  src: url(/fonts/planner-symbols.woff2) format("woff2");
-}
-
 .shell ~ :global(.atelier-footer) { display: none; }
 .topbar { border-block-end: 1px solid var(--line); }
 .topbar > .content,
@@ -1246,10 +1240,6 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
   border-radius: 50%;
   background: var(--accent-soft);
   color: var(--accent);
-  direction: ltr;
-  font: 400 1.25rem/1 "Planner Symbols";
-  font-feature-settings: "liga";
-  white-space: nowrap;
 }
 
 .eventCard {
@@ -1274,12 +1264,11 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
   background: var(--surface);
   box-shadow: inset 0 0 0 1px var(--accent);
 }
-.eventCard:not(.featuredEvent)[aria-pressed="true"]::after {
+.eventCheck {
   position: absolute;
   inset-block-start: 14px;
   inset-inline-end: 14px;
   color: var(--accent);
-  content: "✓" / "";
 }
 .featuredEvent {
   min-height: clamp(150px, 15vw, 200px);
@@ -1338,9 +1327,7 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
   border: 0;
   background: var(--accent);
   color: white;
-  font: 700 12px/1 var(--body);
 }
-.venueOption[aria-pressed="true"] .venueName > span::after { content: "✓" / ""; }
 
 .asideHeading {
   display: flex;
@@ -1449,7 +1436,6 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
   border-radius: 50%;
   background: var(--accent-soft);
   color: var(--accent);
-  font: 700 1.3rem/1 var(--body);
 }
 .curationFields, .curationExplore {
   display: grid;
@@ -1499,7 +1485,7 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
   text-align: center;
   font: 700 0.75rem var(--body);
 }
-.referenceField .curationIcon { width: 28px; height: 28px; font-size: 1rem; }
+.referenceField .curationIcon { width: 28px; height: 28px; }
 .panel .curationFields .referenceField input { min-height: 38px; margin: 2px 0 0; padding: 6px 10px; font-weight: 400; }
 .curationExplore { margin-block-start: auto; }
 .curationExplore > div { padding: 14px; border-radius: 10px; background: var(--soft); }
@@ -1512,8 +1498,8 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
   list-style: none;
   font-size: 0.77rem;
 }
-.curationExplore li { display: flex; align-items: baseline; gap: 6px; }
-.curationExplore li::before { color: var(--accent); content: "✓"; }
+.curationExplore li { display: flex; align-items: center; gap: 6px; }
+.curationExplore li svg { flex: none; color: var(--accent); }
 .curationPrimary, .curationExplore a {
   display: flex;
   align-items: center;
@@ -1533,7 +1519,7 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
 .curationPrimary:hover { background: var(--accent-dark); }
 .curationExplore a { background: var(--accent-soft); color: var(--ink); }
 .curationExplore a:hover { background: var(--line); }
-.shell[dir="rtl"] .curationPrimary span { transform: scaleX(-1); }
+.shell[dir="rtl"] .curationPrimary > svg { transform: scaleX(-1); }
 .shell[data-curation] .actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);

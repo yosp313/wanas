@@ -4,6 +4,7 @@ import { useAuth, useClerk, useSignIn, useSignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { RouteLoading } from "@/components/RouteLoading";
 import { isLocale } from "@/lib/i18n/config";
 import { safeReturnTo } from "@/lib/i18n/return-to";
 import { emailLinkMessage, finishEmailSignIn } from "../email-link";
@@ -63,5 +64,5 @@ function VerifyLink() {
 }
 
 export default function VerifyPage() {
-  return <Suspense><VerifyLink /></Suspense>;
+  return <Suspense fallback={<RouteLoading />}><VerifyLink /></Suspense>;
 }

@@ -4,6 +4,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { toast } from "sonner";
+import type { IconType } from "react-icons";
+import {
+  LuArrowDown, LuArrowLeft, LuArrowRight, LuArrowUpRight, LuBookOpen,
+  LuCheck, LuChevronLeft, LuChevronRight, LuHeart, LuHouse,
+  LuPanelsTopLeft, LuPartyPopper, LuSparkles, LuUtensils, LuWallet,
+} from "react-icons/lu";
 import { FieldError } from "@/components/forms/field-validation";
 import { WanasWordmark } from "@/components/WanasWordmark";
 import { fieldsByStep, plannerFieldErrors, type PlannerField } from "./field-errors";
@@ -22,11 +28,11 @@ const curationColors = [
   { hex: "#f8f6f0", en: "Ivory", ar: "عاجي" },
 ];
 
-const featuredEvents: Record<string, string> = {
-  wedding: "favorite",
-  "katb-el-ketab": "auto_stories",
-  birthday: "celebration",
-  "private-dinner": "villa",
+const featuredEvents: Partial<Record<string, IconType>> = {
+  wedding: LuHeart,
+  "katb-el-ketab": LuBookOpen,
+  birthday: LuPartyPopper,
+  "private-dinner": LuHouse,
 };
 
 const eventOptions = [
@@ -238,7 +244,7 @@ function AvailabilityCalendar({
           onClick={() => shift(-1)}
           aria-label={locale === "ar" ? "الشهر السابق" : "Previous month"}
         >
-          ‹
+          <LuChevronLeft size={20} aria-hidden="true" />
         </button>
         <strong>{monthLabel}</strong>
         <button
@@ -246,7 +252,7 @@ function AvailabilityCalendar({
           onClick={() => shift(1)}
           aria-label={locale === "ar" ? "الشهر التالي" : "Next month"}
         >
-          ›
+          <LuChevronRight size={20} aria-hidden="true" />
         </button>
       </div>
       <div className={styles.calendarLegend}>
@@ -588,7 +594,7 @@ export function Planner({ locale }: { locale: Locale }) {
               disabled={index + 1 > step}
               onClick={() => goToStep(index + 1)}
             >
-              <span className={styles.stepMarker} aria-hidden="true">{step > index + 1 ? "✓" : index + 1}</span>
+              <span className={styles.stepMarker} aria-hidden="true">{step > index + 1 ? <LuCheck size={14} /> : index + 1}</span>
               <span className={styles.stepIndex} aria-hidden="true">
                 {index + 1 === step
                   ? ar ? "الخطوة الحالية" : "Active"
@@ -647,27 +653,32 @@ export function Planner({ locale }: { locale: Locale }) {
                     <small>{ar ? "اختاروا نوعًا واحدًا" : "Choose one event type"}</small>
                   </div>
                   <div className={styles.eventGrid} role="group" aria-label={t.eventType} {...fieldProps("eventType")} tabIndex={-1}>
-                    {eventOptions.map((option) => (
-                      <button
-                        type="button"
-                        key={option.id}
-                        onClick={() => update("eventType", option.id)}
-                        aria-label={option.labels[locale]}
-                        aria-pressed={draft.eventType === option.id}
-                        className={`${styles.eventCard} ${featuredEvents[option.id] ? styles.featuredEvent : ""}`}
-                      >
-                        {featuredEvents[option.id] && (
-                          <span className={styles.symbol} aria-hidden="true">{featuredEvents[option.id]}</span>
-                        )}
-                        {featuredEvents[option.id] && draft.eventType === option.id && (
-                          <span className={styles.eventSelection} aria-hidden="true">{ar ? "تم الاختيار" : "Selected"}</span>
-                        )}
-                        <span className={styles.eventType}>{option.labels[locale]}</span>
-                        {featuredEvents[option.id] && (
-                          <span className={styles.eventDescription}>{eventDescriptions[option.id]}</span>
-                        )}
-                      </button>
-                    ))}
+                    {eventOptions.map((option) => {
+                      const Icon = featuredEvents[option.id];
+                      const selected = draft.eventType === option.id;
+                      return (
+                        <button
+                          type="button"
+                          key={option.id}
+                          onClick={() => update("eventType", option.id)}
+                          aria-label={option.labels[locale]}
+                          aria-pressed={selected}
+                          className={`${styles.eventCard} ${Icon ? styles.featuredEvent : ""}`}
+                        >
+                          {Icon && (
+                            <span className={styles.symbol} aria-hidden="true"><Icon size={20} /></span>
+                          )}
+                          {selected && (Icon
+                            ? <span className={styles.eventSelection} aria-hidden="true">{ar ? "تم الاختيار" : "Selected"}</span>
+                            : <LuCheck className={styles.eventCheck} size={16} aria-hidden="true" />
+                          )}
+                          <span className={styles.eventType}>{option.labels[locale]}</span>
+                          {Icon && (
+                            <span className={styles.eventDescription}>{eventDescriptions[option.id]}</span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                   {fieldError("eventType")}
                   {draft.eventType === "other" && (
@@ -736,7 +747,7 @@ export function Planner({ locale }: { locale: Locale }) {
                     </span>
                   </label>
                   <div className={styles.formula}>
-                    <span className={styles.symbol} aria-hidden="true">table_restaurant</span>
+                    <span className={styles.symbol} aria-hidden="true"><LuUtensils size={20} /></span>
                     <div>
                       <small>{ar ? "تخطيط الجلوس" : "Seating guide"}</small>
                       <p>{seatingTables
@@ -798,7 +809,7 @@ export function Planner({ locale }: { locale: Locale }) {
                             </span>
                           )}
                           <span className={styles.venueName}>
-                            <span aria-hidden="true" />
+                            <span aria-hidden="true">{draft.venueType === option.id && <LuCheck size={12} />}</span>
                             <b>{option.labels[locale]}</b>
                           </span>
                         </button>
@@ -915,7 +926,7 @@ export function Planner({ locale }: { locale: Locale }) {
                         aria-pressed={conciergeSelected}
                         onClick={() => update("decorMode", "curate")}
                       >
-                        <span className={styles.curationIcon} aria-hidden="true">✧</span>
+                        <span className={styles.curationIcon} aria-hidden="true"><LuSparkles size={20} /></span>
                         <span>
                           <strong>{ar ? "نسّقوا الحفل لي" : "Full concierge curation"}</strong>
                           <small>{ar ? "يتولى فريق وناس اختيار الألوان وتنسيق التفاصيل." : "Wanas chooses the palette and decor details for you."}</small>
@@ -946,7 +957,7 @@ export function Planner({ locale }: { locale: Locale }) {
                       <label>
                         <span>{ar ? "روابط الصور المرجعية" : "Reference image links"}</span>
                         <span className={styles.referenceField}>
-                          <span className={styles.curationIcon} aria-hidden="true">↗</span>
+                          <span className={styles.curationIcon} aria-hidden="true"><LuArrowUpRight size={16} /></span>
                           <span>{ar ? "أضيفوا رابط لوحة أو صورة ملهمة" : "Share a moodboard or inspiration photo"}</span>
                           <input aria-label={t.links} {...fieldProps("inspirationLinks")} value={draft.inspirationLinks}
                             onChange={(event) => update("inspirationLinks", event.target.value)} placeholder="https://..." dir="ltr"
@@ -958,7 +969,7 @@ export function Planner({ locale }: { locale: Locale }) {
                         update("decorMode", "curate");
                         if (validateStep(2, ["notes", "inspirationLinks"])) goToStep(3);
                       }}>
-                        {ar ? "تأكيد التنسيق والمتابعة" : "Confirm curation & proceed"} <span aria-hidden="true">→</span>
+                        {ar ? "تأكيد التنسيق والمتابعة" : "Confirm curation & proceed"} <LuArrowRight size={16} aria-hidden="true" />
                       </button>
                     </div>
                   </section>
@@ -969,7 +980,7 @@ export function Planner({ locale }: { locale: Locale }) {
                         aria-pressed={draft.decorMode === "customize"}
                         onClick={() => update("decorMode", "customize")}
                       >
-                        <span className={styles.curationIcon} aria-hidden="true">▤</span>
+                        <span className={styles.curationIcon} aria-hidden="true"><LuPanelsTopLeft size={20} /></span>
                         <span>
                           <strong>{ar ? "أصمّم الديكور بنفسي" : "Curate from signature moodboards"}</strong>
                           <small>{ar ? "استكشفوا الألوان والخامات واختروا ما يناسب مناسبتكم." : "Explore palettes, materials, and styling for your celebration."}</small>
@@ -983,11 +994,11 @@ export function Planner({ locale }: { locale: Locale }) {
                           {(ar
                             ? ["لوحات الألوان", "خامات الديكور", "تنسيق الكوشة", "الطاولات والإضاءة"]
                             : ["Color palettes", "Decor materials", "Ceremony backdrop", "Tablescape & lighting"]
-                          ).map((item) => <li key={item}>{item}</li>)}
+                          ).map((item) => <li key={item}><LuCheck size={14} aria-hidden="true" />{item}</li>)}
                         </ul>
                       </div>
                       <a href="#moodboard-title" onClick={() => update("decorMode", "customize")}>
-                        {ar ? "استكشفوا لوحات الإلهام" : "Explore signature moodboards"} <span aria-hidden="true">↓</span>
+                        {ar ? "استكشفوا لوحات الإلهام" : "Explore signature moodboards"} <LuArrowDown size={16} aria-hidden="true" />
                       </a>
                     </div>}
                   </section>
@@ -1188,7 +1199,7 @@ export function Planner({ locale }: { locale: Locale }) {
             {step > 1 && !(curationStep && conciergeSelected) && (
               <div className={styles.actions}>
                 <button type="button" onClick={() => goToStep(step - 1)}>
-                  <span aria-hidden="true">←</span> {curationStep ? ar ? "العودة إلى نطاق المناسبة" : "Back to scope & venue" : t.back}
+                  <LuArrowLeft size={16} aria-hidden="true" /> {curationStep ? ar ? "العودة إلى نطاق المناسبة" : "Back to scope & venue" : t.back}
                 </button>
                 {curationStep && (
                   <div className={styles.curationBudget}>
@@ -1198,7 +1209,7 @@ export function Planner({ locale }: { locale: Locale }) {
                 )}
                 {step < 4 ? (
                   <button type="button" className={styles.primary} onClick={next} aria-label={curationStep ? t.next : undefined}>
-                    {curationStep ? ar ? "المتابعة إلى الضيافة" : "Continue to catering" : t.next} <span aria-hidden="true">→</span>
+                    {curationStep ? ar ? "المتابعة إلى الضيافة" : "Continue to catering" : t.next} <LuArrowRight size={16} aria-hidden="true" />
                   </button>
                 ) : (
                   <button
@@ -1207,7 +1218,7 @@ export function Planner({ locale }: { locale: Locale }) {
                     onClick={submit}
                     disabled={submitting}
                   >
-                    {submitting ? (locale === "ar" ? "جارٍ الإرسال…" : "Sending…") : t.submit} <span aria-hidden="true">→</span>
+                    {submitting ? (locale === "ar" ? "جارٍ الإرسال…" : "Sending…") : t.submit} <LuArrowRight size={16} aria-hidden="true" />
                   </button>
                 )}
               </div>
@@ -1217,7 +1228,7 @@ export function Planner({ locale }: { locale: Locale }) {
             <aside className={styles.aside}>
               <div className={styles.asideHeading}>
                 <h2>{ar ? "ملخص المناسبة" : "Event summary"}</h2>
-                <span className={styles.symbol} aria-hidden="true">account_balance_wallet</span>
+                <span className={styles.symbol} aria-hidden="true"><LuWallet size={20} /></span>
               </div>
               <div className={styles.estimate} aria-live="polite">
                 <small>
@@ -1273,7 +1284,7 @@ export function Planner({ locale }: { locale: Locale }) {
               {step === 1 && (
                 <div className={styles.actions}>
                   <button type="button" className={styles.primary} onClick={next}>
-                    {t.next} <span aria-hidden="true">→</span>
+                    {t.next} <LuArrowRight size={16} aria-hidden="true" />
                   </button>
                 </div>
               )}

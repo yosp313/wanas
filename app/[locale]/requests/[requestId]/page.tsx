@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { LuArrowLeft } from "react-icons/lu";
 import { AcceptQuoteButton } from "@/components/requests/AcceptQuoteButton";
 import { BookingChangeForm } from "@/components/requests/BookingChangeForm";
 import { QuoteTerms } from "@/components/requests/QuoteTerms";
@@ -27,7 +28,7 @@ export default async function CustomerRequestPage({ params }: { params: Promise<
   const canWithdraw = request.status === "submitted" || request.status === "quoted";
   return (
     <main className="shell">
-      <Link href={`/${locale}/requests`}>{ar ? "طلباتي" : "My requests"}</Link>
+      <Link href={`/${locale}/requests`}><LuArrowLeft size={16} aria-hidden="true" />{ar ? "طلباتي" : "My requests"}</Link>
       <section>
         <h1><bdi>{request.customerName}</bdi></h1>
         <p>{ar ? "تاريخ طلبك" : "Requested date"} · <time dateTime={request.eventDate}>{request.eventDate}</time></p>

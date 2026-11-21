@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { LuArrowRight } from "react-icons/lu";
 import { ApplyBookingChangeForm } from "@/components/admin/ApplyBookingChangeForm";
 import { catalogLabel } from "@/lib/catalog/catalog";
 import { isLocale, type Locale } from "@/lib/i18n/config";
@@ -202,7 +203,7 @@ async function BookingChanges({ locale, searchParams }: { locale: Locale; search
                     <div className={styles.comparison}>
                       <div className={styles.change}>
                         {kind === "reschedule" && requested?.newDate ? (
-                          <>{previousDate && <><del>{eventDate(previousDate)}</del><span aria-hidden="true">{ar ? "←" : "→"}</span></>}<strong>{eventDate(requested.newDate)}</strong></>
+                          <>{previousDate && <><del>{eventDate(previousDate)}</del><LuArrowRight size={16} aria-hidden="true" className={styles.dateArrow} /></>}<strong>{eventDate(requested.newDate)}</strong></>
                         ) : kind === "cancellation" && previousDate ? <del>{eventDate(previousDate)}</del> : (ar ? "نطاق المناسبة" : "Event scope")}
                       </div>
                       {delta !== undefined ? (

@@ -1,0 +1,72 @@
+.loading,
+.notFound {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  min-block-size: 22rem;
+  padding: 3rem var(--gutter);
+}
+
+.loading p {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  color: var(--secondary);
+}
+
+:global(.admin-shell) > .loading {
+  grid-column: 1 / -1;
+}
+
+:global(html[lang="en"]) .loading [lang="ar"],
+:global(html[lang="ar"]) .loading [lang="en"] {
+  display: none;
+}
+
+.spinner {
+  inline-size: 1rem;
+  block-size: 1rem;
+  border: 2px solid var(--line);
+  border-block-start-color: var(--accent);
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .spinner {
+    animation: spin 700ms linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(1turn); }
+}
+
+.notFound {
+  min-block-size: 28rem;
+  text-align: center;
+}
+
+.notFound h1,
+.code {
+  font-family: var(--display);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.code {
+  margin: 0;
+  color: var(--accent);
+  font-size: clamp(3rem, 9vw, 5.5rem);
+}
+
+.notFound h1 {
+  margin: 0.25rem 0 0.75rem;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+}
+
+.notFound p:not(.code) {
+  max-inline-size: 32ch;
+  margin: 0 auto 1.5rem;
+  color: var(--secondary);
+}

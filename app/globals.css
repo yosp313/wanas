@@ -171,8 +171,7 @@ body:has([data-client-sign-in]) > :is(.locale-header, .atelier-footer) { display
   margin-block-end: 16px;
   text-underline-offset: 4px;
 }
-.shell > a:first-child::before { content: "←"; }
-[dir="rtl"] .shell > a:first-child::before { content: "→"; }
+[dir="rtl"] .shell > a:first-child > svg { transform: scaleX(-1); }
 .shell > section {
   padding: clamp(16px, 3vw, 32px);
   border: 1px solid var(--line);

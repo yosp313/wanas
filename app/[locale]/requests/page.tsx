@@ -2,6 +2,7 @@ import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { LuPlus } from "react-icons/lu";
 import { WanasWordmark } from "@/components/WanasWordmark";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/config";
@@ -55,7 +56,7 @@ export default async function RequestsPage({ params }: { params: Promise<{ local
                 "تابعوا خطط مناسباتكم وراجعوا عروض الأسعار وأديروا حجوزاتكم مع وناس.")}</p>
             </div>
             <Link className={styles.primary} href={planner} data-press>
-              <span aria-hidden="true">+</span>{t("New celebration inquiry", "طلب مناسبة جديد")}
+              <LuPlus size={18} aria-hidden="true" />{t("New celebration inquiry", "طلب مناسبة جديد")}
             </Link>
           </div>
         </section>

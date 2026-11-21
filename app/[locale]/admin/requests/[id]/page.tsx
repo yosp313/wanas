@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { LuArrowLeft } from "react-icons/lu";
 import { AdminRequestActions } from "@/components/admin/AdminRequestActions";
 import { QuoteTerms } from "@/components/requests/QuoteTerms";
 import { RequestScope } from "@/components/requests/RequestScope";
@@ -18,7 +19,7 @@ export default async function AdminRequestPage({ params }: { params: Promise<{ l
   const previous = quotes.find((quote) => quote.status === "current");
   return (
     <main className="shell">
-      <Link href={`/${locale}/admin/inbox`}>{ar ? "صندوق الطلبات" : "Request inbox"}</Link>
+      <Link href={`/${locale}/admin/inbox`}><LuArrowLeft size={16} aria-hidden="true" />{ar ? "صندوق الطلبات" : "Request inbox"}</Link>
       <section>
         <h1><bdi>{request.customerName}</bdi></h1>
         <p><bdi dir="ltr">{request.customerEmail}</bdi> · <bdi dir="ltr">{request.customerMobile}</bdi></p>

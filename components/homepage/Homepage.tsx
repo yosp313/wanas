@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
+import { LuArrowRight, LuArrowUpRight } from "react-icons/lu";
 import LocaleSwitcher from "@/app/[locale]/locale-switcher";
 import { WanasWordmark } from "@/components/WanasWordmark";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -52,8 +53,8 @@ export async function Homepage({ locale }: { locale: Locale }) {
               "تصميم الكوشة وتنسيق المكان والضيافة لمناسباتكم في القاهرة. خطّطوا للتفاصيل واطلبوا عرض سعر.",
             ])}</p>
             <div className={styles.actions}>
-              <Link className={styles.primary} href={planner} data-press>{t(["Launch event planning studio", "افتحوا استوديو التخطيط"])} <span aria-hidden="true">→</span></Link>
-              <a className={styles.secondary} href="#ceremonies" data-press>{t(["Explore ceremonial portfolio", "استكشفوا أعمالنا للمراسم"])} <span aria-hidden="true">↗</span></a>
+              <Link className={styles.primary} href={planner} data-press>{t(["Launch event planning studio", "افتحوا استوديو التخطيط"])} <LuArrowRight size={16} aria-hidden="true" /></Link>
+              <a className={styles.secondary} href="#ceremonies" data-press>{t(["Explore ceremonial portfolio", "استكشفوا أعمالنا للمراسم"])} <LuArrowUpRight size={16} aria-hidden="true" /></a>
             </div>
           </div>
           <div className={styles.highlights}>
@@ -109,7 +110,7 @@ export async function Homepage({ locale }: { locale: Locale }) {
                   <strong>{t(["Your event brief", "ملخّص مناسبتكم"])}</strong>
                   <p>{t(["Review your plans before requesting a quote.", "راجعوا خطّتكم قبل طلب عرض السعر."])}</p>
                 </div>
-                <Link className={styles.primary} href={planner} data-press>{t(["Start planning", "ابدأوا التخطيط لمناسبتكم"])} <span aria-hidden="true">→</span></Link>
+                <Link className={styles.primary} href={planner} data-press>{t(["Start planning", "ابدأوا التخطيط لمناسبتكم"])} <LuArrowRight size={16} aria-hidden="true" /></Link>
               </div>
             </div>
           </div>
@@ -132,7 +133,7 @@ export async function Homepage({ locale }: { locale: Locale }) {
                   <h3>{t(card.title)}</h3>
                   <p>{t(card.description)}</p>
                   <Link className={styles.cardLink} href={`${planner}?eventType=${card.eventType}`}>
-                    {t(["Plan this celebration", "خطّطوا لهذه المناسبة"])} <span aria-hidden="true">→</span>
+                    {t(["Plan this celebration", "خطّطوا لهذه المناسبة"])} <LuArrowRight size={16} aria-hidden="true" />
                   </Link>
                 </div>
               </article>
@@ -225,8 +226,8 @@ export async function Homepage({ locale }: { locale: Locale }) {
                 </div>
               </fieldset>
               <div className={styles.actions}>
-                <button className={styles.primary} type="submit">{t(["Open the planner", "افتحوا استوديو التخطيط"])} <span aria-hidden="true">→</span></button>
-                <a className={styles.textLink} href="#concierge">{t(["Event inquiries", "استفسارات المناسبات"])} <span aria-hidden="true">→</span></a>
+                <button className={styles.primary} type="submit">{t(["Open the planner", "افتحوا استوديو التخطيط"])} <LuArrowRight size={16} aria-hidden="true" /></button>
+                <a className={styles.textLink} href="#concierge">{t(["Event inquiries", "استفسارات المناسبات"])} <LuArrowRight size={16} aria-hidden="true" /></a>
               </div>
             </form>
           </div>

@@ -378,7 +378,8 @@
   color: var(--portal-muted);
 }
 
-[dir="rtl"] .arrow { display: inline-block; transform: scaleX(-1); }
+.arrow { display: inline-block; flex: none; vertical-align: middle; }
+[dir="rtl"] .arrow { transform: scaleX(-1); }
 [dir="rtl"] .page :is(.eyebrow, .divider, .badge, .header nav, .footer nav, .invitation a, .help strong, .features dt, label) {
   letter-spacing: normal;
 }

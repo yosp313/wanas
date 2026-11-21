@@ -4,6 +4,7 @@ import { HandleSSOCallback, useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
+import { RouteLoading } from "@/components/RouteLoading";
 import { isLocale } from "@/lib/i18n/config";
 import { safeReturnTo } from "@/lib/i18n/return-to";
 
@@ -41,5 +42,5 @@ function GoogleCallback() {
 }
 
 export default function GoogleCallbackPage() {
-  return <Suspense><GoogleCallback /></Suspense>;
+  return <Suspense fallback={<RouteLoading />}><GoogleCallback /></Suspense>;
 }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useId, useState, type ReactNode } from "react";
+import { LuChevronDown } from "react-icons/lu";
 import styles from "./changes.module.css";
 
 export function ChangeCard({ initialOpen, summary, reviewLabel, requestUrl, requestLabel, children }: {
@@ -20,7 +21,7 @@ export function ChangeCard({ initialOpen, summary, reviewLabel, requestUrl, requ
         {summary}
         <div className={styles.actions}>
           <button className={styles.review} type="button" aria-expanded={open} aria-controls={panel} onClick={() => setOpen(!open)}>
-            {reviewLabel}<span aria-hidden="true" />
+            {reviewLabel}<LuChevronDown size={14} aria-hidden="true" />
           </button>
           <Link href={requestUrl}>{requestLabel}</Link>
         </div>

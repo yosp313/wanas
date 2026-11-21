@@ -427,7 +427,7 @@
 :global([dir="rtl"]) .site :is(h1, h2, h3) { line-height: 1.4; letter-spacing: 0; }
 :global([dir="rtl"]) .intro h1 { max-width: 24ch; font-size: clamp(32px, 4.1vw, 60px); }
 :global([dir="rtl"]) .intro em { font-style: normal; }
-:global([dir="rtl"]) .site :is(.primary, .secondary, .textLink, .cardLink) > span { transform: scaleX(-1); }
+:global([dir="rtl"]) .site :is(.primary, .secondary, .textLink, .cardLink) > svg { transform: scaleX(-1); }
 :global([dir="rtl"]) .site :is(.eyebrow, .primary, .secondary, .footerGrid h2) { letter-spacing: 0; }
 
 @media (max-width: 1279px) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { LuSearch } from "react-icons/lu";
 import type { Locale } from "@/lib/i18n/config";
 import styles from "./requests.module.css";
 
@@ -51,6 +52,7 @@ export function RequestList({ entries, locale, emptyMessage }: {
           </div>
           <div className={styles.controls}>
             <label className={styles.search}>
+              <LuSearch size={16} aria-hidden="true" />
               <input type="search" aria-label={searchLabel} placeholder={searchLabel + "…"} value={search}
                 onChange={(event) => setSearch(event.target.value)} />
             </label>

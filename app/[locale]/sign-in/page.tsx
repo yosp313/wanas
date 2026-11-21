@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
+import { LuArrowLeft, LuArrowRight } from "react-icons/lu";
 import { WanasWordmark } from "@/components/WanasWordmark";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -62,7 +63,7 @@ export default async function SignInPage({
         <div className={styles.headerInner}>
           <nav aria-label={ar ? "روابط الأتيليه" : "Atelier navigation"}>
             <Link href={home}>
-              <span className={styles.arrow} aria-hidden="true">←</span>{" "}
+              <LuArrowLeft size={16} aria-hidden="true" className={styles.arrow} />{" "}
               {ar ? "العودة إلى الأتيليه" : "Back to Atelier"}
             </Link>
             <Link className={styles.studioLink} href={studio}>{ar ? "اكتشفوا الاستوديو" : "Explore Studio"}</Link>
@@ -98,7 +99,7 @@ export default async function SignInPage({
             <span>{ar ? "هل تخططون لحفل جديد؟" : "Planning your first celebration?"}</span>
             <Link href={plan}>
               {ar ? "ابدؤوا التخطيط" : "Start planning"}{" "}
-              <span className={styles.arrow} aria-hidden="true">→</span>
+              <LuArrowRight size={16} aria-hidden="true" className={styles.arrow} />
             </Link>
           </div>
           <div className={styles.help}>
