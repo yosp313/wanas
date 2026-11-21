@@ -1248,9 +1248,8 @@ button.moodTile:hover,
   transition: background-color var(--motion), border-color var(--motion), color var(--motion);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .panel > :not(.actions),
-  .moodPreview figure {
-    animation: var(--motion-rise);
-  }
+.panel,
+.previewHero {
+  transition: opacity var(--motion-enter);
+  @starting-style { opacity: 0.8; }
 }

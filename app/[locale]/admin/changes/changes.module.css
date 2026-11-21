@@ -183,17 +183,20 @@
 .review[aria-expanded="true"] span { transform: translateY(2px) rotate(225deg); }
 :global([dir="rtl"]) .review span { border-inline: 0; border-right: 1.5px solid; }
 
-.drawer:not([hidden]) {
+.drawer {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   gap: var(--card-inset);
   padding: var(--card-inset);
   border-radius: 0 0 12px 12px;
   background: #fff4ef;
+  transition: opacity var(--motion-enter), display var(--motion-enter) allow-discrete;
+  @starting-style { opacity: 0; }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .drawer:not([hidden]) { animation: var(--motion-rise); }
+.drawer[hidden] {
+  display: none;
+  opacity: 0;
 }
 
 .terms,
@@ -278,7 +281,7 @@
 }
 
 @media (max-width: 620px) {
-  .stats, .drawer:not([hidden]) { grid-template-columns: minmax(0, 1fr); }
+  .stats, .drawer { grid-template-columns: minmax(0, 1fr); }
   .stats > div { min-height: 0; gap: 10px; }
 }
 

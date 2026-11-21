@@ -64,8 +64,8 @@
   --control-radius: 8px;
   --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --motion: 150ms var(--motion-ease);
-  --motion-enter: 320ms var(--motion-ease);
-  --motion-rise: atelier-rise-in var(--motion-enter);
+  --motion-enter: 220ms var(--motion-ease);
+  --motion-hero: 420ms var(--motion-ease);
 }
 html[dir="rtl"] {
   --display: "Noto Sans Arabic", Manrope, sans-serif;
@@ -405,22 +405,13 @@ body:has([data-client-sign-in]) > :is(.locale-header, .atelier-footer) { display
   .shell { padding-block: 24px 48px; }
   .shell dl { grid-template-columns: minmax(0, 1fr); }
 }
-@keyframes atelier-fade-in {
-  from { opacity: 0.65; }
-}
-
-@keyframes atelier-rise-in {
-  from { opacity: 0.65; translate: 0 8px; }
+:where(main :is([role="alert"], [role="status"])) {
+  transition: opacity var(--motion);
+  @starting-style { opacity: 0.65; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  main:not([aria-busy="true"]) {
-    animation: atelier-fade-in var(--motion-enter);
-  }
-  main :where([role="alert"], [role="status"]) {
-    animation: atelier-fade-in var(--motion);
-  }
-  :where(button:not(:disabled), a.button):active {
+  :where(button:not(:disabled, [aria-pressed], [aria-current]), a.button, [data-press]):active:not(:focus-visible) {
     scale: 0.98;
   }
 }
@@ -428,7 +419,6 @@ body:has([data-client-sign-in]) > :is(.locale-header, .atelier-footer) { display
 @media (prefers-reduced-motion: reduce) {
   :root {
     --motion: 0ms;
-    --motion-enter: 0ms;
   }
 }
 
@@ -439,9 +429,10 @@ body:has([data-client-sign-in]) > :is(.locale-header, .atelier-footer) { display
   color: var(--negative);
   font-size: 0.875rem;
   font-weight: 500;
+  transition: opacity var(--motion);
 }
 
-.field-error:empty { position: absolute; }
+.field-error:empty { position: absolute; opacity: 0; }
 .field-error:not(:empty) { margin-block-start: 0.25rem; }
 
 :where(input, textarea)[aria-invalid="true"] {

@@ -56,7 +56,7 @@ export default async function RequestsPage({ params }: { params: Promise<{ local
               <p>{t("Track your event plans, review proposals, and manage your bookings with WANAS.",
                 "تابعوا خطط مناسباتكم وراجعوا عروض الأسعار وأديروا حجوزاتكم مع وناس.")}</p>
             </div>
-            <Link className={styles.primary} href={planner}>
+            <Link className={styles.primary} href={planner} data-press>
               <span aria-hidden="true">+</span>{t("New celebration inquiry", "طلب مناسبة جديد")}
             </Link>
           </div>

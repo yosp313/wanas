@@ -25,7 +25,7 @@ export function ChangeCard({ initialOpen, summary, reviewLabel, requestUrl, requ
           <Link href={requestUrl}>{requestLabel}</Link>
         </div>
       </div>
-      <div className={styles.drawer} id={panel} hidden={!open}>{children}</div>
+      <div className={styles.drawer} id={panel} hidden={!open} inert={!open}>{children}</div>
     </article>
   );
 }

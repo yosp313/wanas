@@ -51,7 +51,7 @@ export async function Homepage({ locale }: { locale: Locale }) {
           </details>
           <div className={styles.headerActions}>
             <Link href={requests}>{dictionary.myRequests}</Link>
-            <Link className={styles.primary} href={planner}>{t(["Define your celebration", "خطّطوا لمناسبتكم"])}</Link>
+            <Link className={styles.primary} href={planner} data-press>{t(["Define your celebration", "خطّطوا لمناسبتكم"])}</Link>
             <Suspense>
               <LocaleSwitcher locale={locale} label={dictionary.switchLanguage} />
             </Suspense>
@@ -70,8 +70,8 @@ export async function Homepage({ locale }: { locale: Locale }) {
               "تصميم الكوشة وتنسيق المكان والضيافة لمناسباتكم في القاهرة. خطّطوا للتفاصيل واطلبوا عرض سعر.",
             ])}</p>
             <div className={styles.actions}>
-              <Link className={styles.primary} href={planner}>{t(["Launch event planning studio", "افتحوا استوديو التخطيط"])} <span aria-hidden="true">→</span></Link>
-              <a className={styles.secondary} href="#ceremonies">{t(["Explore ceremonial portfolio", "استكشفوا أعمالنا للمراسم"])} <span aria-hidden="true">↗</span></a>
+              <Link className={styles.primary} href={planner} data-press>{t(["Launch event planning studio", "افتحوا استوديو التخطيط"])} <span aria-hidden="true">→</span></Link>
+              <a className={styles.secondary} href="#ceremonies" data-press>{t(["Explore ceremonial portfolio", "استكشفوا أعمالنا للمراسم"])} <span aria-hidden="true">↗</span></a>
             </div>
           </div>
           <div className={styles.highlights}>
@@ -127,7 +127,7 @@ export async function Homepage({ locale }: { locale: Locale }) {
                   <strong>{t(["Your event brief", "ملخّص مناسبتكم"])}</strong>
                   <p>{t(["Review your plans before requesting a quote.", "راجعوا خطّتكم قبل طلب عرض السعر."])}</p>
                 </div>
-                <Link className={styles.primary} href={planner}>{t(["Start planning", "ابدأوا التخطيط لمناسبتكم"])} <span aria-hidden="true">→</span></Link>
+                <Link className={styles.primary} href={planner} data-press>{t(["Start planning", "ابدأوا التخطيط لمناسبتكم"])} <span aria-hidden="true">→</span></Link>
               </div>
             </div>
           </div>
@@ -271,7 +271,7 @@ export async function Homepage({ locale }: { locale: Locale }) {
             <div id="concierge">
               <h2>{t(["Event inquiries", "استفسارات المناسبات"])}</h2>
               <p>{t(["Tell us about your celebration and request a quote.", "أخبرونا بتفاصيل مناسبتكم واطلبوا عرض سعر."])}</p>
-              <Link href={planner} className={styles.secondary}>{t(["Start your request", "ابدأوا طلبكم"])}</Link>
+              <Link href={planner} className={styles.secondary} data-press>{t(["Start your request", "ابدأوا طلبكم"])}</Link>
             </div>
           </div>
           <div className={styles.footerEnd}>

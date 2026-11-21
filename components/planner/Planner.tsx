@@ -626,7 +626,7 @@ export function Planner({ locale }: { locale: Locale }) {
           </div>
         </header>
         <div className={step === 2 ? styles.fullLayout : styles.layout}>
-          <section className={styles.panel}>
+          <section className={styles.panel} key={step}>
             {step === 1 && (
               <>
                 <section className={styles.formSection}>

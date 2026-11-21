@@ -139,6 +139,11 @@
   box-shadow: 0 4px 24px rgb(58 48 42 / 4%);
 }
 
+.formCard:has(form) {
+  transition: opacity var(--motion-enter);
+  @starting-style { opacity: 0.8; }
+}
+
 .formCard form { display: grid; gap: 0.5rem; }
 .formCard label,
 .divider,
