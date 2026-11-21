@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"tertiary-container":"#0e7ea1","inverse-surface":"#392e29","on-error-container":"#93000a","secondary-container":"#fdc2a3","surface-container-lowest":"#ffffff","error":"#ba1a1a","on-secondary-container":"#794e36","surface":"#fff8f6","surface-dim":"#e8d6cf","on-surface":"#231a15","on-secondary":"#ffffff","primary-fixed-dim":"#ffb68f","tertiary":"#006481","on-primary":"#ffffff","on-primary-container":"#0f0300","secondary-fixed-dim":"#f4ba9c","on-error":"#ffffff","on-background":"#231a15","on-tertiary-fixed-variant":"#004d64","tertiary-fixed":"#bee9ff","surface-bright":"#fff8f6","on-tertiary-container":"#fbfdff","outline":"#887368","surface-container":"#fdeae3","background":"#fff8f6","error-container":"#ffdad6","surface-variant":"#f1dfd7","on-secondary-fixed":"#311302","secondary-fixed":"#ffdbca","on-primary-fixed":"#331100","surface-tint":"#984712","surface-container-high":"#f7e4dd","on-primary-fixed-variant":"#773200","on-surface-variant":"#55433a","surface-container-highest":"#f1dfd7","tertiary-fixed-dim":"#7bd1f8","primary-container":"#b75f29","on-tertiary":"#ffffff","on-secondary-fixed-variant":"#653d26","outline-variant":"#dbc1b5","inverse-primary":"#ffb68f","surface-container-low":"#fff1eb","on-tertiary-fixed":"#001f2a","inverse-on-surface":"#ffede6","primary":"#984712","secondary":"#80543c","primary-fixed":"#ffdbca"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-xs":"0.25rem","space-sm":"0.5rem","gutter":"1rem","margin":"1.5rem","space-xl":"2rem","space-md":"1rem","space-lg":"1.5rem"},"fontFamily":{"headline":["EB Garamond"],"display":["EB Garamond"],"body":["Manrope"],"label":["Manrope"]},"fontSize":{}}}}</script></head><body class="bg-surface font-body text-on-surface"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant/60 z-50 flex flex-col justify-between pt-6 pb-6"><div class="px-6"><div class="mb-8 px-2"><span class="text-xl font-headline font-semibold tracking-wide text-on-surface">WANAS <span class="text-outline mx-1 font-normal">|</span> <span class="text-primary">وَنَس</span></span><p class="text-[11px] uppercase tracking-widest text-on-surface-variant mt-1">Atelier Admin</p></div><nav class="flex flex-col gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg"><a aria-current="page" class="flex items-center justify-between px-3 py-2.5 transition-colors bg-primary-container text-on-primary-container font-semibold rounded-lg" data-path="requests-inbox" href="#"><span class="flex items-center gap-3"><span class="material-symbols-outlined text-[20px]">inbox</span>Requests Inbox</span><span class="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-primary text-on-primary">4</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="calendar" href="#"><span class="material-symbols-outlined text-[20px]">calendar_today</span>Calendar</a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="booking-changes" href="#"><span class="material-symbols-outlined text-[20px]">edit_calendar</span>Booking Changes</a></nav></div><div class="px-6 pt-4 border-t border-outline-variant/60"><div class="flex items-center gap-3 px-2"><div class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-headline font-semibold text-sm">MA</div><div class="min-w-0"><p class="text-sm font-medium text-on-surface truncate">Mariam Al-Sabah</p><p class="text-xs text-on-surface-variant truncate">Lead Scenographer</p></div></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/60 z-40 px-8 flex items-center justify-between"><div class="relative w-80"><span class="material-symbols-outlined text-[18px] text-on-surface-variant absolute left-3 top-1/2 -translate-y-1/2">search</span><input class="w-full pl-9 pr-4 py-1.5 text-sm bg-surface-container-lowest border border-outline-variant/60 rounded-lg text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:border-primary" placeholder="Quick search requests, clients..." type="text"/></div><div class="flex items-center gap-5"><button class="relative p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary"></span></button><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/ALJJyrCDyHUV7lraGhBKGgjprSuWmVBwHOFw6c88op4RVw49yOcrEpkbj2SBiWl6UIZdX5884FAuwg72xQPTQzcU83D__AXpIpsGsKOj_SuMI6uTY4_6dh37r8AkSrU0OpSsPFyIspBQAAKYnfvHbOibjIgpUMVeZP9eD5Sq3ZPRKXgPbZDWm2zrt1lpMshtShXbm7wdZFjYDH3__aSp1l2aRfC_jB-g5D6kkxMFGxdLQMTIAJFHubKQ1nzMkQI"/></div></header><main class="relative pt-16 bg-surface w-full px-8"><div class="flex flex-col w-full pb-12">
+<!-- Top Editorial Header & KPI Summary Strip -->
+<section class="pt-6 pb-8">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+<div>
+<p class="text-[11px] uppercase tracking-[0.2em] text-primary font-semibold mb-1.5">01 / Atelier Pipeline</p>
+<h2 class="text-3xl md:text-4xl font-headline font-medium text-on-surface tracking-tight">Requests Inbox</h2>
+</div>
+<p class="text-sm text-on-surface-variant max-w-md">Curate incoming bespoke celebration inquiries, review spatial moodboards, and dispatch tailored proposals.</p>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col justify-between transition-transform duration-300 hover:-translate-y-0.5">
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs uppercase tracking-widest text-on-surface-variant font-medium">New Inquiries</span>
+<span class="w-8 h-8 rounded-full bg-primary-fixed/60 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">mark_email_unread</span>
+</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<p class="text-3xl font-headline font-semibold text-on-surface">12</p>
+<p class="text-xs text-primary font-medium mt-1">+4 since Monday</p>
+</div>
+<svg class="w-16 h-8 text-primary" fill="none" viewbox="0 0 64 32">
+<path d="M2 26C10 24 14 14 22 16C30 18 34 8 42 10C50 12 54 4 62 2" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col justify-between transition-transform duration-300 hover:-translate-y-0.5">
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs uppercase tracking-widest text-on-surface-variant font-medium">Pending Proposals</span>
+<span class="w-8 h-8 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">description</span>
+</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<p class="text-3xl font-headline font-semibold text-on-surface">5</p>
+<p class="text-xs text-on-surface-variant mt-1">Avg. 24h turnaround</p>
+</div>
+<div class="flex items-end gap-1 h-7">
+<span class="w-1.5 h-3 bg-secondary-fixed-dim rounded-full"></span>
+<span class="w-1.5 h-5 bg-secondary-fixed-dim rounded-full"></span>
+<span class="w-1.5 h-4 bg-secondary-fixed-dim rounded-full"></span>
+<span class="w-1.5 h-7 bg-primary rounded-full"></span>
+</div>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col justify-between transition-transform duration-300 hover:-translate-y-0.5">
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs uppercase tracking-widest text-on-surface-variant font-medium">Concierge Reviews</span>
+<span class="w-8 h-8 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">villa</span>
+</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<p class="text-3xl font-headline font-semibold text-on-surface">3</p>
+<p class="text-xs text-tertiary font-medium mt-1">Venue scouting active</p>
+</div>
+<svg class="w-9 h-9 text-tertiary" viewbox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="14" stroke="currentColor" stroke-opacity="0.18" stroke-width="3"></circle>
+<circle cx="18" cy="18" fill="none" r="14" stroke="currentColor" stroke-dasharray="62 88" stroke-linecap="round" stroke-width="3" transform="rotate(-90 18 18)"></circle>
+</svg>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface-container-high rounded-xl p-6 shadow-sm flex flex-col justify-between transition-transform duration-300 hover:-translate-y-0.5">
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs uppercase tracking-widest text-on-surface-variant font-medium">Confirmed This Month</span>
+<span class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+</span>
+</div>
+<div>
+<p class="text-3xl font-headline font-semibold text-on-surface">$148,500</p>
+<p class="text-xs text-on-surface-variant mt-1">7 bespoke events locked</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Filter Bar -->
+<section class="bg-surface-container-low rounded-xl p-3 mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div class="flex flex-wrap items-center gap-1.5" id="status-tabs">
+<button class="status-tab px-4 py-2 rounded-lg text-xs font-semibold tracking-wide bg-primary text-on-primary transition-colors" data-status="all" type="button">All (5)</button>
+<button class="status-tab px-4 py-2 rounded-lg text-xs font-medium tracking-wide text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-status="new" type="button">New</button>
+<button class="status-tab px-4 py-2 rounded-lg text-xs font-medium tracking-wide text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-status="reviewing" type="button">Reviewing</button>
+<button class="status-tab px-4 py-2 rounded-lg text-xs font-medium tracking-wide text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-status="quoted" type="button">Quoted</button>
+<button class="status-tab px-4 py-2 rounded-lg text-xs font-medium tracking-wide text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-status="archived" type="button">Archived</button>
+</div>
+<div class="flex flex-wrap items-center gap-3">
+<div class="flex items-center gap-2 bg-surface-container-lowest rounded-lg px-3 py-2 shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">celebration</span>
+<select class="bg-transparent text-xs font-medium text-on-surface focus:outline-none cursor-pointer" id="event-type-filter">
+<option value="all">All Event Types</option>
+<option value="Katb Al-Kitab">Katb Al-Kitab</option>
+<option value="Wedding">Wedding</option>
+<option value="Anniversary">Anniversary</option>
+<option value="Private Gala">Private Gala</option>
+</select>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-lowest rounded-lg px-3 py-2 shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">sort</span>
+<select class="bg-transparent text-xs font-medium text-on-surface focus:outline-none cursor-pointer" id="sort-select">
+<option value="newest">Sort: Newest First</option>
+<option value="budget">Budget: High to Low</option>
+<option value="date">Event Date: Soonest</option>
+</select>
+</div>
+</div>
+</section>
+<!-- Split-Pane Workspace -->
+<section class="flex flex-col lg:flex-row items-start gap-8">
+<!-- Left Pane (45%): Scannable Request List -->
+<div class="w-full lg:w-[45%] flex flex-col gap-4" id="requests-list">
+<!-- Card 1 (Active) -->
+<article class="request-card cursor-pointer bg-surface-container-lowest rounded-xl p-6 shadow-md transition-all duration-200 relative overflow-hidden" data-id="req-1" data-status="new" data-type="Katb Al-Kitab">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-primary"></div>
+<div class="flex items-start justify-between gap-3 mb-3">
+<div class="min-w-0">
+<div class="flex items-center gap-2.5 mb-1">
+<h3 class="text-lg font-headline font-semibold text-on-surface truncate">Layla Al-Mansoor</h3>
+<span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary-fixed text-on-primary-fixed">New</span>
+</div>
+<span class="inline-flex items-center gap-1 text-xs font-medium text-primary">
+<span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+              Katb Al-Kitab
+            </span>
+</div>
+<span class="text-xs font-semibold text-on-surface bg-surface-container-low px-3 py-1 rounded-full shrink-0">90 Guests</span>
+</div>
+<div class="grid grid-cols-2 gap-y-2.5 gap-x-4 text-xs text-on-surface-variant mt-4 pt-4 bg-surface-container-low/50 rounded-lg p-3">
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-primary shrink-0">calendar_month</span>
+<span class="truncate">Oct 18, 2025</span>
+</div>
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-primary shrink-0">payments</span>
+<span class="font-semibold text-on-surface truncate">$11,000 - $15,700</span>
+</div>
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-primary shrink-0">location_on</span>
+<span class="truncate">Modern Botanic Glasshouse</span>
+</div>
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-primary shrink-0">restaurant</span>
+<span class="truncate">Artisanal Open Buffet</span>
+</div>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="request-card cursor-pointer bg-surface-container-low rounded-xl p-6 hover:bg-surface-container-lowest hover:shadow-sm transition-all duration-200 relative overflow-hidden" data-id="req-2" data-status="reviewing" data-type="Wedding">
+<div class="flex items-start justify-between gap-3 mb-3">
+<div class="min-w-0">
+<div class="flex items-center gap-2.5 mb-1">
+<h3 class="text-lg font-headline font-semibold text-on-surface truncate">Noura &amp; Tariq Al-Harbi</h3>
+<span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-tertiary-fixed text-on-tertiary-fixed-variant">Reviewing</span>
+</div>
+<span class="inline-flex items-center gap-1 text-xs font-medium text-secondary">
+<span class="material-symbols-outlined text-[14px]">favorite</span>
+              Wedding &amp; Reception
+            </span>
+</div>
+<span class="text-xs font-semibold text-on-surface bg-surface-container-lowest px-3 py-1 rounded-full shrink-0">220 Guests</span>
+</div>
+<div class="grid grid-cols-2 gap-y-2.5 gap-x-4 text-xs text-on-surface-variant mt-4 pt-3">
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-secondary shrink-0">calendar_month</span>
+<span class="truncate">Nov 14, 2025</span>
+</div>
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-secondary shrink-0">payments</span>
+<span class="font-semibold text-on-surface truncate">$38,000 - $46,500</span>
+</div>
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-secondary shrink-0">location_on</span>
+<span class="truncate">Concierge Venue</span>
+</div>
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-secondary shrink-0">restaurant</span>
+<span class="truncate">5-Course Plated Tasting</span>
+</div>
+</div>
+</article>
+<!-- Card 3 -->
+<article class="request-card cursor-pointer bg-surface-container-low rounded-xl p-6 hover:bg-surface-container-lowest hover:shadow-sm transition-all duration-200 relative overflow-hidden" data-id="req-3" data-status="quoted" data-type="Private Gala">
+<div class="flex items-start justify-between gap-3 mb-3">
+<div class="min-w-0">
+<div class="flex items-center gap-2.5 mb-1">
+<h3 class="text-lg font-headline font-semibold text-on-surface truncate">Maison Darwish</h3>
+<span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-secondary-fixed text-on-secondary-fixed-variant">Quoted</span>
+</div>
+<span class="inline-flex items-center gap-1 text-xs font-medium text-secondary">
+<span class="material-symbols-outlined text-[14px]">wine_bar</span>
+              Private Gala
+            </span>
+</div>
+<span class="text-xs font-semibold text-on-surface bg-surface-container-lowest px-3 py-1 rounded-full shrink-0">140 Guests</span>
+</div>
+<div class="grid grid-cols-2 gap-y-2.5 gap-x-4 text-xs text-on-surface-variant mt-4 pt-3">
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-secondary shrink-0">calendar_month</span>
+<span class="truncate">Dec 04, 2025</span>
+</div>
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-secondary shrink-0">payments</span>
+<span class="font-semibold text-on-surface truncate">$24,000 - $29,000</span>
+</div>
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-secondary shrink-0">location_on</span>
+<span class="truncate">Al-Shaheed Courtyard</span>
+</div>
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-secondary shrink-0">restaurant</span>
+<span class="truncate">Levantine Canapés &amp; Bar</span>
+</div>
+</div>
+</article>
+<!-- Card 4 -->
+<article class="request-card cursor-pointer bg-surface-container-low rounded-xl p-6 hover:bg-surface-container-lowest hover:shadow-sm transition-all duration-200 relative overflow-hidden" data-id="req-4" data-status="new" data-type="Anniversary">
+<div class="flex items-start justify-between gap-3 mb-3">
+<div class="min-w-0">
+<div class="flex items-center gap-2.5 mb-1">
+<h3 class="text-lg font-headline font-semibold text-on-surface truncate">Salma &amp; Khalid Al-Zahrani</h3>
+<span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary-fixed text-on-primary-fixed">New</span>
+</div>
+<span class="inline-flex items-center gap-1 text-xs font-medium text-secondary">
+<span class="material-symbols-outlined text-[14px]">candle</span>
+              Anniversary
+            </span>
+</div>
+<span class="text-xs font-semibold text-on-surface bg-surface-container-lowest px-3 py-1 rounded-full shrink-0">45 Guests</span>
+</div>
+<div class="grid grid-cols-2 gap-y-2.5 gap-x-4 text-xs text-on-surface-variant mt-4 pt-3">
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-secondary shrink-0">calendar_month</span>
+<span class="truncate">Nov 02, 2025</span>
+</div>
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-secondary shrink-0">payments</span>
+<span class="font-semibold text-on-surface truncate">$8,500 - $11,200</span>
+</div>
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-secondary shrink-0">location_on</span>
+<span class="truncate">Private Desert Villa</span>
+</div>
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[15px] text-secondary shrink-0">restaurant</span>
+<span class="truncate">Chef's Live Fire Table</span>
+</div>
+</div>
+</article>
+</div>
+<!-- Right Pane (55%): Detailed Request Inspector -->
+<div class="w-full lg:w-[55%] bg-surface-container-lowest rounded-2xl p-8 shadow-md" id="request-inspector">
+<!-- Inspector Header -->
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 bg-surface-container-low/60 -mx-8 -mt-8 px-8 pt-8 rounded-t-2xl mb-8">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-primary-fixed text-on-primary-fixed" id="insp-badge">New Inquiry</span>
+<span class="text-xs font-mono text-on-surface-variant" id="insp-ref">REF #WNS-2025-084</span>
+</div>
+<h3 class="text-3xl font-headline font-semibold text-on-surface" id="insp-name">Layla Al-Mansoor</h3>
+<p class="text-sm text-on-surface-variant mt-1" id="insp-meta">Katb Al-Kitab • 90 Guests • Oct 18, 2025</p>
+</div>
+<div class="text-left sm:text-right">
+<p class="text-[11px] uppercase tracking-widest text-on-surface-variant">Estimated Budget</p>
+<p class="text-2xl font-headline font-semibold text-primary mt-0.5" id="insp-budget">$11,000 - $15,700</p>
+</div>
+</div>
+<!-- Client Contact Info -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+<div class="bg-surface-container-low rounded-xl p-4">
+<p class="text-[11px] uppercase tracking-wider text-on-surface-variant mb-1">Email</p>
+<p class="text-xs font-medium text-on-surface truncate" id="insp-email">layla.mansoor@ateliermail.com</p>
+</div>
+<div class="bg-surface-container-low rounded-xl p-4">
+<p class="text-[11px] uppercase tracking-wider text-on-surface-variant mb-1">Phone / WhatsApp</p>
+<p class="text-xs font-medium text-on-surface" id="insp-phone">+965 9942 8104</p>
+</div>
+<div class="bg-surface-container-low rounded-xl p-4">
+<p class="text-[11px] uppercase tracking-wider text-on-surface-variant mb-1">Venue Preference</p>
+<p class="text-xs font-medium text-on-surface truncate" id="insp-venue">Modern Botanic Glasshouse</p>
+</div>
+</div>
+<!-- Spatial Atmosphere & Moodboard Direction -->
+<div class="mb-8">
+<div class="flex items-center justify-between mb-3">
+<h4 class="text-xs uppercase tracking-widest text-on-surface-variant font-semibold">Spatial Atmosphere &amp; Moodboard Direction</h4>
+<span class="text-xs font-medium text-primary" id="insp-mood-tag">Sun-Baked Terrakotta &amp; Olive</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<div class="sm:col-span-2 relative rounded-xl overflow-hidden h-48">
+<img class="w-full h-full object-cover" data-alt="Sunlit luxury Katb Al-Kitab ceremony setup inside a modern botanic glasshouse, long linen-draped tables in warm ivory, terracotta ceramic vessels filled with olive branches and dried desert botanicals, soft golden hour sunlight filtering through glass arches, editorial architectural photography in warm earth tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDj4ExS1CNaLGYvd-CItLaXsX-1QZAEMoyxfgdrQ-X7IhdYCqfO3AZjUAwUKhUQDyunEThuVVHnfk6MkZaKUvdcoLAgm8UsLw6rf5YnZe4vJGtkKzjdkqEDU1KfUrNlviD-WTl0dNf6ku5UUKyFv4ukIbZpEIajm8p1Vy2JahWdFlDaoqwCW9XzSzMXoTo0zeJHv9B_EVu3A2YRDMqzPnhFBUZxcYh035Qnh4n9VRQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/50 via-transparent to-transparent flex items-end p-4">
+<span class="text-xs font-medium text-on-primary">Primary Scenography Direction</span>
+</div>
+</div>
+<div class="relative rounded-xl overflow-hidden h-48">
+<img class="w-full h-full object-cover" data-alt="Close-up editorial tablescape detail featuring handmade terracotta stoneware plates, brushed brass cutlery, raw-edge cream cotton napkins, and olive-green taper candles on a travertine surface, warm afternoon shadows, minimalist luxury aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr-00DzYPi5ZDFrsKhUay-dda3AHI9cD7Ipcq76edgl7O8ftwUrfiJ4DKYVJpOKeKboG0Dt-jFT0FBHUYE1eESTxcLLO17MJRFA-n-Jh4kfkylZw7O8LfYSvQoIJYtl47iTPjppdaHL4IdAJZHtdbGItwPRCxd90KiaeZNNvnCVHjYh7J53tgNpHmskesqqMhuTQ1XxrnWceWmy1vF4-8Z7fDPzJWQ_sWisXNTfbc"/>
+</div>
+</div>
+</div>
+<!-- Catering & Itemized Estimated Allocation -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+<div class="bg-surface-container-low rounded-xl p-5">
+<h4 class="text-xs uppercase tracking-widest text-on-surface-variant font-semibold mb-3">Catering Selection</h4>
+<div class="flex items-start gap-3">
+<span class="w-9 h-9 rounded-lg bg-primary-fixed/70 text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">restaurant</span>
+</span>
+<div>
+<p class="text-sm font-semibold text-on-surface" id="insp-catering">Artisanal Open Buffet</p>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Seasonal Levantine &amp; Mediterranean grazing stations, live saffron flatbreads, and botanical mocktail bar.</p>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-5">
+<h4 class="text-xs uppercase tracking-widest text-on-surface-variant font-semibold mb-3">Itemized Estimated Allocation</h4>
+<div class="space-y-2.5 text-xs">
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant">Spatial Scenography &amp; Florals</span>
+<span class="font-semibold text-on-surface">$5,400</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 42%"></div>
+</div>
+<div class="flex justify-between items-center pt-1">
+<span class="text-on-surface-variant">Artisanal Catering (90 Guests)</span>
+<span class="font-semibold text-on-surface">$6,300</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 48%"></div>
+</div>
+<div class="flex justify-between items-center pt-1">
+<span class="text-on-surface-variant">Lighting &amp; Acoustic Curation</span>
+<span class="font-semibold text-on-surface">$1,800</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Client Notes -->
+<div class="bg-surface-container/60 rounded-xl p-5 mb-8">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-[16px] text-primary">format_quote</span>
+<h4 class="text-xs uppercase tracking-widest text-on-surface-variant font-semibold">Client Notes</h4>
+</div>
+<p class="text-sm text-on-surface leading-relaxed font-headline italic" id="insp-notes">
+          "We envision an intimate late-afternoon Katb Al-Kitab bathed in natural light. We love the warmth of raw terracotta, olive branches, and low lounge seating for elders alongside a long communal family table."
+        </p>
+</div>
+<!-- Primary Action Buttons -->
+<div class="flex flex-wrap items-center gap-3 pt-2">
+<button class="action-btn px-6 py-3 rounded-lg bg-primary text-on-primary text-xs font-semibold tracking-wide hover:bg-primary-container transition-colors shadow-sm flex items-center gap-2" data-action="Approve &amp; Send Proposal" type="button">
+<span class="material-symbols-outlined text-[17px]">send</span>
+          Approve &amp; Send Proposal
+        </button>
+<button class="action-btn px-5 py-3 rounded-lg bg-surface-container-high text-on-surface text-xs font-semibold tracking-wide hover:bg-surface-container-highest transition-colors flex items-center gap-2" data-action="Assign Scenographer" type="button">
+<span class="material-symbols-outlined text-[17px]">person_add</span>
+          Assign Scenographer
+        </button>
+<button class="action-btn px-5 py-3 rounded-lg bg-surface-container-high text-on-surface text-xs font-semibold tracking-wide hover:bg-surface-container-highest transition-colors flex items-center gap-2" data-action="Schedule Consultation" type="button">
+<span class="material-symbols-outlined text-[17px]">event</span>
+          Schedule Consultation
+        </button>
+</div>
+<!-- Subtle Action Feedback Banner -->
+<div class="hidden mt-4 px-4 py-3 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed text-xs font-medium flex items-center justify-between" id="action-toast">
+<span id="action-toast-text">Action completed.</span>
+<button class="text-on-tertiary-fixed-variant hover:underline" id="close-toast" type="button">Dismiss</button>
+</div>
+</div>
+</section>
+</div>
+<script>
+  (function () {
+    const requestData = {
+      'req-1': {
+        name: 'Layla Al-Mansoor',
+        badge: 'New Inquiry',
+        ref: 'REF #WNS-2025-084',
+        meta: 'Katb Al-Kitab • 90 Guests • Oct 18, 2025',
+        budget: '$11,000 - $15,700',
+        email: 'layla.mansoor@ateliermail.com',
+        phone: '+965 9942 8104',
+        venue: 'Modern Botanic Glasshouse',
+        mood: 'Sun-Baked Terrakotta & Olive',
+        catering: 'Artisanal Open Buffet',
+        notes: '"We envision an intimate late-afternoon Katb Al-Kitab bathed in natural light. We love the warmth of raw terracotta, olive branches, and low lounge seating for elders alongside a long communal family table."'
+      },
+      'req-2': {
+        name: 'Noura & Tariq Al-Harbi',
+        badge: 'Reviewing',
+        ref: 'REF #WNS-2025-079',
+        meta: 'Wedding & Reception • 220 Guests • Nov 14, 2025',
+        budget: '$38,000 - $46,500',
+        email: 'noura.harbi@ateliermail.com',
+        phone: '+966 50 482 1190',
+        venue: 'Concierge Venue',
+        mood: 'Desert Travertine & Ivory Silk',
+        catering: '5-Course Plated Tasting',
+        notes: '"Looking for a dramatic yet understated architectural entrance with suspended linen drapery and warm amber uplighting for the evening reception."'
+      },
+      'req-3': {
+        name: 'Maison Darwish',
+        badge: 'Quoted',
+        ref: 'REF #WNS-2025-072',
+        meta: 'Private Gala • 140 Guests • Dec 04, 2025',
+        budget: '$24,000 - $29,000',
+        email: 'events@maisondarwish.com',
+        phone: '+971 52 901 3340',
+        venue: 'Al-Shaheed Courtyard',
+        mood: 'Burnished Brass & Fig',
+        catering: 'Levantine Canapés & Bar',
+        notes: '"Annual collector dinner. Require seamless acoustic zoning for a live oud trio and minimalist sculptural floral plinths."'
+      },
+      'req-4': {
+        name: 'Salma & Khalid Al-Zahrani',
+        badge: 'New Inquiry',
+        ref: 'REF #WNS-2025-086',
+        meta: 'Anniversary • 45 Guests • Nov 02, 2025',
+        budget: '$8,500 - $11,200',
+        email: 'salma.z@ateliermail.com',
+        phone: '+965 6618 4022',
+        venue: 'Private Desert Villa',
+        mood: 'Candlelit Limestone & Linen',
+        catering: "Chef's Live Fire Table",
+        notes: '"Celebrating 10 years with close family under the stars. Warm lantern clusters, woven rugs, and an open-fire culinary experience."'
+      }
+    };
+
+    const cards = document.querySelectorAll('.request-card');
+    const statusTabs = document.querySelectorAll('.status-tab');
+    const typeFilter = document.getElementById('event-type-filter');
+    const toast = document.getElementById('action-toast');
+    const toastText = document.getElementById('action-toast-text');
+
+    function selectCard(card) {
+      cards.forEach(c => {
+        c.classList.remove('bg-surface-container-lowest', 'shadow-md');
+        c.classList.add('bg-surface-container-low');
+        const bar = c.querySelector('.bg-primary.w-1\\.5');
+        if (bar) bar.remove();
+      });
+
+      card.classList.remove('bg-surface-container-low');
+      card.classList.add('bg-surface-container-lowest', 'shadow-md');
+      const indicator = document.createElement('div');
+      indicator.className = 'absolute left-0 top-0 bottom-0 w-1.5 bg-primary';
+      card.prepend(indicator);
+
+      const data = requestData[card.dataset.id];
+      if (!data) return;
+
+      document.getElementById('insp-name').textContent = data.name;
+      document.getElementById('insp-badge').textContent = data.badge;
+      document.getElementById('insp-ref').textContent = data.ref;
+      document.getElementById('insp-meta').textContent = data.meta;
+      document.getElementById('insp-budget').textContent = data.budget;
+      document.getElementById('insp-email').textContent = data.email;
+      document.getElementById('insp-phone').textContent = data.phone;
+      document.getElementById('insp-venue').textContent = data.venue;
+      document.getElementById('insp-mood-tag').textContent = data.mood;
+      document.getElementById('insp-catering').textContent = data.catering;
+      document.getElementById('insp-notes').textContent = data.notes;
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => selectCard(card));
+    });
+
+    function filterCards() {
+      const activeTab = document.querySelector('.status-tab.bg-primary')?.dataset.status || 'all';
+      const selectedType = typeFilter.value;
+
+      cards.forEach(card => {
+        const matchStatus = activeTab === 'all' || card.dataset.status === activeTab;
+        const matchType = selectedType === 'all' || card.dataset.type === selectedType;
+        card.style.display = matchStatus && matchType ? 'block' : 'none';
+      });
+    }
+
+    statusTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        statusTabs.forEach(t => {
+          t.classList.remove('bg-primary', 'text-on-primary', 'font-semibold');
+          t.classList.add('text-on-surface-variant', 'font-medium');
+        });
+        tab.classList.add('bg-primary', 'text-on-primary', 'font-semibold');
+        tab.classList.remove('text-on-surface-variant', 'font-medium');
+        filterCards();
+      });
+    });
+
+    typeFilter.addEventListener('change', filterCards);
+
+    document.querySelectorAll('.action-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const clientName = document.getElementById('insp-name').textContent;
+        toastText.textContent = `${btn.dataset.action} initiated for ${clientName}.`;
+        toast.classList.remove('hidden');
+      });
+    });
+
+    document.getElementById('close-toast').addEventListener('click', () => {
+      toast.classList.add('hidden');
+    });
+  })();
+</script></main></div></body></html>

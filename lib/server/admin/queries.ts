@@ -1,19 +1,22 @@
 import "server-only";
 
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { requireAdmin } from "../auth/guards";
 import { requireDb } from "../db";
-import { dateReservations, eventRequests, notificationOutbox, quotes } from "../db/schema";
+import { bookings, dateReservations, eventRequests, notificationOutbox, quotes } from "../db/schema";
+import { CAIRO_TIME_ZONE } from "../time/cairo";
 
-export async function getAdminInbox() {
+export async function getAdminInbox(includeArchived: boolean) {
   await requireAdmin();
   const db = requireDb();
-  const [entries, failures] = await Promise.all([
+  const [entries, failures, [confirmed]] = await Promise.all([
     db.select({ request: eventRequests, conflict: dateReservations.eventDate })
       .from(eventRequests)
       .leftJoin(dateReservations, and(eq(dateReservations.eventDate, eventRequests.eventDate),
         eq(dateReservations.kind, "booking")))
-      .where(inArray(eventRequests.status, ["submitted", "quoted"]))
+      .where(inArray(eventRequests.status, includeArchived
+        ? ["submitted", "quoted", "booked", "closed", "withdrawn"]
+        : ["submitted", "quoted"]))
       .orderBy(desc(eventRequests.createdAt)),
     db.select({
       id: notificationOutbox.id,
@@ -23,8 +26,19 @@ export async function getAdminInbox() {
       updatedAt: notificationOutbox.updatedAt,
     }).from(notificationOutbox).where(eq(notificationOutbox.status, "failed"))
       .orderBy(desc(notificationOutbox.updatedAt)).limit(50),
+    db.select({ count: count() }).from(bookings).where(and(
+      eq(bookings.status, "confirmed"),
+      sql`date_trunc('month', ${bookings.eventDate}::timestamp) = date_trunc('month', now() at time zone ${CAIRO_TIME_ZONE})`,
+    )),
   ]);
-  return { requests: entries.map(({ request, conflict }) => ({ ...request, dateUnavailable: Boolean(conflict) })), failures };
+  return {
+    requests: entries.map(({ request, conflict }) => ({
+      ...request,
+      dateUnavailable: Boolean(conflict) && (request.status === "submitted" || request.status === "quoted"),
+    })),
+    failures,
+    confirmed: confirmed.count,
+  };
 }
 
 export async function getAdminRequest(requestId: string) {

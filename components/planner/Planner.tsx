@@ -302,6 +302,12 @@ export function Planner({ locale }: { locale: Locale }) {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMinimumDate(minimumCairoDate());
+    const eventType = new URLSearchParams(window.location.search).get("eventType");
+    const initialDraft = emptyDraft(locale);
+    if (eventType && catalog.eventTypes.some((option) => option.id === eventType)) {
+      initialDraft.eventType = eventType;
+    }
+    setDraft(initialDraft);
     try {
       const raw = sessionStorage.getItem(storageKey);
       if (raw) {

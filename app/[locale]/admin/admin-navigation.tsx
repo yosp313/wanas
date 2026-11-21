@@ -17,13 +17,13 @@ export function AdminNavigation({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const prefix = `/${locale}/admin/`;
   const ar = locale === "ar";
-  const calendar = pathname === prefix + "calendar";
+  const workspace = sections.some(({ path }) => pathname === prefix + path);
   return (
     <nav
-      className={calendar ? styles.navigation : "admin-nav"}
+      className={workspace ? styles.navigation : "admin-nav"}
       aria-label={ar ? "لوحة الإدارة" : "Admin workspace"}
     >
-      {calendar ? (
+      {workspace ? (
         <div className={styles.brand}>
           <bdi>WANAS <i aria-hidden="true">|</i> <em lang="ar">وَنَس</em></bdi>
           <small>{ar ? "إدارة الأتيليه" : "Atelier admin"}</small>
@@ -41,12 +41,12 @@ export function AdminNavigation({ locale }: { locale: Locale }) {
             href={href}
             aria-current={current ? "page" : active ? "location" : undefined}
           >
-            {calendar && <CalendarIcon name={path} />}
-            {!calendar && path === "inbox" && !ar ? "Request inbox" : label[locale]}
+            {workspace && <CalendarIcon name={path} />}
+            {!workspace && path === "inbox" && !ar ? "Request inbox" : label[locale]}
           </Link>
         );
       })}
-      {calendar && (
+      {workspace && (
         <div className={styles.sidebarFooter}>
           <Link href={`/${locale}`}>{ar ? "موقع وناس" : "WANAS website"}</Link>
           <LocaleSwitcher locale={locale} label={ar ? "English" : "العربية"} />
