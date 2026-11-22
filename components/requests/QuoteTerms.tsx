@@ -23,11 +23,21 @@ export function QuoteTerms({ quote, locale }: {
   const ar = locale === "ar";
   const total = new Intl.NumberFormat(ar ? "ar-EG" : "en-EG", { style: "currency", currency: "EGP", numberingSystem: "latn" }).format(quote.totalEgp);
   const services = typeof quote.services === "string" ? quote.services : "";
+  const status = quoteStatuses[quote.status]?.[ar ? 1 : 0];
   return (
     <div>
-      <p><time dateTime={quote.offeredDate}>{quote.offeredDate}</time> · <bdi>{total}</bdi> · {quoteStatuses[quote.status]?.[ar ? 1 : 0]}</p>
-      {services && <p>{services}</p>}
-      {quote.scopeExplanation && <p>{quote.scopeExplanation}</p>}
+      <p data-quote-summary>
+        <time dateTime={quote.offeredDate}>{quote.offeredDate}</time>{" "}
+        <span aria-hidden="true">·</span>{" "}
+        <bdi>{total}</bdi>
+        {status && <> <span aria-hidden="true">·</span>{" "}<span data-quote-status={quote.status}>{status}</span></>}
+      </p>
+      {(services || quote.scopeExplanation) && (
+        <div data-quote-description>
+          {services && <p dir="auto">{services}</p>}
+          {quote.scopeExplanation && <p dir="auto">{quote.scopeExplanation}</p>}
+        </div>
+      )}
     </div>
   );
 }
