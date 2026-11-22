@@ -66,7 +66,7 @@ const cateringDetails: Record<string, Record<Locale, string>> = {
     ar: "أطباق فردية تُقدّم على الطاولة",
   },
   recommend: {
-    en: "We’ll suggest a format for your venue and guest count",
+    en: "We'll suggest a format for your venue and guest count",
     ar: "نقترح أسلوبًا يناسب المكان وعدد الضيوف",
   },
 };
@@ -496,18 +496,18 @@ export function Planner({ locale }: { locale: Locale }) {
     : "-";
   const steps = ar
     ? ["تفاصيل المناسبة", "الديكور والألوان", "الضيافة", "مراجعة الطلب"]
-    : ["Scope & venue", "Decor & moodboards", "Catering", "Review & request"];
+    : ["Event details", "Decor & moodboards", "Catering", "Review"];
   const title =
     locale === "ar"
       ? [
           "تفاصيل المناسبة",
-          "نسّقوا لوحة الإلهام لمناسبتكم",
+          "اختاروا الديكور",
           "اختاروا أسلوب الضيافة",
           "راجعوا تفاصيل الحفل",
         ]
       : [
-          "Define your",
-          "Curate your aesthetic moodboard",
+          "Event details",
+          "Choose your decor",
           "Choose your catering",
           "Review your request",
         ];
@@ -521,23 +521,23 @@ export function Planner({ locale }: { locale: Locale }) {
         ]
       : [
           "Start with your occasion, guest count, venue, and date.",
-          "Pick a palette and decor details, or ask Wanas to choose.",
-          "Add catering and choose how you’d like it served.",
+          "Pick a palette and decor details, or ask WANAS to choose.",
+          "Add catering and choose how you'd like it served.",
           "Check your event details and add your contact information.",
         ];
   const eventDescriptions: Record<string, string> =
     locale === "ar"
       ? {
-          wedding: "تجربة متكاملة ليوم مميز",
-          "katb-el-ketab": "احتفال حميم وتنسيق الكوشة",
-          birthday: "جلسة أنيقة لمناسبة خاصة",
-          "private-dinner": "عشاء خاص بتفاصيل مدروسة",
+          wedding: "تنسيق الكوشة والممر وحفل الاستقبال",
+          "katb-el-ketab": "تنسيق الكوشة ومقاعد الحضور",
+          birthday: "ديكور لحفل عيد الميلاد",
+          "private-dinner": "تنسيق الطاولات لعشاء خاص",
         }
       : {
-          wedding: "A full day of considered details",
-          "katb-el-ketab": "An intimate ceremony with signature styling",
-          birthday: "A thoughtful setting for a milestone",
-          "private-dinner": "An intimate dinner, made memorable",
+          wedding: "Kosha, aisle, and reception decor",
+          "katb-el-ketab": "Kosha and seating for the ceremony",
+          birthday: "Decor for a birthday party",
+          "private-dinner": "Table decor for a private dinner",
         };
   const guestPresets = [
     { value: 40, en: "Intimate", ar: "حميمي", range: "20–60" },
@@ -606,7 +606,7 @@ export function Planner({ locale }: { locale: Locale }) {
         </nav>
         {step > 1 && (
           <div className={styles.scopeStrip}>
-            {curationStep && <span className={styles.scopeBadge}>{ar ? "نطاق المناسبة" : "Event scope"}</span>}
+            {curationStep && <span className={styles.scopeBadge}>{ar ? "ملخّص المناسبة" : "Event summary"}</span>}
             <dl className={styles.scopeDetails}>
               <div>
                 <dt>{t.eventType}</dt>
@@ -627,17 +627,15 @@ export function Planner({ locale }: { locale: Locale }) {
             </dl>
             {curationStep && (
               <button className={styles.scopeEdit} type="button" onClick={() => goToStep(1)}>
-                {ar ? "تعديل النطاق" : "Modify scope"}
+                {ar ? "تعديل التفاصيل" : "Edit details"}
               </button>
             )}
           </div>
         )}
         <header className={styles.intro}>
           <div>
-            {step === 1 && <span className={styles.eyebrow}>{ar ? "استوديو تخطيط المناسبات" : "Event planning studio"}</span>}
-            {curationStep && <span className={styles.eyebrow}>{ar ? "التنسيق ولوحات الإلهام" : "Curation & moodboards"}</span>}
             <h1 ref={heading} tabIndex={-1}>
-              {title[step - 1]}{step === 1 && !ar && <> <em>celebration</em></>}
+              {title[step - 1]}
             </h1>
             {!curationStep && <p>{captions[step - 1]}</p>}
           </div>
@@ -922,20 +920,20 @@ export function Planner({ locale }: { locale: Locale }) {
                   <section className={styles.curationCard} data-active={conciergeSelected || undefined}>
                     <h2>
                       <button type="button" className={styles.pathCard}
-                        aria-label={ar ? undefined : "Curate it for me, full concierge curation"}
+                        aria-label={ar ? "نسّقوا الحفل لي" : "Let WANAS choose the decor"}
                         aria-pressed={conciergeSelected}
                         onClick={() => update("decorMode", "curate")}
                       >
                         <span className={styles.curationIcon} aria-hidden="true"><LuSparkles size={20} /></span>
                         <span>
-                          <strong>{ar ? "نسّقوا الحفل لي" : "Full concierge curation"}</strong>
-                          <small>{ar ? "يتولى فريق وناس اختيار الألوان وتنسيق التفاصيل." : "Wanas chooses the palette and decor details for you."}</small>
+                          <strong>{ar ? "نسّقوا الحفل لي" : "Let WANAS choose the decor"}</strong>
+                          <small>{ar ? "يتولى فريق وناس اختيار الألوان وتنسيق التفاصيل." : "WANAS chooses the palette and decor details for you."}</small>
                         </span>
                       </button>
                     </h2>
                     <div className={styles.curationFields}>
                       <label>
-                        <span>{ar ? "الرؤية الإبداعية وتفاصيل المناسبة" : "Creative vision & ceremony notes"}</span>
+                        <span>{ar ? "ملاحظات على الديكور والمراسم" : "Decor and ceremony notes"}</span>
                         <textarea aria-label={t.notes} {...fieldProps("notes")} value={draft.notes}
                           onChange={(event) => update("notes", event.target.value)}
                           placeholder={ar ? "ألوان أو طقوس أو تفاصيل تحبونها..." : "Traditions, motifs, or details you love…"}
@@ -969,36 +967,36 @@ export function Planner({ locale }: { locale: Locale }) {
                         update("decorMode", "curate");
                         if (validateStep(2, ["notes", "inspirationLinks"])) goToStep(3);
                       }}>
-                        {ar ? "تأكيد التنسيق والمتابعة" : "Confirm curation & proceed"} <LuArrowRight size={16} aria-hidden="true" />
+                        {ar ? "المتابعة إلى الضيافة" : "Continue to catering"} <LuArrowRight size={16} aria-hidden="true" />
                       </button>
                     </div>
                   </section>
                   <section className={styles.curationCard} data-active={draft.decorMode === "customize" || undefined}>
                     <h2>
                       <button type="button" className={styles.pathCard}
-                        aria-label={ar ? undefined : "Customize my decor, curate from signature moodboards"}
+                        aria-label={ar ? "أصمّم الديكور بنفسي" : "Customize my decor"}
                         aria-pressed={draft.decorMode === "customize"}
                         onClick={() => update("decorMode", "customize")}
                       >
                         <span className={styles.curationIcon} aria-hidden="true"><LuPanelsTopLeft size={20} /></span>
                         <span>
-                          <strong>{ar ? "أصمّم الديكور بنفسي" : "Curate from signature moodboards"}</strong>
+                          <strong>{ar ? "أصمّم الديكور بنفسي" : "Customize my decor"}</strong>
                           <small>{ar ? "استكشفوا الألوان والخامات واختروا ما يناسب مناسبتكم." : "Explore palettes, materials, and styling for your celebration."}</small>
                         </span>
                       </button>
                     </h2>
                     {!conciergeSelected && <div className={styles.curationExplore}>
                       <div>
-                        <strong>{ar ? "ما تتضمنه لوحات الإلهام" : "Explore the styling details"}</strong>
+                        <strong>{ar ? "ما تتضمنه لوحات الإلهام" : "What the moodboards include"}</strong>
                         <ul>
                           {(ar
                             ? ["لوحات الألوان", "خامات الديكور", "تنسيق الكوشة", "الطاولات والإضاءة"]
-                            : ["Color palettes", "Decor materials", "Ceremony backdrop", "Tablescape & lighting"]
+                            : ["Color palettes", "Decor materials", "Ceremony backdrop", "Table decor and lighting"]
                           ).map((item) => <li key={item}><LuCheck size={14} aria-hidden="true" />{item}</li>)}
                         </ul>
                       </div>
                       <a href="#moodboard-title" onClick={() => update("decorMode", "customize")}>
-                        {ar ? "استكشفوا لوحات الإلهام" : "Explore signature moodboards"} <LuArrowDown size={16} aria-hidden="true" />
+                        {ar ? "استكشفوا لوحات الإلهام" : "Browse moodboards"} <LuArrowDown size={16} aria-hidden="true" />
                       </a>
                     </div>}
                   </section>
@@ -1199,7 +1197,7 @@ export function Planner({ locale }: { locale: Locale }) {
             {step > 1 && !(curationStep && conciergeSelected) && (
               <div className={styles.actions}>
                 <button type="button" onClick={() => goToStep(step - 1)}>
-                  <LuArrowLeft size={16} aria-hidden="true" /> {curationStep ? ar ? "العودة إلى نطاق المناسبة" : "Back to scope & venue" : t.back}
+                  <LuArrowLeft size={16} aria-hidden="true" /> {curationStep ? ar ? "العودة إلى تفاصيل المناسبة" : "Back to event details" : t.back}
                 </button>
                 {curationStep && (
                   <div className={styles.curationBudget}>
@@ -1296,10 +1294,10 @@ export function Planner({ locale }: { locale: Locale }) {
         <div className={styles.content}>
           <div>
             <WanasWordmark locale={locale} />
-            <p>{ar ? "تصميم وتنسيق المناسبات والضيافة في القاهرة." : "Celebration design, venue styling, and hospitality in Cairo."}</p>
+            <p>{ar ? "تصميم وتنسيق المناسبات والضيافة في القاهرة." : "Event decor and catering in Cairo."}</p>
           </div>
           <nav aria-label={ar ? "روابط وناس" : "WANAS links"}>
-            <Link href={`/${locale}`}>{ar ? "الأتيليه" : "The atelier"}</Link>
+            <Link href={`/${locale}`}>{ar ? "الرئيسية" : "Home"}</Link>
             <Link href={`/${locale}/requests`}>{ar ? "طلباتي" : "My requests"}</Link>
           </nav>
         </div>

@@ -1,6 +1,6 @@
 export type NotificationFailure = { id: string; type: string; providerCode: string; failedAt: Date; recipient?: string };
 
-/** Admin-only presentation seam. The server must pass the verified is_admin result. */
+/** Pass the server's verified is_admin result. */
 export function NotificationFailureList({ failures, isAdmin }: { failures: NotificationFailure[]; isAdmin: boolean }) {
   if (!isAdmin) return null;
   if (failures.length === 0) return <p>No notification failures need attention.</p>;

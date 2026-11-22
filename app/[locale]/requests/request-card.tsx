@@ -20,7 +20,7 @@ export function requestEntry(request: Request, locale: Locale, today: string): R
   const venueType = details?.venueTypeOther || labels?.venueType?.[locale] ||
     catalogLabel("venueTypes", details?.venueType ?? "", locale);
   const venue = details?.venueName || venueType;
-  const title = eventType || t("Celebration request", "طلب مناسبة");
+  const title = eventType || t("Event request", "طلب مناسبة");
   const guestCount = details?.guestCount && new Intl.NumberFormat(locale).format(details.guestCount);
   const guests = guestCount ? t(`${guestCount} guests`, `${guestCount} ضيف`) : "";
   const catering = details?.cateringRequested
@@ -38,8 +38,8 @@ export function requestEntry(request: Request, locale: Locale, today: string): R
 
   const status = booking?.status === "cancelled" ? t("Booking cancelled", "أُلغي الحجز")
     : booking?.status === "confirmed" ? t("Booking confirmed", "الحجز مؤكّد")
-    : quote ? t("Proposal ready for review", "عرض السعر جاهز للمراجعة")
-    : request.status === "quoted" ? t("Proposal expired", "انتهت صلاحية العرض")
+    : quote ? t("Quote ready", "عرض السعر جاهز للمراجعة")
+    : request.status === "quoted" ? t("Quote expired", "انتهت صلاحية عرض السعر")
     : request.status === "submitted" ? t("In review", "قيد المراجعة")
     : request.status === "withdrawn" ? t("Withdrawn", "مسحوب")
     : t("Closed", "مغلق");
@@ -95,7 +95,7 @@ export function requestEntry(request: Request, locale: Locale, today: string): R
           {quote ? (
             <div className={styles.inspiration}>
               <div className={styles.inspirationHeading}>
-                <p>{t("Atelier inspiration", "إلهام من وناس")}</p>
+                <p>{t("Decor examples", "أمثلة على الديكور")}</p>
                 <Link href={`/${locale}#ceremonies`}>{t("Explore decor", "استكشفوا الديكور")}</Link>
               </div>
               <div className={styles.photos}>
@@ -120,7 +120,7 @@ export function requestEntry(request: Request, locale: Locale, today: string): R
 
         {quote && (
           <div className={styles.allocation}>
-            {amount(t("Proposal total", "إجمالي العرض"), price)}
+            {amount(t("Quote total", "إجمالي عرض السعر"), price)}
             {budget && <span>{t("Requested budget", "الميزانية المطلوبة")} · <bdi>{budget}</bdi></span>}
           </div>
         )}
@@ -132,8 +132,8 @@ export function requestEntry(request: Request, locale: Locale, today: string): R
             </div>
             <ol>
               <li data-complete>{t("Request received", "استلمنا الطلب")}</li>
-              <li aria-current="step">{t("Atelier review", "مراجعة وناس")}</li>
-              <li>{t("Proposal ready", "عرض السعر")}</li>
+              <li aria-current="step">{t("WANAS review", "مراجعة وناس")}</li>
+              <li>{t("Quote ready", "عرض السعر")}</li>
               <li>{t("Booking confirmed", "تأكيد الحجز")}</li>
             </ol>
           </div>
@@ -143,12 +143,12 @@ export function requestEntry(request: Request, locale: Locale, today: string): R
           {holdUntil && (
             <p>{t("Date held until", "الموعد محجوز مؤقتًا حتى")} <strong><bdi>{holdUntil}</bdi></strong> {t("Cairo time", "بتوقيت القاهرة")}</p>
           )}
-          {group === "confirmed" && <p className={styles.bookingNote}>{t("Your celebration date is reserved.", "تم حجز موعد مناسبتكم.")}</p>}
+          {group === "confirmed" && <p className={styles.bookingNote}>{t("Your event date is reserved.", "تم حجز موعد مناسبتكم.")}</p>}
           <div className={styles.cardActions}>
             {quote && <Link className={styles.secondary} href={href}>{t("View request", "عرض الطلب")}</Link>}
             <Link className={quote ? styles.primary : styles.secondary}
               href={quote ? `${href}#quotes` : href}>
-              {quote ? t("Review proposal", "مراجعة العرض") : t("View request", "عرض الطلب")}
+              {quote ? t("Review quote", "مراجعة عرض السعر") : t("View request", "عرض الطلب")}
             </Link>
           </div>
         </footer>

@@ -33,9 +33,9 @@ test("defaults to Arabic and remembers a route-preserving language switch", asyn
 
 test("the homepage seeds a new plan and preserves an existing draft", async ({ page }) => {
   await page.goto("/en");
-  await page.getByRole("link", { name: "Explore ceremonial portfolio" }).click();
+  await page.getByRole("link", { name: "See our work" }).click();
   await expect(page).toHaveURL(/#ceremonies$/);
-  await page.getByRole("radio", { name: "Anniversary soirée" }).check();
+  await page.getByRole("radio", { name: "Anniversary" }).check();
   await page.getByRole("button", { name: "Open the planner" }).click();
   await expect(page).toHaveURL(/\/en\/plan\?eventType=anniversary$/);
   const anniversary = page.getByRole("button", { name: "Anniversary", exact: true });

@@ -35,14 +35,6 @@
 .intro > div:first-child {
   max-width: 60rem;
 }
-.eyebrow {
-  margin: 0;
-  color: var(--accent);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
 .intro h1 {
   margin: 12px 0 12px;
   font: 400 clamp(2.7rem, 6vw, 5.35rem)/1.04 var(--display);
@@ -1210,18 +1202,8 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
 }
 .progressStep[aria-current="step"] .stepIndex { color: var(--accent); }
 .progressStep strong { font-size: 0.9rem; }
-.shell[dir="rtl"] :is(.stepIndex, .eyebrow) { letter-spacing: 0; }
+.shell[dir="rtl"] .stepIndex { letter-spacing: 0; }
 
-.eyebrow::before {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-inline-end: 8px;
-  border-radius: 50%;
-  background: currentColor;
-  vertical-align: 2px;
-  content: "";
-}
 .draftNote {
   padding: 8px 14px;
   border-radius: var(--control-radius);

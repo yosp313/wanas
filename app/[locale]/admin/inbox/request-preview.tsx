@@ -101,7 +101,7 @@ export function RequestPreview({ request, locale }: { request: Preview; locale: 
         <Link className={styles.primary} href={`/${locale}/admin/requests/${request.id}`}>
           <CalendarIcon name={actionable ? "send" : "quote"} />
           {actionable
-            ? (ar ? "مراجعة وإرسال عرض السعر" : "Review & send proposal")
+            ? (ar ? "مراجعة وإرسال عرض السعر" : "Review and send quote")
             : (ar ? "عرض تفاصيل الطلب" : "View request details")}
         </Link>
       </div>

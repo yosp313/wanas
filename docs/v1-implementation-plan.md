@@ -1,6 +1,6 @@
-# WANAS v1 — Implementation Plan
+# WANAS v1 implementation plan
 
-Phased plan for taking Cairo event requests from the bilingual planner through confirmed bookings.
+This is the original v1 plan. The app now uses Clerk for sign-in. See the [Clerk migration plan](clerk-auth-implementation-plan.md) for the current authentication design.
 
 1. A visitor browses WANAS decor, plans an event in Arabic or English, and signs in by email code to submit the completed request.
 2. An invited admin checks supplier availability, reviews the original request, and sends a quote with one total in EGP and a 48-hour hold.
@@ -10,13 +10,11 @@ Phased plan for taking Cairo event requests from the bilingual planner through c
 
 UI mockups: [Event scope and venue](../stitch-exports/event-scope-venue-estimator.png), [catering](../stitch-exports/event-scope-catering-estimator.png), [moodboard selection](../stitch-exports/moodboards-theme-selection.jpg).
 
-Companion references:
+## Code at the start of the project
 
-- `Home()` in [app/page.tsx](../app/page.tsx#L3) is the starter homepage. Replace its Next.js links with WANAS decor examples and **Plan your event** on the localized homepage.
-- `RootLayout()` in [app/layout.tsx](../app/layout.tsx#L20) owns the document element and currently hard-codes `lang="en"`. Move document language and direction to the locale layout.
+- `Home()` in `app/page.tsx` is the starter homepage. Replace its Next.js links with WANAS decor examples and **Plan your event** on the localized homepage.
+- `RootLayout()` in `app/layout.tsx` owns the document element and currently hard-codes `lang="en"`. Move document language and direction to the locale layout.
 - `nextConfig` in [next.config.ts](../next.config.ts#L3) enables Cache Components. Keep live availability and authorization-dependent reads outside shared caches.
-
-**Status:** Implementation plan — decisions below are confirmed; ready to execute.
 
 ---
 
@@ -131,7 +129,7 @@ Return localized validation and state errors for booked dates, expired or supers
 
 ---
 
-## Phase 1 — Application and database foundations
+## 1. Application and database foundations
 
 **Goal:** Establish the bilingual shell, verified access checks, and Postgres schema for later phases. No new user-facing behaviour in production.
 
@@ -141,7 +139,7 @@ Validate `ar` and `en` in the localized layout. Add a language switch that prese
 
 ### 1.2 Schema, time, and transactions
 
-Add the tables for event requests, quotes, bookings, booking change requests, booking revisions, date reservations, admin access, and the notification outbox. Add database constraints for request deduplication and reservation capacity. Centralize Cairo date arithmetic, the lock order, and the after-lock database clock read. Provision test Postgres and wire migration checks into CI.
+Add the tables for event requests, quotes, bookings, booking change requests, booking revisions, date reservations, admin access, and the notification outbox. Add database constraints for request deduplication and reservation capacity. Centralize Cairo date arithmetic, the lock order, and the after-lock database clock read. Set up a test Postgres database and run migration checks in CI.
 
 **Acceptance**
 
@@ -151,7 +149,7 @@ Add the tables for event requests, quotes, bookings, booking change requests, bo
 
 ---
 
-## Phase 2 — Customer planner and submission
+## 2. Customer planner and submission
 
 **Goal:** A guest completes the full planner and submits one request after signing in.
 
@@ -159,8 +157,8 @@ Add the tables for event requests, quotes, bookings, booking change requests, bo
 
 Replace the starter homepage with decor examples and **Plan your event**. Collect event type, estimated guest count, date, venue name, street address, venue type, and one EGP budget range for decor and any requested catering.
 
-- Event types are Wedding, Katb El-Ketab, Engagement, Birthday, Anniversary, Private Dinner, Corporate Event, and Other. Venue types are Apartment, Villa, Garden, Hall, Hotel, and Other. Each Other selection requires a description.
-- **Curate it for me** delegates the decor. **Customize my decor** offers a moodboard, palette, backdrop, florals, and table styling, with individual choices delegable to WANAS. Both modes accept optional notes and inspiration links.
+- Event types are Wedding, Katb al-kitab, Engagement, Birthday, Anniversary, Private dinner, Corporate event, and Other. Venue types are Apartment, Villa, Garden, Hall, Hotel, and Other. Each Other selection requires a description.
+- **Let WANAS choose the decor** lets WANAS select the decor. **Customize my decor** offers a moodboard, palette, backdrop, florals, and table styling, with individual choices delegable to WANAS. Both modes accept optional notes and inspiration links.
 - Optional catering in either mode offers canapés, buffet, plated dining, or a WANAS recommendation from the fixed launch catalog. Use the Stitch exports for layout. Use the product scope for planner behavior and EGP budget input. Venue sourcing is deferred.
 - Fetch live availability for the visible month. Show held dates as selectable and booked dates as disabled. Final review collects the customer's name and mobile number. Keep the draft and submission ID in the tab's `sessionStorage` through refresh, locale switches, and email-code sign-in. Return to completed review for explicit submission.
 
@@ -179,7 +177,7 @@ Replace the starter homepage with decor examples and **Plan your event**. Collec
 
 ---
 
-## Phase 3 — Admin request review and first quote
+## 3. Admin request review and first quote
 
 **Goal:** An invited admin reviews a request, declines it or sends its first quote, and reserves the offered date.
 
@@ -208,13 +206,13 @@ Show actionable requests and their original details. Keep supplier checks intern
 
 ---
 
-## Phase 4 — Customer quote acceptance and confirmed calendar
+## 4. Customer quote acceptance and confirmed calendar
 
 **Goal:** The customer accepts a live quote from My requests and the admin sees the confirmed booking and competing requests.
 
 ### 4.1 My requests and acceptance
 
-Add a signed-in list and detail page for each customer's requests. Show quote history, bookings, and change requests as their phases land. Preserve the intended localized request link through sign-in.
+Add a signed-in list and detail page for each customer's requests. Show quote history, bookings, and change requests as each phase is implemented. Preserve the intended localized request link through sign-in.
 
 `acceptQuote(requestId, quoteId)`
 
@@ -235,9 +233,9 @@ Open the month calendar with confirmed bookings by default. Add an optional pend
 
 ---
 
-## Phase 5 — Localized notification delivery
+## 5. Localized notification delivery
 
-**Goal:** Deliver queued customer email and show admin failures that need attention. This phase can begin after the outbox schema lands.
+**Goal:** Deliver queued customer email and show admin failures that need attention. This phase can begin after the outbox migration is ready.
 
 ### 5.1 Cron worker and templates
 
@@ -256,7 +254,7 @@ Expose a secret-protected `POST /api/internal/notifications` for Supabase Cron t
 
 ---
 
-## Phase 6 — Quote lifecycle and request withdrawal
+## 6. Quote lifecycle and request withdrawal
 
 **Goal:** Customers can decline a quote or withdraw an unbooked request, and admins can replace or resend offers with a fresh hold.
 
@@ -285,7 +283,7 @@ Derive effective expiry from the hold timestamp for customer and admin reads. Re
 
 ---
 
-## Phase 7 — Booking changes, cancellation, and rescheduling
+## 7. Booking changes, cancellation, and rescheduling
 
 **Goal:** WANAS records agreed changes to a confirmed booking, including any price adjustment, and keeps capacity correct.
 
@@ -313,7 +311,7 @@ Derive effective expiry from the hold timestamp for customer and admin reads. Re
 
 ---
 
-## Phase 8 — Tests and production rollout
+## 8. Tests and production rollout
 
 **Goal:** Prove the full flow and the concurrency rules on Postgres, then release with production configuration and reversible app deployment.
 
@@ -349,6 +347,6 @@ Phase 1 ──▶ Phase 2 ──▶ Phase 3 ──▶ Phase 4 ──┐
                                              ▼
                              Phase 6 ──▶ Phase 7 ──▶ Phase 8
 
-Phase 5 can start once Phase 1 lands. Integrate it with the quote jobs
+Phase 5 can start once Phase 1 is complete. Integrate it with the quote jobs
 and admin inbox from Phase 3. The milestone requires Phases 4 and 5.
 ```

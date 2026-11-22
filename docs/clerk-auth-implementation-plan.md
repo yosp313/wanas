@@ -1,4 +1,4 @@
-# Clerk auth migration — Implementation Plan
+# Clerk auth migration plan
 
 Move sign-in and session verification to Clerk. Supabase Postgres continues to host the application tables and notification schedule.
 
@@ -6,9 +6,9 @@ Move sign-in and session verification to Clerk. Supabase Postgres continues to h
 2. An existing customer signs in again and can open the same requests, quotes, and bookings. Requests, quote links, and booking history keep their existing IDs.
 3. Invited staff sign in through Clerk. A trusted operator grants and revokes access in Postgres, and revoked staff lose admin access on their next protected request.
 
-Companion references:
+## Related code
 
-- Session and access contracts in `getVerifiedUser()`, `requireCustomer()`, `requireAdmin()`, and `withPageAccess()` (`lib/server/auth/server.ts`, `lib/server/auth/guards.ts`, `lib/server/auth/page-access.ts`).
+- Session and access contracts in `getVerifiedUser()`, `requireCustomer()`, `requireAdmin()`, and `withPageAccess()` (`lib/server/auth/identity.ts`, `lib/server/auth/guards.ts`, `lib/server/auth/page-access.ts`).
 - Stored ownership and audit IDs in `eventRequests`, `bookingChangeRequests`, `bookingRevisions`, and `adminAccess` (`lib/server/db/schema.ts`).
 - Submission and quote email behavior in `submitRequest()` and `acceptQuote()` (`lib/server/requests/submit.ts`, `lib/server/requests/actions.ts`).
 - Customer read and write checks in `getCustomerRequest()` and `requestBookingChange()` (`lib/server/requests/queries.ts`, `lib/server/bookings/actions.ts`).
@@ -18,7 +18,7 @@ Companion references:
 - Draft and submission retry in `Planner()` and `submitRequestAction()` (`components/planner/Planner.tsx`, `app/actions/submit-request.ts`).
 - Scheduled notifications in `POST()` (`app/api/internal/notifications/route.ts`).
 
-**Status:** The Clerk integration and operator commands are implemented. The staging rehearsal imported one verified email account and preserved its original UUID. The inventory found no existing request owners, staff grants, or historical booking actors. The local rollback smoke check read preserved bookings with the previous Supabase Auth build.
+The app uses Clerk and includes commands to manage staff access and import identity mappings. The staging rehearsal imported one verified email account and preserved its original UUID. The inventory found no existing request owners, staff grants, or historical booking actors. The local rollback smoke check read preserved bookings with the previous Supabase Auth build.
 
 Live magic-link delivery, same-tab planner recovery after opening the link in a second tab, and Google sign-in for the imported account still need confirmation. Production setup and cutover are pending at the owner's request.
 
@@ -48,7 +48,7 @@ Guest or returning customer                      Invited staff
 
 | Topic | Decision | Why |
 |---|---|---|
-| Provider | **Clerk for authentication.** Use `@clerk/nextjs` for sessions. Keep Drizzle, Supabase Postgres, Supabase Cron, and Resend on their existing paths. | `getVerifiedUser()` is the provider boundary. `submitRequest()` writes through Drizzle, and the notification `POST()` authenticates with `NOTIFICATION_CRON_SECRET`. |
+| Provider | **Clerk for authentication.** Use `@clerk/nextjs` for sessions. Keep Drizzle, Supabase Postgres, Supabase Cron, and Resend on their existing paths. | `getVerifiedUser()` verifies the Clerk session and resolves the application UUID. `submitRequest()` writes through Drizzle, and the notification `POST()` authenticates with `NOTIFICATION_CRON_SECRET`. |
 | Sign-in methods | **Email magic links and Google OAuth.** Offer both for sign-up and sign-in in the localized shell. | `SignInForm()` already lets new and returning customers start from one page, and `withPageAccess()` sends guests there. |
 | Identity | **Keep application UUIDs.** Resolve a verified Clerk subject through a server-only mapping. Seed imported users with their original UUID and allocate a UUID for each new account. | `eventRequests.customerId` scopes ownership and submission retries. `bookingChangeRequests.customerId`, `bookingRevisions.agreedBy`, and `adminAccess` store UUIDs for ownership, audit, and staff access. |
 | Authorization | **Keep server-side ownership and role checks.** Preserve `requireCustomer()`, `requireAdmin()`, and `withPageAccess()` as the access boundaries. Check the database for staff privileges on each protected operation. | `getCustomerRequest()` and `requestBookingChange()` scope reads and writes by owner. `sendQuote()` checks `requireAdmin()` before its transaction. `withPageAccess()` redirects guests and returns not found for unauthorized staff pages. |
@@ -56,15 +56,7 @@ Guest or returning customer                      Invited staff
 | New request email | **Use a verified Clerk email.** Resolve the primary verified email on the server before a new request can be written. | `submitRequest()` snapshots the account email and queues the initial notification in the same transaction. `acceptQuote()` uses the saved request email. |
 | Rendering | **Keep Clerk session setup in the Next.js proxy and provider.** Compose it with locale handling and keep protected reads at request time. | `proxy()` writes `w_locale`, `LocaleLayout()` owns document language and direction, and `nextConfig` enables Cache Components. |
 
-### Open items (do not block v1)
-
-| Item | Note |
-|---|---|
-| None | |
-
----
-
-## 0. Conventions
+## Conventions
 
 ### Code layout
 
@@ -89,9 +81,9 @@ Before changing app code, read the installed Next.js authentication and proxy gu
 
 ---
 
-## Phase 1 — Session and identity foundations
+## 1. Session and identity foundations
 
-**Goal:** Clerk can verify sessions and resolve them to application UUIDs in staging. No new user-facing behaviour.
+Verify Clerk sessions and resolve them to application UUIDs in staging.
 
 ### 1.1 Approval and CLI setup
 
@@ -109,7 +101,7 @@ Present the setup checklist and wait for an explicit yes. The checklist covers i
 
 Compose `clerkMiddleware()` into the existing `proxy.ts` and preserve the `w_locale` cookie and root locale selection. Cover the localized pages and Server Action POSTs that call Clerk. Keep public availability and the internal notification endpoint on their current access paths. Mount `ClerkProvider` inside the localized layout's body. Keep authenticated content request-scoped and under the necessary Suspense boundaries.
 
-Implement the Clerk-backed identity adapter in `lib/server/auth/` and wire it into the staging Clerk build alongside Phase 2. Use `auth()` to verify the active session and derive its subject. Fetch the Clerk profile server-side when a caller needs a verified email. Preserve the UUID returned as `id` and supply a verified email to `submitRequest()`. Preserve the existing guest and no-email error contracts. Surface provider or database failures as operational errors so they can be distinguished from an absent session.
+Implement the Clerk-backed identity adapter in `lib/server/auth/` and include it in the Phase 2 staging build. Use `auth()` to verify the active session and derive its subject. Fetch the Clerk profile server-side when a caller needs a verified email. Preserve the UUID returned as `id` and supply a verified email to `submitRequest()`. Preserve the existing guest and no-email error contracts. Report provider or database failures separately from missing sessions.
 
 ### 1.3 Stable UUID mapping and import
 
@@ -127,7 +119,7 @@ Add `clerk_identities` with a text primary key `clerk_user_id` and a unique, non
 
 ---
 
-## Phase 2 — Customer sign-in and request access
+## 2. Customer sign-in and request access
 
 **Goal:** Customers sign in from the planner or a protected request link and continue in the same locale.
 
@@ -153,7 +145,7 @@ Run `submitRequest(draft, submissionId)` using the resolved UUID and verified pr
 
 ---
 
-## Phase 3 — Staff sign-in and access management
+## 3. Staff sign-in and access management
 
 **Goal:** Invited staff use the shared Clerk sign-in while Postgres remains the authority for granting and revoking staff access.
 
@@ -173,7 +165,7 @@ Use the mapped UUID in `requireAdmin()` and keep both `is_admin = true` and `rev
 
 ---
 
-## Phase 4 — Verification and rollout
+## 4. Verification and rollout
 
 **Goal:** Rehearse the migration with existing data and release Clerk with verified ownership, staff access, and notification delivery.
 

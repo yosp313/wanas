@@ -25,7 +25,7 @@ export function RequestList({ entries, locale, emptyMessage }: {
   const filters = [
     ["all", ar ? "كل الطلبات" : "All requests"],
     ["review", ar ? "قيد المراجعة" : "In review"],
-    ["proposals", ar ? "العروض الجاهزة" : "Proposals ready"],
+    ["proposals", ar ? "عروض الأسعار الجاهزة" : "Quotes ready"],
     ["confirmed", ar ? "الحجوزات المؤكدة" : "Confirmed bookings"],
     ["past", ar ? "الأرشيف" : "Archive"],
   ] as const;

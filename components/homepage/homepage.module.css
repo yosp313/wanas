@@ -121,12 +121,6 @@
   letter-spacing: .17em;
   text-transform: uppercase;
 }
-.heroLabel {
-  padding: 6px 16px;
-  border-radius: 999px;
-  color: var(--muted);
-  background: var(--tint);
-}
 .intro h1 {
   max-width: 22ch;
   margin: 22px auto 0;

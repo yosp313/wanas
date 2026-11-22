@@ -45,28 +45,17 @@ export default async function SignInPage({
   const home = `/${locale}`;
   const studio = `${home}#studio`;
   const plan = `${home}/plan`;
-  const features = ar
-    ? [
-        ["الإلهام", "لوحات الأفكار وتنسيقات الزهور"],
-        ["تخطيط الحفل", "تفاصيل المساحة والضيافة"],
-        ["طلباتكم", "تابعوا طلباتكم وعروض الأسعار"],
-      ]
-    : [
-        ["Inspiration", "Moodboards & floral palettes"],
-        ["Event planning", "Venue & catering details"],
-        ["Your requests", "Request updates & quotes"],
-      ];
 
   return (
     <div className={styles.page} data-client-sign-in>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <nav aria-label={ar ? "روابط الأتيليه" : "Atelier navigation"}>
+          <nav aria-label={ar ? "التنقل الرئيسي" : "Main navigation"}>
             <Link href={home}>
               <LuArrowLeft size={16} aria-hidden="true" className={styles.arrow} />{" "}
-              {ar ? "العودة إلى الأتيليه" : "Back to Atelier"}
+              {ar ? "العودة إلى الرئيسية" : "Back to home"}
             </Link>
-            <Link className={styles.studioLink} href={studio}>{ar ? "اكتشفوا الاستوديو" : "Explore Studio"}</Link>
+            <Link className={styles.studioLink} href={studio}>{ar ? "طريقة التخطيط" : "How planning works"}</Link>
           </nav>
           <WanasWordmark locale={locale} />
           <nav aria-label={ar ? "روابط الحساب" : "Account navigation"}>
@@ -82,32 +71,21 @@ export default async function SignInPage({
 
       <main className={styles.main}>
         <section className={styles.intro}>
-          <p className={styles.eyebrow}>{ar ? "بوابة عملاء الأتيليه" : "Private Client Suite · Atelier Access"}</p>
-          <h1>
-            {ar ? "مرحبًا بكم في " : "Welcome to Your "}
-            <em>{ar ? "أتيليه وناس" : "Atelier Sanctuary"}</em>
-          </h1>
+          <h1>{dictionary.signIn}</h1>
           <p className={styles.description}>
             {ar
-              ? "استكشفوا لوحات الأفكار وتنسيقات الزهور، وتابعوا تفاصيل حفلكم وعروض الأسعار."
-              : "Explore ceremony moodboards and floral palettes, and sign in to follow your event requests and review your quotes."}
+              ? "سجّلوا الدخول لمتابعة طلباتكم ومراجعة عروض الأسعار."
+              : "See your requests and review your quotes."}
           </p>
           <Suspense fallback={<p className={styles.formCard} role="status">{ar ? "جارٍ تحميل تسجيل الدخول…" : "Loading sign-in…"}</p>}>
             <SignIn locale={locale} searchParams={searchParams} />
           </Suspense>
           <div className={styles.invitation}>
-            <span>{ar ? "هل تخططون لحفل جديد؟" : "Planning your first celebration?"}</span>
+            <span>{ar ? "هل تخططون لحفل جديد؟" : "Planning a new event?"}</span>
             <Link href={plan}>
               {ar ? "ابدؤوا التخطيط" : "Start planning"}{" "}
               <LuArrowRight size={16} aria-hidden="true" className={styles.arrow} />
             </Link>
-          </div>
-          <div className={styles.help}>
-            <div>
-              <strong>{ar ? "تعرفوا على وناس" : "Meet the atelier"}</strong>
-              <p>{ar ? "اكتشفوا كيف نصمم احتفالكم." : "See how we design your celebration."}</p>
-            </div>
-            <Link href={studio}>{ar ? "الاستوديو" : "Explore Studio"}</Link>
           </div>
         </section>
 
@@ -120,20 +98,8 @@ export default async function SignInPage({
             sizes="(max-width: 640px) 94vw, (max-width: 959px) 608px, (min-width: 1280px) 560px, 44vw"
           />
           <figcaption>
-            <span className={styles.badge}>{ar ? "من أعمال الأتيليه" : "From the Atelier"}</span>
-            <span className={styles.edition}>{ar ? "تصميم الاحتفالات" : "Celebrations & Spatial Design"}</span>
+            <span className={styles.edition}>{ar ? "ديكور قاعة أفراح" : "Ballroom decor"}</span>
           </figcaption>
-          <blockquote>
-            {ar ? "«حيث تلتقي العمارة بالاحتفال.»" : "“Where architecture meets celebration in quiet, uncompromising opulence.”"}
-          </blockquote>
-          <dl className={styles.features}>
-            {features.map(([title, description]) => (
-              <div key={title}>
-                <dt>{title}</dt>
-                <dd>{description}</dd>
-              </div>
-            ))}
-          </dl>
         </figure>
       </main>
 
@@ -141,10 +107,10 @@ export default async function SignInPage({
         <div className={styles.footerInner}>
           <div>
             <WanasWordmark locale={locale} />
-            <p>{ar ? "تصميم الاحتفالات والمساحات بتفاصيل خاصة بكم" : "Bespoke celebration design & spatial storytelling"}</p>
+            <p>{ar ? "ديكور المناسبات والضيافة في القاهرة" : "Event decor and catering in Cairo"}</p>
           </div>
           <nav aria-label={ar ? "روابط وناس" : "WANAS links"}>
-            <Link href={studio}>{ar ? "الاستوديو" : "Explore Studio"}</Link>
+            <Link href={studio}>{ar ? "طريقة التخطيط" : "How planning works"}</Link>
             <Link href={plan}>{ar ? "خططوا لحفلكم" : "Plan an event"}</Link>
             <Link href={`${home}/requests`}>{dictionary.myRequests}</Link>
           </nav>

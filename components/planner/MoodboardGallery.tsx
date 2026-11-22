@@ -8,7 +8,7 @@ const directions = [
   {
     id: "sunlit-terracotta",
     image: "terracotta",
-    en: "Sun-baked terracotta & olive",
+    en: "Terracotta and olive",
     profile: { en: "Earthy & sunlit", ar: "ترابي ومشرق" },
     ar: "تيراكوتا دافئة",
     colors: [
@@ -21,7 +21,7 @@ const directions = [
   {
     id: "ivory-garden",
     image: "ivory",
-    en: "Celestial white & alabaster",
+    en: "Ivory and alabaster",
     profile: { en: "Luminous & airy", ar: "مشرق وخفيف" },
     ar: "عاجي وألباستر",
     colors: [
@@ -33,7 +33,7 @@ const directions = [
   {
     id: "midnight-candlelight",
     image: "emerald",
-    en: "Oud & gilded emerald",
+    en: "Emerald and gold",
     profile: { en: "Rich & intimate", ar: "فاخر وحميم" },
     ar: "زمرد على ضوء الشموع",
     colors: [
@@ -57,7 +57,7 @@ const directions = [
   {
     id: "",
     image: "blush",
-    en: "Blush dune & bohemian pampas",
+    en: "Blush and pampas grass",
     profile: { en: "Soft & modern", ar: "ناعم وعصري" },
     ar: "وردي وعشب البامباس",
     colors: [
@@ -95,7 +95,7 @@ export function MoodboardGallery({
   return (
     <section className={styles.moodSection} aria-labelledby="moodboard-title">
       <header className={styles.moodHeading}>
-        <h2 id="moodboard-title" tabIndex={-1}>{ar ? "لوحات وناس المميزة" : "Signature moodboards"}</h2>
+        <h2 id="moodboard-title" tabIndex={-1}>{ar ? "لوحات الإلهام" : "Moodboards"}</h2>
         {!options.length && (
           <p>{ar
             ? "استلهموا من هذه الأمثلة واذكروا ما أعجبكم في الملاحظات."
@@ -189,7 +189,7 @@ export function MoodboardGallery({
                   sizes="(max-width: 800px) 90vw, 50vw"
                 />
                 <figcaption>
-                  <small>{ar ? "تنسيق المكان" : "Spatial styling"}</small>
+                  <small>{ar ? "تنسيق المكان" : "Venue decor"}</small>
                   {terracotta ? ar ? "كوشة بتنسيق بسيط وغير متماثل" : "Asymmetric ceremony backdrop" : preview[locale]}
                 </figcaption>
               </figure>
@@ -197,7 +197,7 @@ export function MoodboardGallery({
                 <div className={styles.previewDetails}>
                   <div>
                     <Image src="/atelier/centerpiece.webp" alt="" width={64} height={56} />
-                    <span><small>{ar ? "تنسيق الطاولة" : "Tablescape"}</small>{ar ? "زهور طاولة منخفضة" : "Low floral centerpieces"}</span>
+                    <span><small>{ar ? "تنسيق الطاولة" : "Table decor"}</small>{ar ? "زهور طاولة منخفضة" : "Low floral centerpieces"}</span>
                   </div>
                   <div>
                     <Image src="/atelier/lighting.webp" alt="" width={64} height={56} />

@@ -103,10 +103,10 @@ accounts("delivers a quote and confirms and reschedules the booking through the 
     await customer.getByRole("button", { name: "Garden", exact: true }).click();
     await customer.getByRole("button", { name: "Under EGP 50,000" }).click();
     await customer.getByRole("button", { name: "Continue" }).click();
-    await customer.getByRole("button", { name: "Curate it for me" }).click();
-    await expect(customer.getByRole("region", { name: "Signature moodboards" })).toBeHidden();
+    await customer.getByRole("button", { name: "Let WANAS choose the decor" }).click();
+    await expect(customer.getByRole("region", { name: "Moodboards", exact: true, includeHidden: true })).toBeHidden();
     await expect(customer.getByRole("button", { name: "Continue", exact: true })).toBeHidden();
-    await customer.getByRole("button", { name: "Confirm curation & proceed" }).click();
+    await customer.getByRole("button", { name: "Continue to catering" }).click();
     await customer.getByLabel("Include catering").check();
     await customer.getByRole("button", { name: "Buffet", exact: true }).click();
     await customer.getByRole("button", { name: "Continue" }).click();
@@ -150,7 +150,7 @@ accounts("delivers a quote and confirms and reschedules the booking through the 
     await admin.goto(origin + "/en/admin/inbox");
     await admin.waitForURL("**/en/sign-in?**");
     await signIn(admin, adminAccount.email);
-    await admin.getByText("This page could not be found.").waitFor();
+    await admin.getByRole("heading", { name: "Page not found" }).waitFor();
     await setAccess("grant", adminAccount.id, operatorId);
     const [grant] = await appDb`
       select app_user_id, granted_by
@@ -164,7 +164,7 @@ accounts("delivers a quote and confirms and reschedules the booking through the 
     await inboxSearch.press("Enter");
     await expect(admin.getByRole("link", { name: customerName, exact: true })).toHaveAttribute("aria-current", "true");
     await expect(admin.getByRole("article", { name: customerName })).toContainText(customerEmail);
-    await admin.getByRole("link", { name: "Review & send proposal" }).click();
+    await admin.getByRole("link", { name: "Review and send quote" }).click();
     await admin.getByLabel("Services").fill("Garden backdrop and table styling");
     await admin.getByLabel("Total EGP").fill("35000");
     await admin.getByLabel("Scope explanation").fill("Seasonal florals included");
@@ -176,7 +176,7 @@ accounts("delivers a quote and confirms and reschedules the booking through the 
     const { dates } = await availability.json() as { dates: { date: string; status: string }[] };
     assert.deepEqual(dates.find(({ date }) => date === eventDate), { date: eventDate, status: "held" });
     await customer.goto(origin + "/en/admin/inbox");
-    await customer.getByText("This page could not be found.").waitFor();
+    await customer.getByRole("heading", { name: "Page not found" }).waitFor();
 
     assert.equal((await http.post("/api/internal/notifications")).status(), 401);
     await Promise.all([runWorker(http, workerSecret), runWorker(http, workerSecret)]);
@@ -187,8 +187,8 @@ accounts("delivers a quote and confirms and reschedules the booking through the 
     assert.ok(quoteUrl);
     assert.equal(quoteUrl, origin + "/en/requests/" + requestId);
     await customer.goto(origin + "/en/requests");
-    await customer.getByRole("button", { name: /^Proposals ready / }).click();
-    await expect(customer.getByRole("link", { name: "Review proposal" })).toHaveAttribute("href", `/en/requests/${requestId}#quotes`);
+    await customer.getByRole("button", { name: /^Quotes ready / }).click();
+    await expect(customer.getByRole("link", { name: "Review quote" })).toHaveAttribute("href", `/en/requests/${requestId}#quotes`);
 
     const emailSession = await browser.newPage();
     await emailSession.goto(quoteUrl);
@@ -202,7 +202,9 @@ accounts("delivers a quote and confirms and reschedules the booking through the 
     await admin.getByRole("link", { name: "Pending requests", exact: true }).click();
     await expect(grid.getByRole("link", { name: new RegExp(customerName) })).toHaveCount(0);
     await admin.getByRole("link", { name: "Confirmed bookings", exact: true }).click();
+    await expect(admin).toHaveURL(/[?&]filter=confirmed(?:&|$)/);
     await admin.getByRole("link", { name: "Agenda", exact: true }).click();
+    await expect(admin).toHaveURL(/[?&]view=agenda(?:&|$)/);
     await admin.getByRole("link", { name: "Hide summary" }).click();
     await expect(admin.locator("main aside")).toHaveCount(0);
     await expect(admin.getByRole("link", { name: new RegExp(customerName) })).toContainText(eventDate);
@@ -249,10 +251,10 @@ accounts("delivers a quote and confirms and reschedules the booking through the 
     assert.ok(outcomes.some((message) => message.to.includes(customerEmail) && message.subject === "Your WANAS booking was rescheduled"));
 
     await admin.goto(quoteUrl);
-    await admin.getByText("This page could not be found.").waitFor();
+    await admin.getByRole("heading", { name: "Page not found" }).waitFor();
     await setAccess("revoke", adminAccount.id, operatorId);
     await admin.goto(origin + "/en/admin/inbox");
-    await admin.getByText("This page could not be found.").waitFor();
+    await admin.getByRole("heading", { name: "Page not found" }).waitFor();
     await setAccess("grant", adminAccount.id, operatorId);
     await admin.goto(origin + "/en/admin/requests/" + requestId);
     await admin.getByRole("heading", { name: customerName }).waitFor();
@@ -285,7 +287,8 @@ accounts("submits an Arabic custom-decor request and preserves the draft when sw
 
   await page.getByRole("button", { name: "التالي", exact: true }).click();
   await page.getByRole("button", { name: "أصمّم الديكور بنفسي" }).click();
-  await page.getByRole("button", { name: "تيراكوتا دافئة" }).click();
+  await page.getByRole("region", { name: "لوحات الإلهام", exact: true })
+    .getByRole("button", { name: "تيراكوتا دافئة", exact: true }).click();
   await page.getByRole("button", { name: "التالي", exact: true }).click();
   await page.getByRole("button", { name: "التالي", exact: true }).click();
   await page.getByLabel("الاسم", { exact: true }).fill(customerName);

@@ -27,7 +27,7 @@ export function AdminNavigation({ locale }: { locale: Locale }) {
       {workspace ? (
         <div className={styles.brand}>
           <WanasWordmark locale={locale} />
-          <small>{ar ? "إدارة الأتيليه" : "Atelier admin"}</small>
+          <small>{ar ? "إدارة وناس" : "WANAS admin"}</small>
         </div>
       ) : <span>{ar ? "إدارة وناس" : "Wanas Studio"}</span>}
       {sections.map(({ path, ...label }) => {

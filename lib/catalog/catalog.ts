@@ -10,12 +10,12 @@ export type CatalogOption = {
 
 export const eventTypes: CatalogOption[] = [
   ["wedding", "Wedding", "زفاف"],
-  ["katb-el-ketab", "Katb El-Ketab", "كتب كتاب"],
+  ["katb-el-ketab", "Katb al-kitab", "كتب كتاب"],
   ["engagement", "Engagement", "خطوبة"],
   ["birthday", "Birthday", "عيد ميلاد"],
   ["anniversary", "Anniversary", "ذكرى سنوية"],
-  ["private-dinner", "Private Dinner", "عشاء خاص"],
-  ["corporate", "Corporate Event", "فعالية شركات"],
+  ["private-dinner", "Private dinner", "عشاء خاص"],
+  ["corporate", "Corporate event", "فعالية شركات"],
   ["other", "Other", "أخرى"],
 ].map(([id, en, ar]) => ({ id, labels: { en, ar } }));
 
@@ -36,7 +36,7 @@ export const budgetRanges: CatalogOption[] = [
 ].map(([id, en, ar]) => ({ id, labels: { en, ar } }));
 
 export const decorModes: CatalogOption[] = [
-  ["curate", "Curate it for me", "نسّقوا الحفل لي"],
+  ["curate", "Let WANAS choose the decor", "نسّقوا الحفل لي"],
   ["customize", "Customize my decor", "أصمّم الديكور بنفسي"],
 ].map(([id, en, ar]) => ({ id, labels: { en, ar } }));
 

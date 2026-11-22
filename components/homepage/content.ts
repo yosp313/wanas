@@ -11,19 +11,19 @@ export const highlights = [
   {
     image: "banquet",
     kicker: ["Ceremonial dining", "ضيافة المراسم"],
-    title: ["Plated Banquets & Cloche Elegance", "ولائم بتقديم فردي"],
+    title: ["Plated banquets", "ولائم بتقديم فردي"],
     description: ["Fine china, crystal glassware, and silver cloches.", "أطباق خزفية وكؤوس كريستال وأغطية تقديم فضية."],
   },
   {
     image: "kosha",
-    kicker: ["Signature scenography", "تصاميم وناس الخاصة"],
-    title: ["Signature Kosha & Ceremony Staging", "الكوشة وتنسيق المراسم"],
+    kicker: ["Ceremony decor", "ديكور المراسم"],
+    title: ["Kosha and ceremony decor", "الكوشة وتنسيق المراسم"],
     description: ["Stone arches, draped fabric, and floral canopies frame the ceremony.", "أقواس حجرية وأقمشة منسدلة ومظلّات من الزهور تؤطّر المراسم."],
   },
   {
     image: "feast",
-    kicker: ["Artisanal hospitality", "ضيافة متقنة"],
-    title: ["Gourmet Dining & Live Stations", "ولائم ومحطات طهي حيّة"],
+    kicker: ["Catering", "الضيافة"],
+    title: ["Dining and live cooking", "ولائم ومحطات طهي حيّة"],
     description: ["Copper serving dishes, seasonal mezze, and live cooking.", "أوانٍ نحاسية ومقبلات موسمية وطهي أمام الضيوف."],
   },
 ] satisfies Card[];
@@ -35,7 +35,7 @@ export const ceremonies = [
     eventType: "wedding",
     label: ["Wedding & reception", "الزفاف والاستقبال"],
     title: ["Wedding and reception", "الزفاف وحفل الاستقبال"],
-    description: ["A statement kosha, a floral aisle, and a reception planned around your guests.", "كوشة مميزة وممر مزيّن بالزهور واستقبال مُنسّق لضيوفكم."],
+    description: ["Decor for the kosha, the aisle, and the reception.", "تنسيق الكوشة والممر وحفل الاستقبال."],
   },
   {
     image: "katb",
@@ -49,9 +49,9 @@ export const ceremonies = [
     image: "anniversary",
     kicker: ["Garden celebrations", "احتفالات في الحديقة"],
     eventType: "anniversary",
-    label: ["Anniversary soirée", "احتفال بالذكرى"],
+    label: ["Anniversary", "احتفال بالذكرى"],
     title: ["Anniversary dinner", "الذكرى والسهرة"],
-    description: ["Sculptural centerpieces, garden lighting, and an evening around the table.", "قطع مركزية لافتة وإضاءة للحديقة وسهرة حول المائدة."],
+    description: ["Centerpieces and outdoor lighting for a garden dinner.", "زينة للطاولات وإضاءة لعشاء في الحديقة."],
   },
   {
     image: "gala",
@@ -59,7 +59,7 @@ export const ceremonies = [
     eventType: "private-dinner",
     label: ["Private dinner", "عشاء خاص"],
     title: ["Private dinner or gala", "العشاء الخاص والحفلات الرسمية"],
-    description: ["Candlelit tables, layered linens, and a setting designed for dinner.", "موائد على ضوء الشموع ومفارش متناسقة وأجواء مصمّمة للعشاء."],
+    description: ["Candlelit tables with layered linens.", "موائد على ضوء الشموع ومفارش متناسقة."],
   },
 ] satisfies (Card & { label: Bilingual; eventType: string })[];
 
@@ -80,11 +80,11 @@ export const venues = [
     image: "pavilion",
     kicker: ["Dune & shore", "الصحراء والساحل"],
     title: ["Desert or coastal pavilion", "خيمة في الصحراء أو على الساحل"],
-    description: ["Flowing fabric canopies and warm pools of light outdoors.", "مظلّات قماشية منسدلة وإضاءة دافئة في الهواء الطلق."],
+    description: ["Fabric canopies and warm outdoor lighting.", "مظلّات قماشية منسدلة وإضاءة دافئة في الهواء الطلق."],
   },
   {
     image: "ballroom",
-    kicker: ["Grand staging", "تنسيق القاعات"],
+    kicker: ["Indoor venues", "قاعات داخلية"],
     title: ["Hotel ballroom", "قاعة فندق"],
     description: ["Ceiling installations, layered drapery, and a custom stage.", "تجهيزات للسقف وأقمشة منسدلة ومسرح مصمّم للمناسبة."],
   },
@@ -96,7 +96,7 @@ export const dining = [
     kicker: ["Welcome reception", "ضيافة الاستقبال"],
     title: ["Canapés and mocktails", "مقبلات ومشروبات الاستقبال"],
     description: ["Small bites served on trays as guests gather, with botanical mocktails.", "لقيمات تُقدّم على صوانٍ أثناء استقبال الضيوف مع مشروبات عشبية."],
-    tags: [["Hors d’œuvres", "مقبلات"], ["Standing reception", "استقبال وقوفًا"]],
+    tags: [["Appetizers", "مقبلات"], ["Standing reception", "استقبال وقوفًا"]],
   },
   {
     image: "buffet",
@@ -128,7 +128,7 @@ export const studioSteps = [
   {
     title: ["Catering", "الطعام والضيافة"],
     example: ["Optional catering", "ضيافة اختيارية"],
-    description: ["Add food service when you want catering for your celebration.", "أضيفوا خدمة الطعام إذا رغبتم في ضيافة لمناسبتكم."],
+    description: ["Choose a serving style or ask WANAS to recommend one.", "اختاروا طريقة التقديم أو اطلبوا من وناس اقتراح الأنسب."],
   },
   {
     title: ["Review and request a quote", "مراجعة وطلب عرض سعر"],
@@ -139,15 +139,15 @@ export const studioSteps = [
 
 export const principles = [
   {
-    title: ["Spatial Precision", "دقّة توزيع المساحة"],
-    description: ["We plan focal points, seating, and circulation together so guests can see the ceremony and move through the room comfortably.", "نخطّط لنقاط التركيز والمقاعد ومسارات الحركة كي يشاهد الضيوف المراسم ويتنقّلوا بسهولة."],
+    title: ["Seating and layout", "توزيع المقاعد والمساحة"],
+    description: ["We arrange seats and aisles so guests can see the ceremony and move around easily.", "نرتّب المقاعد والممرات ليتمكّن الضيوف من رؤية المراسم والتنقّل بسهولة."],
   },
   {
-    title: ["Fabrics & Flowers", "خامات ملموسة"],
-    description: ["Linen, terracotta, and seasonal flowers give each setting its own texture and palette.", "تمنح أقمشة الكتّان والتيراكوتا والزهور الموسمية كل مساحة ملمسها وألوانها."],
+    title: ["Fabrics and flowers", "الأقمشة والزهور"],
+    description: ["We choose fabrics, table decor, and seasonal flowers to match your palette.", "نختار الأقمشة وزينة الطاولات والزهور الموسمية بما يناسب ألوان مناسبتكم."],
   },
   {
-    title: ["Transparent Pricing", "عروض أسعار واضحة"],
-    description: ["Review your event details with WANAS and receive a quote before deciding whether to book.", "راجعوا تفاصيل المناسبة مع وناس واستلموا عرض السعر قبل اتخاذ قرار الحجز."],
+    title: ["Quotes before booking", "عرض السعر قبل الحجز"],
+    description: ["Your quote lists the included services and the total price in Egyptian pounds.", "يوضّح العرض الخدمات المشمولة والسعر الإجمالي بالجنيه المصري."],
   },
 ] satisfies { title: Bilingual; description: Bilingual }[];

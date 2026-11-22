@@ -131,8 +131,8 @@ async function BookingChanges({ locale, searchParams }: { locale: Locale; search
 
       <div className={styles.content}>
         <div className={styles.title}>
-          <h1>{ar ? "تعديلات الحجوزات" : "Booking Changes"}</h1>
-          <p>{ar ? "راجع طلبات العملاء لتعديل الحجوزات، وحدّث المواعيد والنطاق والتكاليف المتفق عليها." : "Review client requests and update booking dates, scope, and agreed costs."}</p>
+          <h1>{ar ? "تعديلات الحجوزات" : "Booking changes"}</h1>
+          <p>{ar ? "راجع طلبات تعديل الحجوزات وسجّل ما اتفق عليه فريق وناس مع العميل." : "Review change requests and record what WANAS and the customer agreed to."}</p>
         </div>
 
         <dl className={styles.stats}>

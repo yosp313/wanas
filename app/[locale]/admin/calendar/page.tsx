@@ -18,7 +18,7 @@ const copy = {
     all: "All events", confirmed: "Confirmed bookings", pending: "Pending requests",
     empty: "No events for this period.", search: "Search clients or venues…", searchButton: "Search",
     inbox: "Open requests inbox", hideSummary: "Hide summary", showSummary: "Show summary",
-    schedule: "Atelier schedule", upcoming: "Upcoming this week", weekSummary: "Week at a glance",
+    schedule: "Booking calendar", upcoming: "Upcoming this week", weekSummary: "Week at a glance",
     count: (count: number) => `${count} ${count === 1 ? "event" : "events"}`,
   },
   ar: {

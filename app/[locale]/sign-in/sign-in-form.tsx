@@ -125,7 +125,7 @@ export default function SignInForm({
         )}
       </form>
       <p className={styles.formNote}>
-        {ar ? "سنرسل رابطًا للاستخدام مرة واحدة. لا حاجة إلى كلمة مرور." : "We’ll email you a single-use link. No password needed."}
+        {ar ? "سنرسل رابطًا للاستخدام مرة واحدة. لا حاجة إلى كلمة مرور." : "We'll email you a single-use link. No password needed."}
       </p>
       <div id="clerk-captcha" />
     </div>

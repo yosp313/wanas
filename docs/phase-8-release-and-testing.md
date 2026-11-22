@@ -1,8 +1,6 @@
 # Phase 8 release and testing runbook
 
-This runbook describes the checks required before the WANAS v1 release. It is
-deliberately independent of a hosting provider, a production Supabase project,
-and an approved launch catalog. Do not put real credentials, a production URL,
+Use these checks before releasing WANAS v1. Do not put real credentials, a production URL,
 or customer data in the repository.
 
 ## Test environments
@@ -22,7 +20,7 @@ production command is being run.
 
 Browser tests use Clerk development credentials, disposable test users, and a local notification capture. Staging uses a controlled inbox to verify real email delivery and an approved Google account to verify OAuth.
 
-## Fixture-independent test harness
+## Test data and cleanup
 
 Every test creates its own namespace and data. Do not depend on rows left by a
 previous test or on a global seed with fixed primary keys.
@@ -35,16 +33,15 @@ previous test or on a global seed with fixed primary keys.
 4. Create catalog rows through the same catalog loader used by the app. The
    test catalog must use stable option IDs, both locale labels, and no real
    image URLs.
-5. Pass a `Clock` or database-clock seam into date-sensitive services. Tests
-   set an instant and the application converts it with `Africa/Cairo`.
+5. Give tests control of the clock for date-sensitive operations. The
+   application converts the test instant with `Africa/Cairo`.
 6. Roll back the transaction or delete only the run-owned rows in teardown.
    Teardown must run after a failed test and must report failures.
 7. Capture outbox rows and worker attempts by job ID. Assertions must not rely
    on email ordering or provider-generated IDs.
 
-The harness should provide builders for a customer, an invited admin, a
-request, a quote, a reservation, and a booking. Builders should return IDs and
-the submitted revision, rather than exposing table internals to every test.
+Use helpers to create customers, invited admins, requests, quotes,
+reservations, and bookings. Return the IDs and submitted revision that tests need.
 The concurrency helpers must use separate connections and a barrier so that
 both transactions reach the intended lock or unique constraint before either
 continues.
@@ -127,9 +124,9 @@ The primary scenario is:
 
 Separate scenarios cover decline, quote replacement, hold expiry, cancellation,
 rescheduling, competing requests, cross-account access, revoked admin access,
-and the public month availability response. Assertions should use accessible
-roles and labels, not generated CSS class names. Capture a trace and screenshot
-on failure. Clean up by run ID even when a test fails.
+and the public month availability response. Find elements by their accessible
+roles and labels. Capture a trace and screenshot on failure. Clean up by run ID
+even when a test fails.
 
 ## Run the browser flow locally
 
@@ -151,8 +148,8 @@ For GitHub Actions, set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` as a repository vari
    `npm run test:e2e -- --workers=1`. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`
    if you want to use an installed Chromium executable.
 
-The browser suite submits an English curated request and an Arabic custom
-request. It signs in with Clerk, opens a quote from the local delivery
+The browser suite lets WANAS choose the decor in English and selects decor
+options in Arabic. It signs in with Clerk, opens a quote from the local delivery
 capture, confirms the booking, checks the calendar, reschedules the booking,
 and verifies admin revocation. Hosted staging uses the live Resend integration
 with a test sender. The loopback delivery transport is unavailable in production.
@@ -193,7 +190,7 @@ Before release, confirm the owned domain, production host, Clerk and Supabase in
 4. Deploy the Clerk build with production keys. Grant staff access with `npm run admin:access -- grant <clerk-user-id> <operator-uuid>` and verify the existing Supabase Cron call using its Vault secret.
 5. Verify localized redirects, imported owner and staff access, and quote deep links before reopening writes and registrations. Check the worker rejects an unauthorized call with 401.
 
-Before reopening writes, roll back a failed cutover by redeploying the previous build with its Supabase Auth environment. Leave the identity migration in place and verify the previous build reads the same business data. After reopening writes, repair forward unless the rollback preserves Clerk-only accounts and their data. Record the staging rollback rehearsal before releasing.
+Before reopening writes, roll back a failed cutover by redeploying the previous build with its Supabase Auth environment. Leave the identity migration in place and verify the previous build reads the same business data. After reopening writes, fix issues in the current build unless the rollback preserves Clerk-only accounts and their data. Record the staging rollback rehearsal before releasing.
 
 ## Evidence and exit criteria
 

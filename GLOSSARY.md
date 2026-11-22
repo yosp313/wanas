@@ -17,13 +17,13 @@ The Cairo location the customer provides for the event, identified by its name, 
 The customer's total spending range in EGP for decor and any requested catering.
 
 **Planning mode**:
-The customer's choice between asking the decor team to curate the event decor and choosing decor options themselves.
+The customer's choice to let WANAS select the decor or to choose decor options themselves.
 
-**Curate it for me**:
-The planning mode in which the customer delegates decor choices to WANAS and may share preferences or notes.
+**Let WANAS choose the decor**:
+WANAS chooses the decor. The customer can share preferences or notes.
 
 **Customize my decor**:
-The planning mode in which the customer chooses a moodboard, palette, and decor elements. The customer may delegate individual choices to WANAS.
+The customer chooses a moodboard, palette, and decor elements. They can leave individual choices to WANAS.
 
 **Catering**:
 An optional food and dining service the customer can request alongside decor in either planning mode.

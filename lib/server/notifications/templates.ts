@@ -2,16 +2,16 @@ import type { Mail, NotificationJob, NotificationLocale } from "./types";
 
 const copy = {
   en: {
-    request_submitted: ["We received your WANAS request", "Your event request is with the WANAS team."],
-    quote_ready: ["Your WANAS quote is ready", "Your quote is ready to review."],
+    request_submitted: ["We received your WANAS request", "We'll email you after we review your request."],
+    quote_ready: ["Your WANAS quote is ready", "Open your request to see the services, price, and date."],
     request_declined: ["An update from WANAS", "WANAS could not take on this request."],
     booking_confirmed: ["Your WANAS booking is confirmed", "Your booking is confirmed."],
     booking_cancelled: ["Your WANAS booking was cancelled", "Your booking has been cancelled."],
     booking_rescheduled: ["Your WANAS booking was rescheduled", "Your booking date has changed."],
   },
   ar: {
-    request_submitted: ["استلمنا طلبك من وناس", "وصل طلب تنظيم مناسبتك إلى فريق وناس."],
-    quote_ready: ["عرض وناس جاهز", "يمكنك الآن مراجعة عرض السعر."],
+    request_submitted: ["استلم فريق وناس طلبك", "سنرسل إليك رسالة بعد مراجعة طلبك."],
+    quote_ready: ["عرض وناس جاهز", "افتح طلبك للاطّلاع على الخدمات والسعر والموعد."],
     request_declined: ["تحديث من وناس", "يتعذر على وناس تنفيذ هذا الطلب."],
     booking_confirmed: ["تم تأكيد حجزك مع وناس", "تم تأكيد حجز مناسبتك."],
     booking_cancelled: ["تم إلغاء حجزك مع وناس", "تم إلغاء حجزك."],

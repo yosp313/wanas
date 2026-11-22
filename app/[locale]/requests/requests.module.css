@@ -66,7 +66,6 @@
 .portal a:hover { color: var(--portal-accent); }
 .account { flex-wrap: nowrap; gap: 14px; }
 .account a { font-size: 12px; }
-.client,
 .status {
   display: inline-flex;
   align-items: center;
@@ -80,10 +79,7 @@
   text-transform: uppercase;
 }
 
-.client { white-space: nowrap; }
-.client::before,
-.status::before,
-.eyebrow::before {
+.status::before {
   content: "";
   flex: 0 0 6px;
   height: 6px;
@@ -91,7 +87,6 @@
   background: currentColor;
 }
 
-.client::before { color: var(--portal-accent); }
 .hero {
   background: #fff4ef;
   padding-block: clamp(32px, 4.2vw, 50px);
@@ -119,18 +114,6 @@
 }
 
 .hero h1 + p { max-width: 64ch; color: var(--portal-text); }
-.eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--portal-muted);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-}
-
-.eyebrow::before { color: var(--portal-accent); }
 .primary,
 .secondary {
   display: inline-flex;
@@ -371,7 +354,6 @@
 .footer nav { font-size: 12px; text-transform: uppercase; }
 
 @media (max-width: 1040px) {
-  .client { display: none; }
   .proposal .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .support { grid-template-columns: 1fr; }
 }

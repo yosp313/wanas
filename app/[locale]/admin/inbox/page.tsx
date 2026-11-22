@@ -117,7 +117,7 @@ async function Inbox({ locale, searchParams }: { locale: Locale; searchParams: I
   const failuresLabel = ar ? "رسائل البريد التي تعذر إرسالها" : "Notification failures";
   const stats = [
     { label: ar ? "طلبات جديدة" : "New inquiries", value: active.filter((request) => request.status === "submitted").length, icon: "mail" },
-    { label: ar ? "عروض مرسلة" : "Pending proposals", value: active.filter((request) => request.status === "quoted").length, icon: "quote" },
+    { label: ar ? "عروض مرسلة" : "Quotes sent", value: active.filter((request) => request.status === "quoted").length, icon: "quote" },
     { label: ar ? "تعارضات المواعيد" : "Date conflicts", value: active.filter((request) => request.dateUnavailable).length, icon: "alert" },
     { label: ar ? "حجوزات هذا الشهر" : "Confirmed this month", value: confirmed, icon: "check" },
   ] as const;
@@ -138,8 +138,8 @@ async function Inbox({ locale, searchParams }: { locale: Locale; searchParams: I
 
       <div className={styles.content}>
         <div className={styles.title}>
-          <h1>{ar ? "صندوق الطلبات" : "Requests Inbox"}</h1>
-          <p>{ar ? "راجع الطلبات الواردة ولوحات الإلهام وأرسل عروض الأسعار." : "Review incoming inquiries and moodboards, and send proposals."}</p>
+          <h1>{ar ? "صندوق الطلبات" : "Request inbox"}</h1>
+          <p>{ar ? "راجع طلبات المناسبات وأرسل عروض الأسعار." : "Review event requests and send quotes."}</p>
         </div>
         <dl className={styles.stats}>
           {stats.map(({ label, value, icon }) => (

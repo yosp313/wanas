@@ -34,12 +34,11 @@ export default async function RequestsPage({ params }: { params: Promise<{ local
           <WanasWordmark locale={locale} />
           <nav aria-label={t("Main navigation", "التنقل الرئيسي")}>
             <Link href={`${home}#ceremonies`}>{t("Ceremonies", "المراسم")}</Link>
-            <Link href={planner}>{t("Planning studio", "استوديو التخطيط")}</Link>
+            <Link href={planner}>{t("Event planner", "مخطط المناسبات")}</Link>
             <Link href={path} aria-current="page">{dictionary.myRequests}</Link>
-            <a href="#concierge">{t("Concierge support", "دعم وناس")}</a>
+            <a href="#concierge">{t("Help", "المساعدة")}</a>
           </nav>
           <div className={styles.account}>
-            <span className={styles.client}>{t("Private client", "عميل خاص")}</span>
             <Suspense><LocaleSwitcher locale={locale} label={dictionary.switchLanguage} /></Suspense>
             <UserButton />
           </div>
@@ -50,13 +49,12 @@ export default async function RequestsPage({ params }: { params: Promise<{ local
         <section className={styles.hero}>
           <div className={`${styles.wrap} ${styles.heroInner}`}>
             <div>
-              <p className={styles.eyebrow}>{t("Private client portal", "بوابة العملاء")}</p>
-              <h1>{t("My Celebration Requests", "طلبات مناسباتي")}</h1>
-              <p>{t("Track your event plans, review proposals, and manage your bookings with WANAS.",
-                "تابعوا خطط مناسباتكم وراجعوا عروض الأسعار وأديروا حجوزاتكم مع وناس.")}</p>
+              <h1>{dictionary.myRequests}</h1>
+              <p>{t("Check your request status, review quotes, and request booking changes.",
+                "تابعوا حالة طلباتكم وراجعوا عروض الأسعار واطلبوا تعديل الحجوزات.")}</p>
             </div>
             <Link className={styles.primary} href={planner} data-press>
-              <LuPlus size={18} aria-hidden="true" />{t("New celebration inquiry", "طلب مناسبة جديد")}
+              <LuPlus size={18} aria-hidden="true" />{t("New request", "طلب جديد")}
             </Link>
           </div>
         </section>
@@ -65,14 +63,13 @@ export default async function RequestsPage({ params }: { params: Promise<{ local
           <RequestList entries={entries} locale={locale} emptyMessage={dictionary.noRequests} />
           <section className={styles.support} id="concierge">
             <div>
-              <p className={styles.eyebrow}>{t("WANAS dedicated support", "دعم وناس")}</p>
-              <h2>{t("Need help with your celebration?", "هل تحتاجون إلى مساعدة بشأن مناسبتكم؟")}</h2>
-              <p>{t("Keep your request reference handy when you get in touch about your plans.",
-                "احتفظوا بالرقم المرجعي لطلبكم عند التواصل بشأن خطط مناسبتكم.")}</p>
+              <h2>{t("Help with a request", "المساعدة بشأن طلب")}</h2>
+              <p>{t("Include your request reference when you contact WANAS.",
+                "اذكروا الرقم المرجعي للطلب عند التواصل مع وناس.")}</p>
             </div>
             <dl>
               <div>
-                <dt>{t("Request correspondence", "مراسلات الطلب")}</dt>
+                <dt>{t("Request emails", "رسائل الطلب")}</dt>
                 <dd>{t("See your WANAS emails", "راجعوا رسائل وناس")}</dd>
               </div>
               <div>
@@ -80,7 +77,7 @@ export default async function RequestsPage({ params }: { params: Promise<{ local
                 <dd><a href="#request-list">{t("Open a booking", "افتحوا أحد الحجوزات")}</a></dd>
               </div>
               <div>
-                <dt>{t("Design studio", "استوديو التصميم")}</dt>
+                <dt>{t("Location", "الموقع")}</dt>
                 <dd>{t("Cairo, Egypt", "القاهرة، مصر")}</dd>
               </div>
             </dl>
@@ -92,12 +89,12 @@ export default async function RequestsPage({ params }: { params: Promise<{ local
         <div className={`${styles.wrap} ${styles.footerInner}`}>
           <div>
             <WanasWordmark locale={locale} />
-            <p>{t("Celebration design in Cairo", "تصميم وتنسيق المناسبات في القاهرة")}</p>
+            <p>{t("Event decor in Cairo", "تصميم وتنسيق المناسبات في القاهرة")}</p>
           </div>
           <nav aria-label={t("WANAS links", "روابط وناس")}>
             <Link href={`${home}#ceremonies`}>{t("Ceremonies", "المراسم")}</Link>
-            <Link href={planner}>{t("Planning studio", "استوديو التخطيط")}</Link>
-            <a href="#concierge">{t("Concierge support", "دعم وناس")}</a>
+            <Link href={planner}>{t("Event planner", "مخطط المناسبات")}</Link>
+            <a href="#concierge">{t("Help", "المساعدة")}</a>
           </nav>
           <p>© WANAS Atelier</p>
         </div>

@@ -1,6 +1,6 @@
 const messages = {
-  title: "WANAS — Event decor",
-  description: "Plan a Cairo event with WANAS.",
+  title: "WANAS event decor",
+  description: "Plan event decor and optional catering in Cairo. Request a quote from WANAS.",
   plan: "Plan your event",
   switchLanguage: "العربية",
   signIn: "Sign in",
