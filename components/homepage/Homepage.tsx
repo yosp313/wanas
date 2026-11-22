@@ -1,9 +1,6 @@
-import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
 import { LuArrowRight, LuArrowUpRight } from "react-icons/lu";
-import LocaleSwitcher from "@/app/[locale]/locale-switcher";
 import { WanasWordmark } from "@/components/WanasWordmark";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
@@ -28,21 +25,6 @@ export async function Homepage({ locale }: { locale: Locale }) {
 
   return (
     <div className={styles.site}>
-      <header className={styles.header}>
-        <div className={`${styles.wrap} ${styles.headerInner}`}>
-          <WanasWordmark locale={locale} />
-          <nav className={styles.headerActions} aria-label={t(["Main navigation", "التنقل الرئيسي"])}>
-            <a href="#ceremonies">{t(["Portfolio", "أعمالنا"])}</a>
-            <Link href={requests}>{dictionary.myRequests}</Link>
-            <Link className={styles.primary} href={planner} data-press>{t(["Plan your event", "خطّطوا لمناسبتكم"])}</Link>
-            <Suspense>
-              <LocaleSwitcher locale={locale} label={dictionary.switchLanguage} />
-            </Suspense>
-            <UserButton />
-          </nav>
-        </div>
-      </header>
-
       <main>
         <section className={`${styles.hero} ${styles.wrap}`}>
           <div className={styles.intro}>

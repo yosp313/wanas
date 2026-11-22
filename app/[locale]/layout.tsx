@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
-import { ClerkProvider, UserButton } from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import Link from "next/link";
 import { Toaster } from "sonner";
 import { notFound } from "next/navigation";
 import { WanasWordmark } from "@/components/WanasWordmark";
 import { isLocale, locales } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
-import LocaleSwitcher from "./locale-switcher";
+import { SiteNavbar } from "./site-navbar";
 import "../globals.css";
 
 type Params = { params: Promise<{ locale: string }> };
@@ -34,19 +34,9 @@ export default async function LocaleLayout({
     <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
       <body>
         <ClerkProvider signInUrl={`/${locale}/sign-in`} signUpUrl={`/${locale}/sign-in`} afterSignOutUrl={`/${locale}`}>
-          <header className="locale-header">
-            <WanasWordmark locale={locale} />
-            <nav aria-label={locale === "ar" ? "التنقل الرئيسي" : "Main navigation"}>
-              <Link href={`/${locale}/plan`}>
-                {locale === "ar" ? "خططوا لحفلكم" : "Plan an event"}
-              </Link>
-              <Link href={`/${locale}/requests`}>{dictionary.myRequests}</Link>
-              <Suspense>
-                <LocaleSwitcher locale={locale} label={dictionary.switchLanguage} />
-              </Suspense>
-              <UserButton />
-            </nav>
-          </header>
+          <Suspense>
+            <SiteNavbar locale={locale} myRequests={dictionary.myRequests} switchLanguage={dictionary.switchLanguage} />
+          </Suspense>
           <Toaster
             dir={locale === "ar" ? "rtl" : "ltr"}
             position={locale === "ar" ? "bottom-left" : "bottom-right"}

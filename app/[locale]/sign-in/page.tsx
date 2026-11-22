@@ -2,14 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
-import { UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
-import { LuArrowLeft, LuArrowRight } from "react-icons/lu";
+import { LuArrowRight } from "react-icons/lu";
 import { WanasWordmark } from "@/components/WanasWordmark";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { safeReturnTo } from "@/lib/i18n/return-to";
-import LocaleSwitcher from "../locale-switcher";
 import SignInForm from "./sign-in-form";
 import styles from "./sign-in.module.css";
 
@@ -48,27 +46,6 @@ export default async function SignInPage({
 
   return (
     <div className={styles.page} data-client-sign-in>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <nav aria-label={ar ? "التنقل الرئيسي" : "Main navigation"}>
-            <Link href={home}>
-              <LuArrowLeft size={16} aria-hidden="true" className={styles.arrow} />{" "}
-              {ar ? "العودة إلى الرئيسية" : "Back to home"}
-            </Link>
-            <Link className={styles.studioLink} href={studio}>{ar ? "طريقة التخطيط" : "How planning works"}</Link>
-          </nav>
-          <WanasWordmark locale={locale} />
-          <nav aria-label={ar ? "روابط الحساب" : "Account navigation"}>
-            <span className={styles.current} aria-current="page">{dictionary.signIn}</span>
-            <Link className={styles.headerPlan} href={plan}>{ar ? "خططوا لحفلكم" : "Plan an event"}</Link>
-            <Suspense>
-              <LocaleSwitcher locale={locale} label={dictionary.switchLanguage} />
-            </Suspense>
-            <UserButton />
-          </nav>
-        </div>
-      </header>
-
       <main className={styles.main}>
         <section className={styles.intro}>
           <h1>{dictionary.signIn}</h1>

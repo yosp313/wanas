@@ -7,7 +7,6 @@ import { BookingChangeForm } from "@/components/requests/BookingChangeForm";
 import { QuoteTerms } from "@/components/requests/QuoteTerms";
 import { RequestLifecycleActions } from "@/components/requests/RequestLifecycleActions";
 import { RequestScope } from "@/components/requests/RequestScope";
-import { WanasWordmark } from "@/components/WanasWordmark";
 import { isLocale } from "@/lib/i18n/config";
 import type { RequestSnapshot } from "@/lib/planner/request-snapshot";
 import { validInspirationLinks } from "@/lib/planner/validation";
@@ -60,13 +59,6 @@ export default async function CustomerRequestPage({ params }: { params: Promise<
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.wrap}>
-          <WanasWordmark locale={locale} />
-          <span>{t("Concierge", "خدمة العملاء")}</span>
-        </div>
-      </header>
-
       <main className={styles.wrap}>
         <nav className={styles.back} aria-label={t("Breadcrumb", "مسار التنقل")}>
           <Link href={`/${locale}/requests`}><LuArrowLeft size={15} aria-hidden="true" />{t("My requests", "طلباتي")}</Link>

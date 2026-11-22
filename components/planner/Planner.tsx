@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useRef, useState, type FocusEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
 import { toast } from "sonner";
 import type { IconType } from "react-icons";
 import {
@@ -573,22 +572,7 @@ export function Planner({ locale }: { locale: Locale }) {
     if (date) setVisibleMonth(date.slice(0, 7));
   }
   return (
-    <div className={styles.shell} data-planner data-curation={curationStep || undefined} dir={ar ? "rtl" : "ltr"}>
-      <header className={styles.topbar}>
-        <div className={styles.content}>
-          <WanasWordmark locale={locale} />
-
-          <nav className={styles.topActions} aria-label={ar ? "التنقل الرئيسي" : "Main navigation"}>
-            <Link href={`/${locale}/requests`}>
-              {ar ? "طلباتي" : "My requests"}
-            </Link>
-            <Link href={`/${ar ? "en" : "ar"}/plan`} hrefLang={ar ? "en" : "ar"}>
-              {ar ? "English" : "العربية"}
-            </Link>
-            <UserButton />
-          </nav>
-        </div>
-      </header>
+    <div className={styles.shell} data-curation={curationStep || undefined} dir={ar ? "rtl" : "ltr"}>
       <main className={styles.content}>
         <nav className={styles.progress} aria-label={ar ? "تقدم التخطيط" : "Planner progress"}>
           {steps.map((label, index) => (

@@ -134,8 +134,7 @@ a { color: var(--accent); }
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-body:has([data-planner]) .locale-header { display: none; }
-body:has([data-client-sign-in]) > :is(.locale-header, .atelier-footer) { display: none; }
+body:has([data-client-sign-in]) > .atelier-footer { display: none; }
 .atelier-footer {
   flex-wrap: wrap;
   margin-block-start: auto;

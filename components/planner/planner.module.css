@@ -1121,8 +1121,6 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
 }
 
 .shell ~ :global(.atelier-footer) { display: none; }
-.topbar { border-block-end: 1px solid var(--line); }
-.topbar > .content,
 .footer > .content {
   display: flex;
   align-items: center;
@@ -1130,15 +1128,12 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
   gap: 12px 24px;
   flex-wrap: wrap;
 }
-.topbar > .content { min-height: 84px; padding-block: 12px; }
-.topActions,
 .footer nav {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 16px;
 }
-.topActions > a,
 .footer nav a {
   display: inline-flex;
   align-items: center;
@@ -1147,12 +1142,6 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
   font-size: 0.875rem;
   text-decoration: none;
 }
-.topActions > a:first-child {
-  padding-inline: 16px;
-  border-radius: var(--control-radius);
-  background: var(--soft);
-}
-.topActions a:hover,
 .footer a:hover { color: var(--accent); }
 
 .progress {
@@ -1344,7 +1333,6 @@ section.previewCard { padding: clamp(12px, 1.85vw, 24px); }
 }
 
 .shell[data-curation] > main { padding-block-end: 32px; }
-.shell[data-curation] .topbar > .content { min-height: 68px; }
 .shell[data-curation] .scopeStrip {
   display: flex;
   flex-wrap: wrap;

@@ -1,4 +1,3 @@
-:global(.locale-header):has(~ .page),
 .page ~ :global(.atelier-footer) {
   display: none;
 }
@@ -29,25 +28,6 @@
   margin-inline: auto;
 }
 
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  border-block-end: 1px solid var(--detail-line);
-  background: var(--detail-paper);
-  background: color-mix(in srgb, var(--detail-paper) 90%, transparent);
-  backdrop-filter: blur(12px);
-}
-
-.header .wrap {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 66px;
-}
-
-.header .wrap > span,
 .venue figcaption span,
 .gallery figcaption {
   font-size: .75rem;
@@ -55,7 +35,6 @@
   text-transform: uppercase;
 }
 
-.header .wrap > span { color: var(--detail-muted); }
 .page main { padding-block: clamp(24px, 3vw, 38px) 48px; }
 
 .back { margin-block-end: 20px; }
@@ -311,6 +290,5 @@
   .columns,
   .columns[data-has-activity="false"],
   .activity { grid-template-columns: minmax(0, 1fr); }
-  .header .wrap { min-height: 60px; }
   .mastheadHeading { align-items: start; flex-direction: column; gap: 12px; }
 }

@@ -94,7 +94,7 @@ accounts("delivers a quote and confirms and reschedules the booking through the 
     assert.equal(await customer.locator("html").getAttribute("dir"), "rtl");
     await customer.getByRole("link", { name: "English" }).click();
     await customer.waitForURL("**/en");
-    await customer.getByRole("link", { name: "Plan your event" }).click();
+    await customer.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Event planner" }).click();
     await customer.getByRole("button", { name: "Wedding", exact: true }).click();
     await customer.getByLabel("Estimated guests").fill("50");
     await customer.locator("input[type=date]").fill(eventDate);

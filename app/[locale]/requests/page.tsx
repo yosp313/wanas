@@ -1,7 +1,5 @@
-import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { LuPlus } from "react-icons/lu";
 import { WanasWordmark } from "@/components/WanasWordmark";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -9,7 +7,6 @@ import { isLocale } from "@/lib/i18n/config";
 import { withPageAccess } from "@/lib/server/auth/page-access";
 import { getCustomerRequests } from "@/lib/server/requests/queries";
 import { cairoDateString } from "@/lib/server/time/cairo";
-import LocaleSwitcher from "../locale-switcher";
 import { requestEntry } from "./request-card";
 import { RequestList } from "./request-list";
 import styles from "./requests.module.css";
@@ -29,22 +26,6 @@ export default async function RequestsPage({ params }: { params: Promise<{ local
 
   return (
     <div className={styles.portal}>
-      <header className={styles.header}>
-        <div className={`${styles.wrap} ${styles.headerInner}`}>
-          <WanasWordmark locale={locale} />
-          <nav aria-label={t("Main navigation", "التنقل الرئيسي")}>
-            <Link href={`${home}#ceremonies`}>{t("Ceremonies", "المراسم")}</Link>
-            <Link href={planner}>{t("Event planner", "مخطط المناسبات")}</Link>
-            <Link href={path} aria-current="page">{dictionary.myRequests}</Link>
-            <a href="#concierge">{t("Help", "المساعدة")}</a>
-          </nav>
-          <div className={styles.account}>
-            <Suspense><LocaleSwitcher locale={locale} label={dictionary.switchLanguage} /></Suspense>
-            <UserButton />
-          </div>
-        </div>
-      </header>
-
       <main>
         <section className={styles.hero}>
           <div className={`${styles.wrap} ${styles.heroInner}`}>
