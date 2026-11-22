@@ -1,16 +1,11 @@
-import { useState } from "react";
 import Image from "next/image";
 import { LuCheck, LuCircle, LuDiamond } from "react-icons/lu";
-import { catalog, type Locale } from "@/lib/catalog/catalog";
+import { moodboards, type Locale } from "@/lib/catalog/catalog";
 import styles from "./planner.module.css";
 
-const directions = [
-  {
-    id: "sunlit-terracotta",
-    image: "terracotta",
-    en: "Terracotta and olive",
+const directionDetails = {
+  "sunlit-terracotta": {
     profile: { en: "Earthy & sunlit", ar: "ترابي ومشرق" },
-    ar: "تيراكوتا دافئة",
     colors: [
       { hex: "#c2652a", en: "Clay", ar: "طيني" },
       { hex: "#7a6e4d", en: "Olive", ar: "زيتوني" },
@@ -18,55 +13,44 @@ const directions = [
       { hex: "#b58d57", en: "Brass", ar: "نحاسي" },
     ],
   },
-  {
-    id: "ivory-garden",
-    image: "ivory",
-    en: "Ivory and alabaster",
+  "ivory-garden": {
     profile: { en: "Luminous & airy", ar: "مشرق وخفيف" },
-    ar: "عاجي وألباستر",
     colors: [
       { hex: "#f8f6f0", en: "Ivory", ar: "عاجي" },
       { hex: "#ded6c9", en: "Alabaster", ar: "ألباستر" },
       { hex: "#9e988f", en: "Stone", ar: "حجري" },
     ],
   },
-  {
-    id: "midnight-candlelight",
-    image: "emerald",
-    en: "Emerald and gold",
+  "midnight-candlelight": {
     profile: { en: "Rich & intimate", ar: "فاخر وحميم" },
-    ar: "زمرد على ضوء الشموع",
     colors: [
       { hex: "#1b3b2b", en: "Emerald", ar: "زمردي" },
       { hex: "#c9a050", en: "Gold", ar: "ذهبي" },
       { hex: "#3d271d", en: "Walnut", ar: "جوزي" },
     ],
   },
-  {
-    id: "quiet-olive",
-    image: "greenhouse",
-    en: "Quiet olive",
+  "quiet-olive": {
     profile: { en: "Soft & botanical", ar: "هادئ ونباتي" },
-    ar: "زيتوني هادئ",
     colors: [
       { hex: "#566044", en: "Olive", ar: "زيتوني" },
       { hex: "#b7ae80", en: "Sage", ar: "أخضر مريمي" },
       { hex: "#e1cab1", en: "Sand", ar: "رملي" },
     ],
   },
-  {
-    id: "",
-    image: "blush",
-    en: "Blush and pampas grass",
+  "blush-pampas": {
     profile: { en: "Soft & modern", ar: "ناعم وعصري" },
-    ar: "وردي وعشب البامباس",
     colors: [
       { hex: "#d9a291", en: "Blush", ar: "وردي فاتح" },
       { hex: "#e3d0c1", en: "Sand", ar: "رملي" },
       { hex: "#8c3c3c", en: "Rosewood", ar: "وردي داكن" },
     ],
   },
-];
+} satisfies Record<string, { profile: Record<Locale, string>; colors: Array<Record<Locale | "hex", string>> }>;
+
+const directions = moodboards.map((board) => ({
+  ...board,
+  ...directionDetails[board.id],
+}));
 
 export function MoodboardGallery({
   locale,
@@ -78,34 +62,18 @@ export function MoodboardGallery({
   onChange: (value: string) => void;
 }) {
   const ar = locale === "ar";
-  const [reference, setReference] = useState("terracotta");
-  const options = catalog.moodboards;
-  const cards = directions.filter((direction) =>
-    options.length
-      ? options.some((option) => option.id === direction.id)
-      : direction.image !== "greenhouse",
-  );
-  const preview =
-    cards.find((direction) =>
-      options.length ? direction.id === value : direction.image === reference,
-    ) ?? cards[0];
-  const activeImage = options.length ? cards.find((direction) => direction.id === value)?.image : preview.image;
+  const preview = directions.find((direction) => direction.id === value) ?? directions[0];
   const terracotta = preview.image === "terracotta";
 
   return (
     <section className={styles.moodSection} aria-labelledby="moodboard-title">
       <header className={styles.moodHeading}>
         <h2 id="moodboard-title" tabIndex={-1}>{ar ? "لوحات الإلهام" : "Moodboards"}</h2>
-        {!options.length && (
-          <p>{ar
-            ? "استلهموا من هذه الأمثلة واذكروا ما أعجبكم في الملاحظات."
-            : "Browse the references and tell us what you like in your notes."}</p>
-        )}
       </header>
       <div className={styles.moodGrid}>
-        {cards.map((direction, index) => {
-          const label = (ar && options.find(({ id }) => id === direction.id)?.labels.ar) || direction[locale];
-          const selected = activeImage === direction.image;
+        {directions.map((direction, index) => {
+          const label = direction.labels[locale];
+          const selected = value === direction.id;
           return (
             <button
               type="button"
@@ -114,7 +82,7 @@ export function MoodboardGallery({
               aria-label={label}
               aria-pressed={selected}
               aria-controls="moodboard-preview"
-              onClick={() => options.length ? onChange(direction.id) : setReference(direction.image)}
+              onClick={() => onChange(selected ? "" : direction.id)}
             >
               <span className={styles.moodImage}>
                 <Image src={`/atelier/${direction.image}.webp`} alt="" fill sizes="(max-width: 680px) 45vw, 25vw" />
@@ -122,7 +90,7 @@ export function MoodboardGallery({
                   {selected ? (
                     <>
                       <LuCheck size={14} />
-                      {options.length ? (ar ? "مختارة" : "Selected") : (ar ? "معاينة" : "Previewing")}
+                      {ar ? "مختارة" : "Selected"}
                     </>
                   ) : <LuCircle size={12} />}
                 </span>
@@ -144,7 +112,7 @@ export function MoodboardGallery({
       <section id="moodboard-preview" className={styles.moodPreview} aria-labelledby="moodboard-preview-title">
         <header>
           <p className={styles.eyebrow}>{ar ? "تفاصيل لوحة الإلهام" : "Moodboard breakdown"}</p>
-          <h3 id="moodboard-preview-title" aria-live="polite">{preview[locale]}</h3>
+          <h3 id="moodboard-preview-title" aria-live="polite">{preview.labels[locale]}</h3>
         </header>
         <div className={styles.previewGrid}>
           <div className={styles.previewStack}>
@@ -190,7 +158,7 @@ export function MoodboardGallery({
                 />
                 <figcaption>
                   <small>{ar ? "تنسيق المكان" : "Venue decor"}</small>
-                  {terracotta ? ar ? "كوشة بتنسيق بسيط وغير متماثل" : "Asymmetric ceremony backdrop" : preview[locale]}
+                  {terracotta ? ar ? "كوشة بتنسيق بسيط وغير متماثل" : "Asymmetric ceremony backdrop" : preview.labels[locale]}
                 </figcaption>
               </figure>
               {terracotta && (

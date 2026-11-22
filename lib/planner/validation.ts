@@ -15,6 +15,7 @@ export const draftSchema = z.object({
   decorMode: z.enum(["curate", "customize"]),
   moodboard: text.max(100),
   palette: text.max(100),
+  paletteColors: z.union([z.tuple([]), z.array(z.string().regex(/^#[0-9a-f]{6}$/i)).length(3)]).default([]),
   decorElements: z.array(text).max(20),
   cateringRequested: z.boolean(),
   cateringOption: text.max(100),

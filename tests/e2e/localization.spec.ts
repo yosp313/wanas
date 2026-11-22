@@ -88,3 +88,37 @@ test("the planner validates mobile numbers before request submission", async ({ 
   await mobile.fill("+٢٠ ١٠٠ ١٢٣ ٤٥٦٧");
   await expect(mobile).toHaveAccessibleDescription("");
 });
+
+test("custom decor keeps the moodboard, edited colors, and elements through reload and review", async ({ page }) => {
+  await page.addInitScript(() => {
+    const key = "wanas-planner-draft-v1";
+    if (!sessionStorage.getItem(key)) sessionStorage.setItem(key, JSON.stringify({ step: 2, draft: {} }));
+  });
+  await page.goto("/en/plan");
+  await page.getByRole("button", { name: "Customize my decor" }).click();
+  const board = page.getByRole("button", { name: "Emerald and gold", exact: true });
+  await board.click();
+  await expect(board).toHaveAttribute("aria-pressed", "true");
+
+  await page.getByRole("button", { name: "Terracotta & olive" }).click();
+  await page.getByRole("button", { name: /Secondary/ }).click();
+  const shade = page.getByLabel("Fine-tune shade");
+  await expect(shade).toHaveValue("#7a6e4f");
+  const wheel = page.locator('[class*="colorWheel"]');
+  await wheel.click({ position: { x: 56, y: 6 } });
+  await expect(shade).toHaveValue("#ff0000");
+  await shade.fill("#447799");
+
+  const lighting = page.getByRole("checkbox", { name: "Lighting", exact: true });
+  await lighting.check();
+  await page.reload();
+  await expect(board).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: /Secondary #447799/ })).toBeVisible();
+  await expect(lighting).toBeChecked();
+
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(page.getByText("Emerald and gold, Terracotta & olive", { exact: true })).toBeVisible();
+  await expect(page.getByText("#c2652a · #447799 · #e8dfd3", { exact: true })).toBeVisible();
+  await expect(page.getByText("Lighting", { exact: true })).toBeVisible();
+});

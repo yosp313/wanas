@@ -13,6 +13,7 @@ export type PlannerDraft = {
   decorMode: "curate" | "customize" | "";
   moodboard: string;
   palette: string;
+  paletteColors: string[];
   decorElements: string[];
   cateringRequested: boolean;
   cateringOption: string;
@@ -24,5 +25,5 @@ export type PlannerDraft = {
 };
 
 export const emptyDraft = (locale: Locale): PlannerDraft => ({
-  eventType: "", eventTypeOther: "", guestCount: "", eventDate: "", venueName: "", streetAddress: "", venueType: "", venueTypeOther: "", budgetRange: "", decorMode: "", moodboard: "", palette: "", decorElements: [], cateringRequested: false, cateringOption: "", notes: "", inspirationLinks: "", customerName: "", mobile: "", locale,
+  eventType: "", eventTypeOther: "", guestCount: "", eventDate: "", venueName: "", streetAddress: "", venueType: "", venueTypeOther: "", budgetRange: "", decorMode: "", moodboard: "", palette: "", paletteColors: [], decorElements: [], cateringRequested: false, cateringOption: "", notes: "", inspirationLinks: "", customerName: "", mobile: "", locale,
 });

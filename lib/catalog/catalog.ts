@@ -1,6 +1,6 @@
 export type Locale = "ar" | "en";
 
-/** The launch catalog is supplied by WANAS. Fixtures are opt-in for tests only. */
+/** Catering fixtures are opt-in for tests only. */
 export const catalogMode = process.env.NEXT_PUBLIC_WANAS_CATALOG_MODE === "fixtures" || process.env.WANAS_CATALOG_MODE === "fixtures" ? "fixtures" : "approved";
 
 export type CatalogOption = {
@@ -40,24 +40,28 @@ export const decorModes: CatalogOption[] = [
   ["customize", "Customize my decor", "أصمّم الديكور بنفسي"],
 ].map(([id, en, ar]) => ({ id, labels: { en, ar } }));
 
-const fixtureMoodboards: CatalogOption[] = [
-  ["sunlit-terracotta", "Sunlit terracotta", "تيراكوتا دافئة"],
-  ["quiet-olive", "Quiet olive", "زيتوني هادئ"],
-  ["ivory-garden", "Ivory garden", "حديقة عاجية"],
-  ["midnight-candlelight", "Midnight candlelight", "ضوء شموع ليلي"],
-].map(([id, en, ar]) => ({ id, labels: { en, ar } }));
+const moodboardOptions = [
+  ["sunlit-terracotta", "terracotta", "Terracotta and olive", "تيراكوتا دافئة"],
+  ["ivory-garden", "ivory", "Ivory and alabaster", "عاجي وألباستر"],
+  ["midnight-candlelight", "emerald", "Emerald and gold", "زمرد على ضوء الشموع"],
+  ["quiet-olive", "greenhouse", "Quiet olive", "زيتوني هادئ"],
+  ["blush-pampas", "blush", "Blush and pampas grass", "وردي وعشب البامباس"],
+] as const;
 
-const fixturePalettes: CatalogOption[] = [
-  ["terracotta-olive", "Terracotta & olive", "تيراكوتا وزيتوني"],
-  ["blush-sand", "Blush & sand", "وردي رملي"],
-  ["champagne-ivory", "Champagne & ivory", "شامبانيا وعاجي"],
-  ["custom", "A different palette", "ألوان أخرى"],
-].map(([id, en, ar]) => ({ id, labels: { en, ar } }));
+export const moodboards = moodboardOptions.map(([id, image, en, ar]) => ({ id, image, labels: { en, ar } }));
 
-const fixtureDecorElements: CatalogOption[] = [
+export const palettes = [
+  { id: "terracotta-olive", labels: { en: "Terracotta & olive", ar: "تيراكوتا وزيتوني" }, colors: ["#c2652a", "#7a6e4f", "#e8dfd3"] },
+  { id: "blush-sand", labels: { en: "Blush & sand", ar: "وردي رملي" }, colors: ["#c7919f", "#d8bcaa", "#8c5c65"] },
+  { id: "champagne-ivory", labels: { en: "Champagne & ivory", ar: "شامبانيا وعاجي" }, colors: ["#c4a475", "#f8f6f0", "#e4d7c3"] },
+  { id: "custom", labels: { en: "Custom palette", ar: "لوحة ألوان مخصّصة" }, colors: ["#b8775e", "#e8dfd3", "#4d5145"] },
+];
+
+export const decorElements: CatalogOption[] = [
   ["backdrop", "Backdrop", "خلفية"],
   ["florals", "Florals", "زهور"],
   ["table-styling", "Table styling", "تنسيق الطاولات"],
+  ["lighting", "Lighting", "إضاءة"],
 ].map(([id, en, ar]) => ({ id, labels: { en, ar } }));
 
 const fixtureCateringOptions: CatalogOption[] = [
@@ -67,12 +71,6 @@ const fixtureCateringOptions: CatalogOption[] = [
   ["recommend", "Recommend a format", "اقترحوا الأنسب"],
 ].map(([id, en, ar]) => ({ id, labels: { en, ar } }));
 
-// These sample options are deliberately absent from a plain production build
-// until WANAS supplies the approved launch catalog. CI and local demos opt in
-// with WANAS_CATALOG_MODE=fixtures (and NEXT_PUBLIC_WANAS_CATALOG_MODE for UI).
-export const moodboards = catalogMode === "fixtures" ? fixtureMoodboards : [];
-export const palettes = catalogMode === "fixtures" ? fixturePalettes : [];
-export const decorElements = catalogMode === "fixtures" ? fixtureDecorElements : [];
 export const cateringOptions = catalogMode === "fixtures" ? fixtureCateringOptions : fixtureCateringOptions.filter((option) => option.id === "recommend");
 export const catalog = { eventTypes, venueTypes, budgetRanges, decorModes, moodboards, palettes, decorElements, cateringOptions } as const;
 

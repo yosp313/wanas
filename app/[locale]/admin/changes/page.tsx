@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { LuArrowRight } from "react-icons/lu";
 import { ApplyBookingChangeForm } from "@/components/admin/ApplyBookingChangeForm";
-import { catalogLabel } from "@/lib/catalog/catalog";
+import { catalogLabel, moodboards } from "@/lib/catalog/catalog";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import type { RequestSnapshot } from "@/lib/planner/request-snapshot";
 import { getAdminBookingChanges } from "@/lib/server/admin/booking-changes";
@@ -19,11 +19,6 @@ import { ChangeCard } from "./change-card";
 import styles from "./changes.module.css";
 
 const filters = ["all", "pending", "applied", "declined"] as const;
-const moodboardImages = new Map([
-  ["sunlit-terracotta", "terracotta"], ["quiet-olive", "greenhouse"],
-  ["ivory-garden", "ivory"], ["midnight-candlelight", "emerald"],
-]);
-
 type Query = Promise<Record<string, string | string[] | undefined>>;
 type Terms = { services?: string; totalEgp?: number; scopeExplanation?: string };
 
@@ -90,7 +85,7 @@ async function BookingChanges({ locale, searchParams }: { locale: Locale; search
     const agreedTotal = typeof agreement?.totalEgp === "number" ? agreement.totalEgp : undefined;
     const delta = kind !== "cancellation" && currentTotal !== undefined && agreedTotal !== undefined
       ? agreedTotal - currentTotal : undefined;
-    return { change, booking, request, before, seen, requested, kind, title, prior, agreement, currentTotal, agreedTotal, delta, image: moodboardImages.get(details?.moodboard ?? "") };
+    return { change, booking, request, before, seen, requested, kind, title, prior, agreement, currentTotal, agreedTotal, delta, image: moodboards.find(({ id }) => id === details?.moodboard)?.image };
   });
   const oldestPending = cards.findLast(({ change }) => change.status === "pending");
   const approvedThisWeek = cards.filter(({ change }) =>

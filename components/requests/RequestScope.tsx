@@ -27,6 +27,7 @@ export function RequestScope({ details, locale, grouped = false }: {
     [ar ? "الديكور" : "Decor", labels?.decorMode?.[locale] || details.decorMode],
     [ar ? "لوحة الإلهام" : "Moodboard", custom ? labels?.moodboard?.[locale] || details.moodboard || delegated : null],
     [ar ? "الألوان" : "Palette", custom ? labels?.palette?.[locale] || details.palette || delegated : null],
+    [ar ? "درجات الألوان" : "Palette colors", custom ? details.paletteColors?.join(" · ") : null],
     [ar ? "عناصر الديكور" : "Decor elements", custom ?
       labels?.decorElements?.map((label) => label[locale]).join(ar ? "، " : ", ") || details.decorElements?.join(ar ? "، " : ", ") || delegated : null],
     [ar ? "الضيافة" : "Catering", details.cateringRequested ? labels?.cateringOption?.[locale] || details.cateringOption :

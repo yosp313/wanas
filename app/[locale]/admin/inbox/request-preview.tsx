@@ -21,6 +21,7 @@ type Preview = {
   moodboard?: string;
   moodboardImage?: string;
   palette?: string;
+  decorElements?: string;
   catering?: string;
   notes?: string;
 };
@@ -81,6 +82,7 @@ export function RequestPreview({ request, locale }: { request: Preview; locale: 
                 <figcaption><bdi>{request.moodboard}</bdi></figcaption>
               </figure>
             ) : <p><bdi>{request.moodboard || request.decor}</bdi></p>}
+            {request.decorElements && <p><bdi>{request.decorElements}</bdi></p>}
           </section>
         )}
 

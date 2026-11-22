@@ -16,6 +16,7 @@ import { fieldsByStep, plannerFieldErrors, type PlannerField } from "./field-err
 import Image from "next/image";
 import { submitRequestAction } from "@/app/actions/submit-request";
 import { MoodboardGallery } from "./MoodboardGallery";
+import { PaletteEditor } from "./PaletteEditor";
 import { catalog, catalogLabel, type Locale } from "@/lib/catalog/catalog";
 import { emptyDraft, type PlannerDraft } from "@/lib/planner/types";
 import styles from "./planner.module.css";
@@ -172,6 +173,11 @@ function Options({
           aria-pressed={value === option.id}
           onClick={() => onChange(option.id)}
         >
+          {"colors" in option && (
+            <span className={styles.presetSwatches} aria-hidden="true">
+              {option.colors.map((color) => <i key={color} style={{ backgroundColor: color }} />)}
+            </span>
+          )}
           {option.labels[locale]}
         </button>
       ))}
@@ -306,6 +312,7 @@ export function Planner({ locale }: { locale: Locale }) {
   const ar = locale === "ar";
   const [draft, setDraft] = useState<PlannerDraft>(() => emptyDraft(locale));
   const conciergeSelected = draft.decorMode === "curate";
+  const selectedPalette = catalog.palettes.find(({ id }) => id === draft.palette);
   const [submissionId, setSubmissionId] = useState("");
   const [step, setStep] = useState(1);
   const curationStep = step === 2;
@@ -1023,8 +1030,20 @@ export function Planner({ locale }: { locale: Locale }) {
                           locale={locale}
                           value={draft.palette}
                           allowDelegation
-                          onChange={(value) => update("palette", value)}
+                          onChange={(value) => {
+                            if (value === draft.palette) return;
+                            const colors = catalog.palettes.find(({ id }) => id === value)?.colors ?? [];
+                            setDraft((current) => ({ ...current, palette: value, paletteColors: colors }));
+                          }}
                         />
+                        {selectedPalette && (
+                          <PaletteEditor
+                            locale={locale}
+                            colors={draft.paletteColors}
+                            defaults={selectedPalette.colors}
+                            onChange={(colors) => update("paletteColors", colors)}
+                          />
+                        )}
                       </fieldset>
                     )}
                     {catalog.decorElements.length > 0 && (
@@ -1150,6 +1169,18 @@ export function Planner({ locale }: { locale: Locale }) {
                         : `${draft.moodboard ? catalogLabel("moodboards", draft.moodboard, locale) : t.choose}, ${draft.palette ? catalogLabel("palettes", draft.palette, locale) : t.choose}`}
                     </dd>
                   </div>
+                  {draft.decorMode === "customize" && draft.paletteColors.length > 0 && (
+                    <div>
+                      <dt>{ar ? "درجات الألوان" : "Palette colors"}</dt>
+                      <dd><bdi>{draft.paletteColors.join(" · ")}</bdi></dd>
+                    </div>
+                  )}
+                  {draft.decorMode === "customize" && draft.decorElements.length > 0 && (
+                    <div>
+                      <dt>{ar ? "عناصر الديكور" : "Decor elements"}</dt>
+                      <dd>{draft.decorElements.map((id) => catalogLabel("decorElements", id, locale)).join(ar ? "، " : ", ")}</dd>
+                    </div>
+                  )}
                   <div>
                     <dt>{t.catering}</dt>
                     <dd>

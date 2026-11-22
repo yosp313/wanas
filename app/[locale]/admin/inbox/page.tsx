@@ -2,7 +2,7 @@ import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { budgetRanges, catalogLabel } from "@/lib/catalog/catalog";
+import { budgetRanges, catalogLabel, moodboards } from "@/lib/catalog/catalog";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import type { RequestSnapshot } from "@/lib/planner/request-snapshot";
 import { withPageAccess } from "@/lib/server/auth/page-access";
@@ -12,13 +12,6 @@ import { RequestPreview } from "./request-preview";
 import styles from "./inbox.module.css";
 
 const filters = ["all", "submitted", "quoted", "archived"] as const;
-const moodboardImages: Record<string, string> = {
-  "sunlit-terracotta": "terracotta",
-  "quiet-olive": "greenhouse",
-  "ivory-garden": "ivory",
-  "midnight-candlelight": "emerald",
-};
-
 type InboxQuery = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function AdminInboxPage({
@@ -94,8 +87,10 @@ async function Inbox({ locale, searchParams }: { locale: Locale; searchParams: I
       email: request.customerEmail,
       phone: request.customerMobile,
       moodboard: labels?.moodboard?.[locale] || catalogLabel("moodboards", moodboard, locale),
-      moodboardImage: Object.hasOwn(moodboardImages, moodboard) ? moodboardImages[moodboard] : undefined,
-      palette: labels?.palette?.[locale] || catalogLabel("palettes", details?.palette ?? "", locale),
+      moodboardImage: moodboards.find(({ id }) => id === moodboard)?.image,
+      palette: [labels?.palette?.[locale] || catalogLabel("palettes", details?.palette ?? "", locale),
+        details?.paletteColors?.join(" · ")].filter(Boolean).join(" · "),
+      decorElements: labels?.decorElements?.map((label) => label[locale]).join(locale === "ar" ? "، " : ", ") || details?.decorElements?.join(", "),
       decor: labels?.decorMode?.[locale] || catalogLabel("decorModes", details?.decorMode ?? "", locale),
       notes: details?.notes,
     };

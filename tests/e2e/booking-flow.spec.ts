@@ -289,6 +289,9 @@ accounts("submits an Arabic custom-decor request and preserves the draft when sw
   await page.getByRole("button", { name: "أصمّم الديكور بنفسي" }).click();
   await page.getByRole("region", { name: "لوحات الإلهام", exact: true })
     .getByRole("button", { name: "تيراكوتا دافئة", exact: true }).click();
+  await page.getByRole("button", { name: "لوحة ألوان مخصّصة", exact: true }).click();
+  await page.getByLabel("ضبط درجة اللون").fill("#447799");
+  await page.getByRole("checkbox", { name: "إضاءة", exact: true }).check();
   await page.getByRole("button", { name: "التالي", exact: true }).click();
   await page.getByRole("button", { name: "التالي", exact: true }).click();
   await page.getByLabel("الاسم", { exact: true }).fill(customerName);
@@ -300,4 +303,7 @@ accounts("submits an Arabic custom-decor request and preserves the draft when sw
   await page.getByRole("button", { name: "إرسال الطلب" }).click();
   await page.waitForURL("**/ar/requests/*");
   await page.getByRole("heading", { name: customerName }).waitFor();
+  await expect(page.getByText("تيراكوتا دافئة", { exact: true })).toBeVisible();
+  await expect(page.getByText("#447799 · #e8dfd3 · #4d5145", { exact: true })).toBeVisible();
+  await expect(page.getByText("إضاءة", { exact: true })).toBeVisible();
 });

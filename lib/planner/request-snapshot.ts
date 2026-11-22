@@ -13,7 +13,8 @@ type ChoiceLabels = {
   cateringOption?: Labels;
 };
 
-export type RequestSnapshot = Omit<PlannerDraft, "customerName" | "mobile" | "locale"> & {
+export type RequestSnapshot = Omit<PlannerDraft, "customerName" | "mobile" | "locale" | "paletteColors"> & {
+  paletteColors?: string[];
   catalogVersion: string;
   submittedLocale: Locale;
   catalogLabels?: ChoiceLabels;
@@ -40,6 +41,7 @@ export function requestSnapshot(draft: PlannerDraft): RequestSnapshot {
     decorMode: draft.decorMode,
     moodboard: custom ? draft.moodboard : "",
     palette: custom ? draft.palette : "",
+    paletteColors: custom && draft.palette && draft.paletteColors.length ? draft.paletteColors : undefined,
     decorElements: custom ? draft.decorElements : [],
     cateringRequested: draft.cateringRequested,
     cateringOption: draft.cateringRequested ? draft.cateringOption : "",
