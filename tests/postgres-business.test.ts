@@ -18,7 +18,15 @@ const isoDate = (daysFromNow: number) => {
   return date.toISOString().slice(0, 10);
 };
 const testRun = () => { const runId = randomUUID(); activeRuns.add(runId); return runId; };
-const customer = () => randomUUID();
+
+async function insertCustomer(db: Sql, runId: string) {
+  const [identity] = await db<{ app_user_id: string }[]>`
+    insert into clerk_identities (clerk_user_id)
+    values (${`test-${runId}-${randomUUID()}`})
+    returning app_user_id
+  `;
+  return identity.app_user_id;
+}
 
 it("preserves imported Clerk mappings and assigns one UUID under concurrent first access", async () => {
   const identitySql = postgres(databaseUrl, { max: 6 });
@@ -54,7 +62,8 @@ it("preserves imported Clerk mappings and assigns one UUID under concurrent firs
   }
 });
 
-async function insertRequest(db: Sql, runId: string, eventDate: string, customerId = customer()) {
+async function insertRequest(db: Sql, runId: string, eventDate: string) {
+  const customerId = await insertCustomer(db, runId);
   const submissionId = randomUUID();
   const [request] = await db`
     insert into event_requests (customer_id, submission_id, language, customer_email, customer_name, customer_mobile, event_date, details)
@@ -68,7 +77,6 @@ async function cleanup(db: Sql, runId: string) {
   await db.begin(async (tx) => {
     const requests = await tx`select id from event_requests where details->>'testRun' = ${runId}`;
     const requestIds = requests.map((row) => row.id as string);
-    if (requestIds.length === 0) return;
     const quotes = await tx`select id, offered_date as "offeredDate" from quotes where request_id = any(${requestIds}::uuid[])`;
     const quoteIds = quotes.map((row) => row.id as string);
     const bookings = await tx`select id from bookings where request_id = any(${requestIds}::uuid[])`;
@@ -83,6 +91,7 @@ async function cleanup(db: Sql, runId: string) {
     if (quoteIds.length) await tx`delete from date_reservations where quote_id = any(${quoteIds}::uuid[])`;
     if (quoteIds.length) await tx`delete from quotes where id = any(${quoteIds}::uuid[])`;
     await tx`delete from event_requests where id = any(${requestIds}::uuid[])`;
+    await tx`delete from clerk_identities where starts_with(clerk_user_id, ${`test-${runId}-`})`;
   });
 }
 
@@ -106,7 +115,7 @@ describe("PostgreSQL business invariants", () => {
   it("deduplicates concurrent submissions by customer and submission ID", async () => {
     const runId = testRun();
     const eventDate = isoDate(20);
-    const customerId = customer();
+    const customerId = await insertCustomer(sql, runId);
     const submissionId = randomUUID();
     const insert = async () => sql.begin(async (tx) => {
       await tx`select pg_advisory_xact_lock(hashtextextended(${`${customerId}:${submissionId}`}, 0))`;
@@ -124,7 +133,6 @@ describe("PostgreSQL business invariants", () => {
     assert.equal(first, second);
     const rows = await sql`select count(*)::int as count from event_requests where customer_id = ${customerId} and submission_id = ${submissionId}`;
     assert.equal(rows[0].count, 1);
-    await cleanup(sql, runId);
   });
 
   it("allows one active hold when two quote transactions target one date", async () => {
@@ -146,7 +154,6 @@ describe("PostgreSQL business invariants", () => {
     const reservations = await sql`select quote_id as "quoteId" from date_reservations where event_date = ${eventDate}`;
     assert.equal(reservations.length, 1);
     assert.equal(reservations[0].quoteId, a ? quoteA : quoteB);
-    await cleanup(sql, runId);
   });
 
   it("rejects acceptance after expiry and accepts only the current replacement quote", async () => {
@@ -162,7 +169,6 @@ describe("PostgreSQL business invariants", () => {
     assert.equal(oldAcceptance.length, 0);
     const currentAcceptance = await sql`select 1 from quotes q join date_reservations r on r.quote_id = q.id where q.id = ${currentQuote} and q.status = 'current' and q.expires_at > now() and r.kind = 'hold' and r.hold_expires_at > now()`;
     assert.equal(currentAcceptance.length, 1);
-    await cleanup(sql, runId);
   });
 
   it("serializes competing reschedules to one destination date", async () => {
@@ -194,7 +200,6 @@ describe("PostgreSQL business invariants", () => {
     const destinationRows = await sql`select booking_id as "bookingId" from date_reservations where event_date = ${destination}`;
     assert.equal(destinationRows.length, 1);
     assert.equal(destinationRows[0].bookingId, a ? bookingA : bookingB);
-    await cleanup(sql, runId);
   });
 
   it("uses Cairo calendar dates for the ten-day notice boundary", async () => {
