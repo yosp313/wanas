@@ -1,0 +1,3 @@
+ALTER TABLE "admin_access" ADD CONSTRAINT "admin_access_user_id_clerk_identities_app_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."clerk_identities"("app_user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "booking_change_requests" ADD CONSTRAINT "booking_change_requests_customer_id_clerk_identities_app_user_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."clerk_identities"("app_user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "event_requests" ADD CONSTRAINT "event_requests_customer_id_clerk_identities_app_user_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."clerk_identities"("app_user_id") ON DELETE no action ON UPDATE no action;

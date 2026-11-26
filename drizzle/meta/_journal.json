@@ -43,6 +43,13 @@
       "when": 1795220355295,
       "tag": "0005_clerk_identities",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795686337894,
+      "tag": "0006_brainy_shatterstar",
+      "breakpoints": true
     }
   ]
 }
