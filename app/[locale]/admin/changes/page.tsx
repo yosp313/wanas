@@ -1,10 +1,10 @@
-import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { LuArrowRight } from "react-icons/lu";
 import { ApplyBookingChangeForm } from "@/components/admin/ApplyBookingChangeForm";
+import { RouteLoading } from "@/components/RouteLoading";
 import { catalogLabel, moodboards } from "@/lib/catalog/catalog";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import type { RequestSnapshot } from "@/lib/planner/request-snapshot";
@@ -32,7 +32,7 @@ export default async function AdminChangesPage({
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   return (
-    <Suspense fallback={<main className={calendar.loading} aria-busy="true">{locale === "ar" ? "جارٍ تحميل التعديلات…" : "Loading booking changes…"}</main>}>
+    <Suspense fallback={<RouteLoading message={locale === "ar" ? "جارٍ تحميل التعديلات…" : "Loading booking changes…"} />}>
       <BookingChanges locale={locale} searchParams={searchParams} />
     </Suspense>
   );
@@ -114,22 +114,20 @@ async function BookingChanges({ locale, searchParams }: { locale: Locale; search
 
   return (
     <main className={styles.workspace}>
-      <header className={`${calendar.header} ${styles.header}`}>
-        <form action={path} className={calendar.search} role="search" key={search}>
-          <input type="hidden" name="status" value={status} />
-          <input type="hidden" name="sort" value={sort} />
-          <button type="submit" aria-label={searchLabel}><CalendarIcon name="search" /></button>
-          <input type="search" name="q" aria-label={searchLabel} placeholder={searchLabel + "…"} defaultValue={search} maxLength={200} />
-        </form>
-        <UserButton />
-      </header>
-
       <div className={styles.content}>
         <div className={styles.title}>
           <h1>{ar ? "تعديلات الحجوزات" : "Booking changes"}</h1>
           <p>{ar ? "راجع طلبات تعديل الحجوزات وسجّل ما اتفق عليه فريق وناس مع العميل." : "Review change requests and record what WANAS and the customer agreed to."}</p>
         </div>
 
+        <div className={calendar.header}>
+          <form action={path} className={calendar.search} role="search" key={search}>
+            <input type="hidden" name="status" value={status} />
+            <input type="hidden" name="sort" value={sort} />
+            <button type="submit" aria-label={searchLabel}><CalendarIcon name="search" /></button>
+            <input type="search" name="q" aria-label={searchLabel} placeholder={searchLabel + "…"} defaultValue={search} maxLength={200} />
+          </form>
+        </div>
         <dl className={styles.stats}>
           <div>
             <dt>{ar ? "طلبات التعديل المعلقة" : "Pending change requests"} <CalendarIcon name="pending" /></dt>
@@ -233,7 +231,7 @@ async function BookingChanges({ locale, searchParams }: { locale: Locale; search
 
                     <div className={styles.agreement}>
                       <div className={styles.clientNotes}>
-                        {image && <Image src={`/atelier/${image}.webp`} width={96} height={96} alt="" />}
+                        {image && <Image className="image-edge" src={`/atelier/${image}.webp`} width={96} height={96} alt="" />}
                         <div>
                           <h3>{ar ? "طلب العميل" : "Customer request"}</h3>
                           <p className={styles.notes} dir={requested?.notes ? "auto" : undefined}>{requested?.notes || (ar ? "لم يضف العميل ملاحظات." : "The client left no notes.")}</p>

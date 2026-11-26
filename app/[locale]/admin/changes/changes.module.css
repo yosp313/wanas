@@ -7,13 +7,6 @@
 
 .workspace :is(h1, h2, h3, h4, p, dl, dd) { margin: 0; }
 
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: var(--calendar-bg);
-}
-
 .content {
   display: grid;
   gap: clamp(24px, 3vw, 40px);
@@ -40,20 +33,23 @@
 }
 
 .stats {
+  --stats-inset: 8px;
+  --stat-radius: 6px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(12px, 1.8vw, 24px);
+  gap: 8px;
+  padding: var(--stats-inset);
+  border: 1px solid var(--calendar-line);
+  border-radius: calc(var(--stat-radius) + var(--stats-inset) + 1px);
+  background: var(--calendar-soft);
 }
 
 .stats > div {
   display: grid;
   align-content: start;
-  gap: 16px;
-  min-height: 174px;
-  padding: clamp(16px, 2.2vw, 28px);
-  border-radius: 12px;
-  background: white;
-  box-shadow: var(--calendar-shadow);
+  gap: 7px;
+  padding: clamp(12px, 1.8vw, 20px);
+  border-radius: var(--stat-radius);
 }
 
 .stats > div:first-child { background: var(--calendar-soft); }
@@ -87,7 +83,7 @@
 }
 
 .filters { justify-content: space-between; }
-.filters nav { padding: 6px; border-radius: 12px; background: var(--calendar-soft); }
+.filters nav { padding: 6px; border-radius: calc(var(--control-radius) + 6px); background: var(--calendar-soft); }
 
 .filters nav a,
 .actions a,
@@ -102,13 +98,12 @@
 
 .filters nav a span { margin-inline-start: 4px; }
 .filters nav a[aria-current], .review { background: var(--calendar-accent); color: white; }
-.filters nav a:hover:not([aria-current]) { background: var(--calendar-raised); }
 .sort { color: var(--calendar-text); }
 .sort select,
 .sort button {
   padding: 6px;
-  border: 1px solid var(--calendar-line);
-  border-radius: 6px;
+  border: 1px solid var(--control-line);
+  border-radius: var(--control-radius);
   background: white;
   color: var(--calendar-ink);
   font: inherit;
@@ -119,12 +114,13 @@
 
 .card {
   min-width: 0;
-  border-radius: 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
   background: white;
-  box-shadow: var(--calendar-shadow);
+  box-shadow: var(--shadow-raised);
 }
 
-.card[data-open="true"] { box-shadow: 0 3px 8px #3e170b19; }
+.card[data-open="true"] { border-color: var(--calendar-line); }
 
 .summary {
   display: grid;
@@ -160,18 +156,17 @@
 .change > span { color: var(--calendar-accent); }
 .amount, .currentTotal bdi { font-weight: 750; }
 .actions a { background: var(--calendar-raised); color: var(--calendar-ink); }
-.actions a:hover { background: var(--calendar-line); }
 
 .review {
   display: inline-flex;
   align-items: center;
   gap: 7px;
+  padding-inline-end: 12px;
   border: 0;
   font-family: inherit;
   cursor: pointer;
 }
 
-.review:hover { background: #773200; }
 .review svg { flex: none; }
 @media (prefers-reduced-motion: no-preference) {
   .review:not(:focus-visible) svg { transition: transform var(--motion); }
@@ -184,7 +179,9 @@
   grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   gap: var(--card-inset);
   padding: var(--card-inset);
-  border-radius: 0 0 12px 12px;
+  border-block-start: 1px solid var(--calendar-line);
+  border-end-start-radius: calc(var(--radius) - 1px);
+  border-end-end-radius: calc(var(--radius) - 1px);
   background: #fff4ef;
   transition: opacity var(--motion-enter), display var(--motion-enter) allow-discrete;
   @starting-style { opacity: 0; }
@@ -206,13 +203,15 @@
 }
 
 .terms {
+  --terms-inset: clamp(16px, 2vw, 24px);
   display: flex;
   flex-direction: column;
-  padding: clamp(16px, 2vw, 24px);
-  border-radius: 12px;
+  padding: var(--terms-inset);
+  border: 1px solid transparent;
+  border-radius: calc(var(--control-radius) + var(--terms-inset) + 1px);
   background: white;
   color: var(--calendar-text);
-  box-shadow: var(--calendar-shadow);
+  box-shadow: var(--shadow-raised);
 }
 
 .terms h3 { color: var(--calendar-ink); font: 650 1.2rem/1.15 var(--display); }
@@ -248,8 +247,8 @@
 .agreement :is(input[type="number"], textarea) {
   width: 100%;
   padding: 8px 12px;
-  border: 1px solid var(--calendar-line);
-  border-radius: 8px;
+  border: 1px solid var(--control-line);
+  border-radius: var(--control-radius);
   background: white;
   color: var(--calendar-ink);
   font: inherit;
@@ -267,9 +266,14 @@
   font-weight: 750;
   cursor: pointer;
 }
-.agreement button:hover { background: #773200; }
 .agreement button:disabled { opacity: .6; cursor: wait; }
 .empty { padding: var(--card-inset); border-radius: 12px; background: white; color: var(--calendar-text); }
+
+@media (hover: hover) {
+  .filters nav a:hover:not([aria-current]) { background: var(--calendar-raised); }
+  .actions a:hover { background: var(--calendar-line); }
+  .review:hover, .agreement button:not(:disabled):hover { background: var(--accent-dark); }
+}
 
 :global([dir="rtl"]) :is(.title h1, .stats dt) { letter-spacing: 0; }
 

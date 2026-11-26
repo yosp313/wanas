@@ -3,7 +3,7 @@ import type { PlannerDraft } from "@/lib/planner/types";
 import { draftSchema, validInspirationLinks } from "@/lib/planner/validation";
 
 export const fieldsByStep = [
-  ["eventType", "eventTypeOther", "guestCount", "venueType", "venueTypeOther", "venueName", "streetAddress", "eventDate", "budgetRange"],
+  ["eventType", "eventTypeOther", "guestCount", "eventDate", "venueType", "venueTypeOther", "venueName", "streetAddress", "budgetRange"],
   ["decorMode", "notes", "inspirationLinks"],
   [],
   ["customerName", "mobile"],

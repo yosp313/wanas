@@ -78,7 +78,7 @@ export function RequestPreview({ request, locale }: { request: Preview; locale: 
             </header>
             {request.moodboardImage ? (
               <figure>
-                <Image fill loading="eager" sizes="(min-width: 781px) 45vw, 90vw" src={`/atelier/${request.moodboardImage}.webp`} alt="" />
+                <Image className="image-edge" fill loading="eager" sizes="(min-width: 781px) 45vw, 90vw" src={`/atelier/${request.moodboardImage}.webp`} alt="" />
                 <figcaption><bdi>{request.moodboard}</bdi></figcaption>
               </figure>
             ) : <p><bdi>{request.moodboard || request.decor}</bdi></p>}

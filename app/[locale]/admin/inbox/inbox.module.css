@@ -1,7 +1,6 @@
 .workspace {
   --gutter: clamp(16px, 2.5vw, 40px);
   --panel-inset: clamp(16px, 2.5vw, 32px);
-  --panel-shadow: 0 2px 4px #3e170b0b, 0 5px 12px #3e170b0e;
   min-width: 0;
   background: var(--calendar-bg);
   color: var(--calendar-ink);
@@ -11,31 +10,13 @@
 .workspace :is(h1, h2, h3, p, dl, dd, ul, figure, blockquote) { margin: 0; }
 
 .header {
-  position: sticky;
-  top: 0;
-  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: 64px;
-  padding: 12px var(--gutter);
-  border-block-end: 1px solid var(--calendar-line);
   background: var(--calendar-bg);
 }
 
-.search {
-  display: flex;
-  align-items: center;
-  width: min(100%, 320px);
-  min-width: 0;
-  border: 1px solid var(--calendar-line);
-  border-radius: 8px;
-  background: white;
-  color: var(--calendar-text);
-}
-
-.search button,
 .account a {
   position: relative;
   display: grid;
@@ -49,20 +30,6 @@
   background: transparent;
   color: inherit;
   cursor: pointer;
-}
-
-.search button:hover,
-.account a:hover { background: var(--calendar-soft); }
-
-.search input {
-  width: 100%;
-  min-width: 0;
-  padding-block: 5px;
-  padding-inline: 0 8px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--calendar-ink);
 }
 
 .account { display: flex; align-items: center; gap: 12px; }
@@ -99,20 +66,23 @@
 .title p { max-width: 29rem; color: var(--calendar-text); }
 
 .stats {
+  --stats-inset: 8px;
+  --stat-radius: 6px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px;
+  gap: 8px;
+  padding: var(--stats-inset);
+  border: 1px solid var(--calendar-line);
+  border-radius: calc(var(--stat-radius) + var(--stats-inset) + 1px);
+  background: var(--calendar-soft);
 }
 
 .stats > div {
   display: grid;
   align-content: space-between;
-  gap: 16px;
-  min-height: 144px;
-  padding: clamp(14px, 1.8vw, 24px);
-  border-radius: 12px;
-  background: white;
-  box-shadow: var(--calendar-shadow);
+  gap: 8px;
+  padding: clamp(12px, 1.8vw, 20px);
+  border-radius: var(--stat-radius);
 }
 
 .stats > div:last-child { background: var(--calendar-raised); }
@@ -124,7 +94,6 @@
   gap: 8px;
 }
 
-.stats dt,
 .contacts dt,
 .budget span,
 .preview h3 {
@@ -164,8 +133,9 @@
 .filters {
   justify-content: space-between;
   gap: 12px;
-  padding: 12px;
-  border-radius: 12px;
+  --filter-inset: 12px;
+  padding: var(--filter-inset);
+  border-radius: calc(var(--control-radius) + var(--filter-inset));
   background: var(--calendar-soft);
 }
 
@@ -174,7 +144,7 @@
   min-height: 36px;
   padding: 6px 12px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--control-radius);
   color: var(--calendar-text);
   font-size: 12px;
   font-weight: 650;
@@ -182,10 +152,8 @@
 }
 
 .filters a { display: inline-flex; align-items: center; }
-.filters a:hover,
-.controls :is(select, button):hover { background: var(--calendar-raised); }
 .filters a[aria-current] { background: var(--calendar-accent); color: white; }
-.controls :is(select, button) { max-width: 100%; background: white; box-shadow: var(--calendar-shadow); cursor: pointer; }
+.controls :is(select, button) { max-width: 100%; border-color: var(--control-line); background: white; cursor: pointer; }
 
 .board {
   display: grid;
@@ -212,11 +180,10 @@
   text-decoration: none;
 }
 
-.card:hover { background: var(--calendar-raised); }
 .card[aria-current] {
   border-inline-start-color: var(--calendar-accent);
   background: white;
-  box-shadow: var(--panel-shadow);
+  box-shadow: var(--shadow-raised);
 }
 .requests:has(.card:focus-visible) .card { transition-duration: 0ms; }
 
@@ -253,13 +220,13 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px 12px;
   margin-block-start: 8px;
-  padding-block: 12px;
+  padding: 12px;
   border-radius: 8px;
   color: var(--calendar-text);
   font-size: 12px;
 }
 
-.card[aria-current] .meta { padding-inline: 12px; background: var(--calendar-bg); }
+.card[aria-current] .meta { background: var(--calendar-bg); }
 .meta span { display: flex; align-items: start; gap: 6px; overflow-wrap: anywhere; }
 .meta strong { color: var(--calendar-ink); }
 .meta svg { flex: none; width: 15px; height: 19px; color: var(--calendar-accent); }
@@ -268,9 +235,10 @@
 .preview, .failures { scroll-margin-block-start: 80px; }
 .preview {
   overflow: clip;
+  border: 1px solid transparent;
   border-radius: 16px;
   background: white;
-  box-shadow: var(--panel-shadow);
+  box-shadow: var(--shadow-raised);
 }
 
 .previewHeader,
@@ -358,13 +326,15 @@
 }
 
 .primary {
+  --icon-stroke: 2.5px;
   display: inline-flex;
   align-items: center;
   justify-self: start;
   gap: 8px;
   min-height: 42px;
-  padding: 8px 18px;
-  border-radius: 8px;
+  padding-block: 8px;
+  padding-inline: 16px 18px;
+  border-radius: var(--control-radius);
   background: var(--calendar-accent);
   color: white;
   font-size: 13px;
@@ -372,7 +342,6 @@
   text-decoration: none;
 }
 
-.primary:hover { background: #763109; }
 
 .empty, .failures {
   padding: 20px 24px;
@@ -385,6 +354,13 @@
 .failures li { margin-block-start: 6px; overflow-wrap: anywhere; }
 .failures li > * { margin-inline-end: 8px; }
 :global([dir="rtl"]) .workspace :is(dt, h3, .budget span) { letter-spacing: 0; }
+
+@media (hover: hover) {
+  .account a:hover { background: var(--calendar-soft); }
+  .filters a:not([aria-current]):hover, .controls :is(select, button):hover { background: var(--calendar-raised); }
+  .card:not([aria-current]):hover { background: var(--calendar-raised); }
+  .primary:hover { background: var(--accent-dark); }
+}
 
 @media (max-width: 1120px) {
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }

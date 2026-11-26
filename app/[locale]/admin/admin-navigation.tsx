@@ -1,7 +1,10 @@
 "use client";
 
+import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
+import { LuArrowUpRight } from "react-icons/lu";
 import { WanasWordmark } from "@/components/WanasWordmark";
 import type { Locale } from "@/lib/i18n/config";
 import LocaleSwitcher from "../locale-switcher";
@@ -18,41 +21,30 @@ export function AdminNavigation({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const prefix = `/${locale}/admin/`;
   const ar = locale === "ar";
-  const workspace = sections.some(({ path }) => pathname === prefix + path);
+
   return (
-    <nav
-      className={workspace ? styles.navigation : "admin-nav"}
-      aria-label={ar ? "لوحة الإدارة" : "Admin workspace"}
-    >
-      {workspace ? (
-        <div className={styles.brand}>
-          <WanasWordmark locale={locale} />
-          <small>{ar ? "إدارة وناس" : "WANAS admin"}</small>
-        </div>
-      ) : <span>{ar ? "إدارة وناس" : "Wanas Studio"}</span>}
-      {sections.map(({ path, ...label }) => {
-        const href = prefix + path;
-        const current = pathname === href;
-        const active =
-          current ||
-          (path === "inbox" && pathname.startsWith(prefix + "requests/"));
-        return (
-          <Link
-            key={path}
-            href={href}
-            aria-current={current ? "page" : active ? "location" : undefined}
-          >
-            {workspace && <CalendarIcon name={path} />}
-            {!workspace && path === "inbox" && !ar ? "Request inbox" : label[locale]}
-          </Link>
-        );
-      })}
-      {workspace && (
-        <div className={styles.sidebarFooter}>
-          <Link href={`/${locale}`}>{ar ? "موقع وناس" : "WANAS website"}</Link>
-          <LocaleSwitcher locale={locale} label={ar ? "English" : "العربية"} />
-        </div>
-      )}
-    </nav>
+    <header className={styles.navigation}>
+      <div className={styles.brand}>
+        <WanasWordmark locale={locale} />
+        <small>{ar ? "إدارة وناس" : "WANAS admin"}</small>
+      </div>
+      <nav aria-label={ar ? "لوحة الإدارة" : "Admin workspace"}>
+        {sections.map(({ path, ...label }) => {
+          const href = prefix + path;
+          const current = pathname === href;
+          const active = path === "inbox" && pathname.startsWith(prefix + "requests/");
+          return (
+            <Link key={path} href={href} aria-current={current ? "page" : active ? "location" : undefined}>
+              <CalendarIcon name={path} />{label[locale]}
+            </Link>
+          );
+        })}
+      </nav>
+      <div className={styles.accountLinks}>
+        <Link href={`/${locale}`}><LuArrowUpRight aria-hidden="true" />{ar ? "الموقع" : "Website"}</Link>
+        <Suspense><LocaleSwitcher locale={locale} label={ar ? "English" : "العربية"} /></Suspense>
+        <UserButton />
+      </div>
+    </header>
   );
 }

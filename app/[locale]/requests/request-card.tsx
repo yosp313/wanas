@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { LuArrowUpRight } from "react-icons/lu";
 import { catalogLabel } from "@/lib/catalog/catalog";
 import type { Locale } from "@/lib/i18n/config";
 import type { RequestSnapshot } from "@/lib/planner/request-snapshot";
@@ -74,83 +74,32 @@ export function requestEntry(request: Request, locale: Locale, today: string): R
     searchText: [reference, request.id, venue, title].join(" "),
     card: (
       <article className={styles.card} data-group={group}>
-        <header className={styles.cardHeader}>
-          <div className={styles.reference}>
+        <div className={styles.record}>
+          <header className={styles.cardHeader}>
             <bdi>{reference}</bdi>
-            {quote && venueType && <span><bdi>{venueType}</bdi></span>}
-          </div>
-          <span className={styles.status}>{status}</span>
-        </header>
-
-        <div className={quote ? styles.proposal : styles.summary}>
-          <div>
-            <h2><Link href={href}><bdi>{title}</bdi></Link></h2>
-            {quote && details?.notes && <p className={styles.notes} dir="auto">{details.notes}</p>}
-            <dl className={styles.facts}>
-              {fields.filter(([, value]) => value).map(([label, value]) => (
-                <div key={label}><dt>{label}</dt><dd><bdi>{value}</bdi></dd></div>
-              ))}
-            </dl>
-          </div>
-          {quote ? (
-            <div className={styles.inspiration}>
-              <div className={styles.inspirationHeading}>
-                <p>{t("Decor examples", "أمثلة على الديكور")}</p>
-                <Link href={`/${locale}#ceremonies`}>{t("Explore decor", "استكشفوا الديكور")}</Link>
-              </div>
-              <div className={styles.photos}>
-                <figure>
-                  <Image src="/atelier/home/cloche.webp" alt="" fill sizes="(max-width: 760px) 42vw, 220px" />
-                  <figcaption>{t("Table styling", "تنسيق الطاولات")}</figcaption>
-                </figure>
-                <figure>
-                  <Image src="/atelier/home/kosha.webp" alt="" fill sizes="(max-width: 760px) 42vw, 220px" />
-                  <figcaption>{t("Ceremony decor", "ديكور المراسم")}</figcaption>
-                </figure>
-              </div>
-              <div className={styles.palette}>
-                {t("Terracotta & warm neutrals", "تيراكوتا ودرجات حيادية دافئة")}
-                <span aria-hidden="true"><i /><i /><i /><i /></span>
-              </div>
-            </div>
-          ) : booking && price ? amount(t("Booking total", "إجمالي الحجز"), price)
-            : group === "review" && budget ? amount(t("Requested budget", "الميزانية المطلوبة"), budget)
-            : null}
+            <span className={styles.status}>{status}</span>
+          </header>
+          <h2><Link href={href}><bdi>{title}</bdi></Link></h2>
+          <dl className={styles.facts}>
+            {fields.filter(([, value]) => value).map(([label, value]) => (
+              <div key={label}><dt>{label}</dt><dd><bdi>{value}</bdi></dd></div>
+            ))}
+          </dl>
+          {group === "review" && request.status === "submitted" && (
+            <p className={styles.nextStep}>{t("WANAS is reviewing your brief. We’ll email you when there’s an update.", "يراجع فريق وناس تفاصيل مناسبتكم. سنراسلكم عند تحديث الطلب.")}</p>
+          )}
         </div>
-
-        {quote && (
-          <div className={styles.allocation}>
-            {amount(t("Quote total", "إجمالي عرض السعر"), price)}
-            {budget && <span>{t("Requested budget", "الميزانية المطلوبة")} · <bdi>{budget}</bdi></span>}
-          </div>
-        )}
-        {group === "review" && request.status === "submitted" && (
-          <div className={styles.progress}>
-            <div>
-              <p>{t("Request progress", "تقدّم الطلب")}</p>
-              <p>{t("In review", "قيد المراجعة")}</p>
-            </div>
-            <ol>
-              <li data-complete>{t("Request received", "استلمنا الطلب")}</li>
-              <li aria-current="step">{t("WANAS review", "مراجعة وناس")}</li>
-              <li>{t("Quote ready", "عرض السعر")}</li>
-              <li>{t("Booking confirmed", "تأكيد الحجز")}</li>
-            </ol>
-          </div>
-        )}
-
         <footer className={styles.cardFooter}>
+          {quote ? amount(t("Quote total", "إجمالي عرض السعر"), price)
+            : booking && price ? amount(t("Booking total", "إجمالي الحجز"), price)
+            : group === "review" && budget ? amount(t("Requested budget", "الميزانية المطلوبة"), budget) : null}
           {holdUntil && (
             <p>{t("Date held until", "الموعد محجوز مؤقتًا حتى")} <strong><bdi>{holdUntil}</bdi></strong> {t("Cairo time", "بتوقيت القاهرة")}</p>
           )}
-          {group === "confirmed" && <p className={styles.bookingNote}>{t("Your event date is reserved.", "تم حجز موعد مناسبتكم.")}</p>}
-          <div className={styles.cardActions}>
-            {quote && <Link className={styles.secondary} href={href}>{t("View request", "عرض الطلب")}</Link>}
-            <Link className={quote ? styles.primary : styles.secondary}
-              href={quote ? `${href}#quotes` : href}>
-              {quote ? t("Review quote", "مراجعة عرض السعر") : t("View request", "عرض الطلب")}
-            </Link>
-          </div>
+          <Link className={quote ? styles.primary : styles.secondary} href={quote ? `${href}#quotes` : href}>
+            {quote ? t("Review quote", "مراجعة عرض السعر") : t("View request", "عرض الطلب")}
+            <LuArrowUpRight size={16} aria-hidden="true" />
+          </Link>
         </footer>
       </article>
     ),

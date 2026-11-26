@@ -1,12 +1,13 @@
-import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { RouteLoading } from "@/components/RouteLoading";
 import { budgetRanges, catalogLabel, moodboards } from "@/lib/catalog/catalog";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import type { RequestSnapshot } from "@/lib/planner/request-snapshot";
 import { withPageAccess } from "@/lib/server/auth/page-access";
 import { getAdminInbox } from "@/lib/server/admin/queries";
+import calendar from "../calendar/calendar.module.css";
 import { CalendarIcon } from "../calendar/icons";
 import { RequestPreview } from "./request-preview";
 import styles from "./inbox.module.css";
@@ -24,7 +25,7 @@ export default async function AdminInboxPage({
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   return (
-    <Suspense fallback={<main className={styles.content} aria-busy="true">{locale === "ar" ? "جارٍ تحميل الطلبات…" : "Loading requests…"}</main>}>
+    <Suspense fallback={<RouteLoading message={locale === "ar" ? "جارٍ تحميل الطلبات…" : "Loading requests…"} />}>
       <Inbox locale={locale} searchParams={searchParams} />
     </Suspense>
   );
@@ -119,22 +120,20 @@ async function Inbox({ locale, searchParams }: { locale: Locale; searchParams: I
 
   return (
     <main className={styles.workspace}>
-      <header className={styles.header}>
-        <form id="inbox-filters" action={path} className={styles.search} role="search" key={search}>
-          {status !== "all" && <input type="hidden" name="status" value={status} />}
-          <button type="submit" aria-label={searchLabel}><CalendarIcon name="search" /></button>
-          <input type="search" name="q" aria-label={searchLabel} placeholder={searchLabel + "…"} defaultValue={search} maxLength={200} />
-        </form>
-        <div className={styles.account}>
-          {failures.length > 0 && <a href="#notification-failures" aria-label={failuresLabel}><CalendarIcon name="bell" /></a>}
-          <UserButton />
-        </div>
-      </header>
-
       <div className={styles.content}>
         <div className={styles.title}>
           <h1>{ar ? "صندوق الطلبات" : "Request inbox"}</h1>
           <p>{ar ? "راجع طلبات المناسبات وأرسل عروض الأسعار." : "Review event requests and send quotes."}</p>
+        </div>
+        <div className={styles.header}>
+          <form id="inbox-filters" action={path} className={calendar.search} role="search" key={search}>
+            {status !== "all" && <input type="hidden" name="status" value={status} />}
+            <button type="submit" aria-label={searchLabel}><CalendarIcon name="search" /></button>
+            <input type="search" name="q" aria-label={searchLabel} placeholder={searchLabel + "…"} defaultValue={search} maxLength={200} />
+          </form>
+          <div className={styles.account}>
+            {failures.length > 0 && <a href="#notification-failures" aria-label={failuresLabel}><CalendarIcon name="bell" /></a>}
+          </div>
         </div>
         <dl className={styles.stats}>
           {stats.map(({ label, value, icon }) => (

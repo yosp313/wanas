@@ -94,7 +94,7 @@ accounts("delivers a quote and confirms and reschedules the booking through the 
     assert.equal(await customer.locator("html").getAttribute("dir"), "rtl");
     await customer.getByRole("link", { name: "English" }).click();
     await customer.waitForURL("**/en");
-    await customer.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Event planner" }).click();
+    await customer.getByRole("banner").getByRole("link", { name: "Event planner" }).click();
     await customer.getByRole("button", { name: "Wedding", exact: true }).click();
     await customer.getByLabel("Estimated guests").fill("50");
     await customer.locator("input[type=date]").fill(eventDate);
@@ -303,7 +303,8 @@ accounts("submits an Arabic custom-decor request and preserves the draft when sw
   await page.getByRole("button", { name: "إرسال الطلب" }).click();
   await page.waitForURL("**/ar/requests/*");
   await page.getByRole("heading", { name: customerName }).waitFor();
-  await expect(page.getByText("تيراكوتا دافئة", { exact: true })).toBeVisible();
-  await expect(page.getByText("#447799 · #e8dfd3 · #4d5145", { exact: true })).toBeVisible();
-  await expect(page.getByText("إضاءة", { exact: true })).toBeVisible();
+  const requestDetails = page.locator("#event-details");
+  await expect(requestDetails.getByText("تيراكوتا دافئة", { exact: true })).toBeVisible();
+  await expect(requestDetails.getByText("#447799 · #e8dfd3 · #4d5145", { exact: true })).toBeVisible();
+  await expect(requestDetails.getByText("إضاءة", { exact: true })).toBeVisible();
 });

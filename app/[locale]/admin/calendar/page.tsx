@@ -1,7 +1,7 @@
-import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { RouteLoading } from "@/components/RouteLoading";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import type { RequestSnapshot } from "@/lib/planner/request-snapshot";
 import { getAdminCalendar } from "@/lib/server/admin/calendar";
@@ -45,7 +45,7 @@ export default async function AdminCalendarPage({
   if (!isLocale(locale)) notFound();
 
   return (
-    <Suspense fallback={<main className={styles.loading} aria-busy="true">{copy[locale].loading}</main>}>
+    <Suspense fallback={<RouteLoading message={copy[locale].loading} />}>
       <Calendar locale={locale} searchParams={searchParams} />
     </Suspense>
   );
@@ -151,16 +151,6 @@ async function Calendar({ locale, searchParams }: { locale: Locale; searchParams
 
   return (
     <main className={styles.workspace}>
-      <header className={styles.header}>
-        <form className={styles.search} action={path} role="search">
-          {Object.entries(state).filter(([key]) => key !== "q").map(([name, value]) => (
-            <input key={name} type="hidden" name={name} value={value} />
-          ))}
-          <button type="submit" aria-label={text.searchButton}><CalendarIcon name="search" /></button>
-          <input key={search} type="search" name="q" defaultValue={search} placeholder={text.search} aria-label={text.search} maxLength={200} />
-        </form>
-        <UserButton />
-      </header>
       <div className={styles.content}>
         <div className={styles.toolbar}>
           <div className={styles.controls}>
@@ -184,6 +174,15 @@ async function Calendar({ locale, searchParams }: { locale: Locale; searchParams
               <CalendarIcon name="inbox" />{text.inbox}
             </Link>
           </div>
+        </div>
+        <div className={styles.header}>
+          <form className={styles.search} action={path} role="search">
+            {Object.entries(state).filter(([key]) => key !== "q").map(([name, value]) => (
+              <input key={name} type="hidden" name={name} value={value} />
+            ))}
+            <button type="submit" aria-label={text.searchButton}><CalendarIcon name="search" /></button>
+            <input key={search} type="search" name="q" defaultValue={search} placeholder={text.search} aria-label={text.search} maxLength={200} />
+          </form>
         </div>
         <div className={styles.filters}>
           <nav className={styles.chips} aria-label={text.filters}>

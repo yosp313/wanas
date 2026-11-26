@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LuArrowLeft } from "react-icons/lu";
@@ -32,30 +31,18 @@ export default async function CustomerRequestPage({ params }: { params: Promise<
   const details = (request.details ?? {}) as Partial<RequestSnapshot>;
   const hasActivity = quotes.length > 0 || bookings.length > 0;
   const canWithdraw = request.status === "submitted" || request.status === "quoted";
-  const status = bookings.some((booking) => booking.status === "confirmed") ? t("Booking confirmed", "تم تأكيد الحجز")
+  const confirmed = bookings.some((booking) => booking.status === "confirmed");
+  const status = confirmed ? t("Booking confirmed", "تم تأكيد الحجز")
     : bookings.some((booking) => booking.status === "cancelled") ? t("Booking cancelled", "أُلغي الحجز")
     : request.status === "quoted" ? (quotes.some((quote) => quote.status === "current")
       ? t("Quote ready", "عرض السعر جاهز") : t("Quote expired", "انتهت صلاحية عرض السعر"))
     : request.status === "submitted" ? t("In review", "قيد المراجعة")
     : request.status === "withdrawn" ? t("Withdrawn", "مسحوب")
     : t("Closed", "مغلق");
-  const venue = [details.venueName, details.streetAddress].filter(Boolean).join(" · ");
   const links = [...new Set(details.inspirationLinks?.trim().split(/\s+/).filter(Boolean))];
-  const gallerySizes = hasActivity
-    ? "(min-width: 1280px) 336px, (min-width: 1024px) 27vw, (min-width: 680px) 42vw, 85vw"
-    : "(min-width: 1280px) 550px, (min-width: 680px) 42vw, 85vw";
-  const inspiration = [
-    {
-      src: "/atelier/home/cloche.webp",
-      caption: t("Atmosphere & table setting", "أجواء الحفل وتنسيق الطاولات"),
-      alt: t("Candlelit table with white flowers and silver cloches", "طاولة على ضوء الشموع مع زهور بيضاء وأغطية فضية"),
-    },
-    {
-      src: "/atelier/terracotta.webp",
-      caption: t("Materials & florals", "الخامات وتنسيق الزهور"),
-      alt: t("Terracotta vases, linen, and white flowers at an outdoor table", "مزهريات فخارية وكتان وزهور بيضاء على طاولة في الهواء الطلق"),
-    },
-  ];
+  const reference = `#${request.id.slice(0, 8).toUpperCase()}`;
+  const date = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" })
+    .format(new Date(request.eventDate + "T00:00:00Z"));
 
   return (
     <div className={styles.page}>
@@ -64,77 +51,18 @@ export default async function CustomerRequestPage({ params }: { params: Promise<
           <Link href={`/${locale}/requests`}><LuArrowLeft size={15} aria-hidden="true" />{t("My requests", "طلباتي")}</Link>
         </nav>
 
-        <section className={styles.masthead} aria-labelledby="request-name">
-          <div className={styles.mastheadHeading}>
-            <div>
-              <h1 id="request-name"><bdi>{request.customerName}</bdi></h1>
-              <p>{t("Requested date", "تاريخ طلبك")} · <time dateTime={request.eventDate}>{request.eventDate}</time></p>
-            </div>
-            <p className={styles.status}>{status}</p>
+        <header className={styles.masthead}>
+          <div>
+            <p><bdi>{reference}</bdi></p>
+            <h1><bdi>{request.customerName}</bdi></h1>
+            <p>{t("Requested event date", "موعد المناسبة المطلوب")} <time dateTime={request.eventDate}>{date}</time></p>
           </div>
-          <figure className={styles.venue}>
-            <Image src="/atelier/home/courtyard.webp" alt="" fill loading="eager" sizes="(min-width: 1280px) 1232px, 100vw" />
-            <figcaption>
-              <span>{t("Venue inspiration", "إلهام للمكان")}</span>
-              {venue && <strong><bdi>{venue}</bdi></strong>}
-            </figcaption>
-          </figure>
-        </section>
+          <p className={styles.status} data-confirmed={confirmed || undefined}>{status}</p>
+        </header>
 
         <div className={styles.columns} data-has-activity={hasActivity}>
-          <section className={`${styles.card} ${styles.specifications}`}>
-            <h2>{t("Event specifications", "تفاصيل المناسبة")}</h2>
-            <RequestScope details={details} locale={locale} grouped />
-            {canWithdraw && <div className={styles.actions}><RequestLifecycleActions requestId={requestId} locale={locale} /></div>}
-          </section>
-
-          <section className={styles.card}>
-            <h2>{t("Visual direction & inspiration", "التوجه البصري والإلهام")}</h2>
-            {links.length > 0 && (
-              <div className={styles.links}>
-                <h3>{t("Inspiration links", "روابط للإلهام")}</h3>
-                <ul>
-                  {links.map((link) => (
-                    <li key={link}>
-                      {validInspirationLinks(link)
-                        ? <a href={link} target="_blank" rel="noopener noreferrer" dir="ltr">{link}</a>
-                        : <bdi>{link}</bdi>}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <div className={styles.gallery}>
-              {inspiration.map(({ src, caption, alt }) => (
-                <figure key={src}>
-                  <div><Image src={src} alt={alt} fill sizes={gallerySizes} /></div>
-                  <figcaption>{caption}</figcaption>
-                </figure>
-              ))}
-            </div>
-          </section>
-
           {hasActivity && (
             <div className={styles.activity}>
-              {quotes.length > 0 && (
-                <section className={styles.card} id="quotes">
-                  <h2>{t("Quotes", "عروض الأسعار")}</h2>
-                  <ul className={styles.quotes}>
-                    {quotes.map((quote) => (
-                      <li key={quote.id}>
-                        <QuoteTerms quote={quote} locale={locale} />
-                        {quote.status === "current" && request.status === "quoted" && (
-                          <div className={styles.actions}>
-                            <AcceptQuoteButton requestId={requestId} quoteId={quote.id} locale={locale} />
-                            <RequestLifecycleActions requestId={requestId} quoteId={quote.id} locale={locale} />
-                          </div>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
-
               {bookings.map((booking) => {
                 const terms = booking.terms as { services?: unknown; totalEgp?: number } | null;
                 const confirmed = booking.status === "confirmed";
@@ -160,8 +88,45 @@ export default async function CustomerRequestPage({ params }: { params: Promise<
                   </section>
                 );
               })}
+              {quotes.length > 0 && (
+                <section className={styles.card} id="quotes">
+                  <h2>{t("Quotes", "عروض الأسعار")}</h2>
+                  <ul className={styles.quotes}>
+                    {quotes.map((quote) => (
+                      <li key={quote.id}>
+                        <QuoteTerms quote={quote} locale={locale} />
+                        {quote.status === "current" && request.status === "quoted" && (
+                          <div className={styles.actions}>
+                            <AcceptQuoteButton requestId={requestId} quoteId={quote.id} locale={locale} />
+                            <RequestLifecycleActions requestId={requestId} quoteId={quote.id} locale={locale} />
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
             </div>
           )}
+          <section className={`${styles.card} ${styles.specifications}`} id="event-details">
+            <h2>{t("Event specifications", "تفاصيل المناسبة")}</h2>
+            <RequestScope details={details} locale={locale} grouped />
+            {links.length > 0 && (
+              <section className={styles.links} data-scope-group="links">
+                <h3>{t("Inspiration links", "روابط للإلهام")}</h3>
+                <ul>
+                  {links.map((link) => (
+                    <li key={link}>
+                      {validInspirationLinks(link)
+                        ? <a href={link} target="_blank" rel="noopener noreferrer" dir="ltr">{link}</a>
+                        : <bdi>{link}</bdi>}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+            {canWithdraw && <div className={styles.actions}><RequestLifecycleActions requestId={requestId} locale={locale} /></div>}
+          </section>
         </div>
       </main>
     </div>

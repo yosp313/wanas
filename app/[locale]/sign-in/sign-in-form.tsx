@@ -104,7 +104,7 @@ export default function SignInForm({
       <form onSubmit={submit}>
         <label htmlFor="email">{ar ? "البريد الإلكتروني" : "Email"}</label>
         <div className={styles.emailField}>
-          <LuMail size={18} aria-hidden="true" strokeWidth={1.6} />
+          <LuMail size={18} aria-hidden="true" />
           <input id="email" dir="ltr" type="email" autoComplete="email" required readOnly={pending}
             placeholder="name@example.com" value={email} onChange={(event) => setEmail(event.target.value)}
             {...field("email", ar ? "أدخل بريدًا إلكترونيًا صالحًا." : "Enter a valid email address.")} />

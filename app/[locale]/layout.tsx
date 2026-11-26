@@ -33,7 +33,19 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
       <body>
-        <ClerkProvider signInUrl={`/${locale}/sign-in`} signUpUrl={`/${locale}/sign-in`} afterSignOutUrl={`/${locale}`}>
+        <ClerkProvider signInUrl={`/${locale}/sign-in`} signUpUrl={`/${locale}/sign-in`} afterSignOutUrl={`/${locale}`}
+          appearance={{
+            variables: {
+              colorPrimary: "var(--accent)",
+              colorBackground: "var(--surface)",
+              borderRadius: "var(--control-radius)",
+              fontFamily: "var(--body)",
+            },
+            elements: {
+              userButtonPopoverCard: "account-popover",
+              userButtonPopoverMain: "account-popover-main",
+            },
+          }}>
           <Suspense>
             <SiteNavbar locale={locale} myRequests={dictionary.myRequests} switchLanguage={dictionary.switchLanguage} />
           </Suspense>
@@ -41,14 +53,21 @@ export default async function LocaleLayout({
             dir={locale === "ar" ? "rtl" : "ltr"}
             position={locale === "ar" ? "bottom-left" : "bottom-right"}
             containerAriaLabel={locale === "ar" ? "الإشعارات" : "Notifications"}
-            toastOptions={{ closeButtonAriaLabel: locale === "ar" ? "إغلاق الإشعار" : "Dismiss notification" }}
+            toastOptions={{
+              closeButtonAriaLabel: locale === "ar" ? "إغلاق الإشعار" : "Dismiss notification",
+              style: { borderRadius: "var(--radius)", boxShadow: "var(--shadow-raised)" },
+            }}
             richColors
             closeButton
           />
           {children}
           <footer className="atelier-footer">
-            <WanasWordmark locale={locale} />
+            <div>
+              <WanasWordmark locale={locale} />
+              <p>{locale === "ar" ? "ديكور المناسبات والضيافة في القاهرة" : "Event decor and catering in Cairo"}</p>
+            </div>
             <nav aria-label={locale === "ar" ? "روابط وناس" : "WANAS links"}>
+              <Link href={`/${locale}#ceremonies`}>{locale === "ar" ? "أفكار للديكور" : "Decor ideas"}</Link>
               <Link href={`/${locale}/plan`}>
                 {locale === "ar" ? "خططوا لحفلكم" : "Plan an event"}
               </Link>

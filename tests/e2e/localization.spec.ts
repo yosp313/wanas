@@ -33,9 +33,14 @@ test("defaults to Arabic and remembers a route-preserving language switch", asyn
 
 test("the homepage seeds a new plan and preserves an existing draft", async ({ page }) => {
   await page.goto("/en");
-  await page.getByRole("link", { name: "See our work" }).click();
+  const occasion = page.getByLabel("Your occasion");
+  await page.getByRole("button", { name: "Open the planner" }).click();
+  await expect(occasion).toBeFocused();
+  await page.getByRole("button", { name: "Next setting" }).click();
+  await expect(page.getByText("The ceremony setting")).toBeVisible();
+  await page.getByRole("link", { name: "Occasions", exact: true }).click();
   await expect(page).toHaveURL(/#ceremonies$/);
-  await page.getByRole("radio", { name: "Anniversary" }).check();
+  await page.getByLabel("Your occasion").selectOption("anniversary");
   await page.getByRole("button", { name: "Open the planner" }).click();
   await expect(page).toHaveURL(/\/en\/plan\?eventType=anniversary$/);
   const anniversary = page.getByRole("button", { name: "Anniversary", exact: true });
@@ -43,7 +48,7 @@ test("the homepage seeds a new plan and preserves an existing draft", async ({ p
 
   await page.getByLabel("Venue name").fill("Garden room");
   await page.goto("/en");
-  await page.getByRole("radio", { name: "Wedding & reception" }).check();
+  await page.getByLabel("Your occasion").selectOption("wedding");
   await page.getByRole("button", { name: "Open the planner" }).click();
   await expect(page).toHaveURL(/\/en\/plan\?eventType=wedding$/);
   await expect(anniversary).toHaveAttribute("aria-pressed", "true");

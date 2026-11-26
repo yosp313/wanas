@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { LuArrowRight } from "react-icons/lu";
-import { WanasWordmark } from "@/components/WanasWordmark";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { safeReturnTo } from "@/lib/i18n/return-to";
@@ -41,11 +40,10 @@ export default async function SignInPage({
   const dictionary = await getDictionary(locale);
   const ar = locale === "ar";
   const home = `/${locale}`;
-  const studio = `${home}#studio`;
   const plan = `${home}/plan`;
 
   return (
-    <div className={styles.page} data-client-sign-in>
+    <div className={styles.page}>
       <main className={styles.main}>
         <section className={styles.intro}>
           <h1>{dictionary.signIn}</h1>
@@ -66,37 +64,10 @@ export default async function SignInPage({
           </div>
         </section>
 
-        <figure className={styles.showcase}>
-          <Image
-            src="/atelier/ballroom.webp"
-            alt=""
-            fill
-            loading="eager"
-            sizes="(max-width: 640px) 94vw, (max-width: 959px) 608px, (min-width: 1280px) 560px, 44vw"
-          />
-          <figcaption>
-            <span className={styles.edition}>{ar ? "ديكور قاعة أفراح" : "Ballroom decor"}</span>
-          </figcaption>
-        </figure>
-      </main>
-
-      <footer className={styles.footer}>
-        <div className={styles.footerInner}>
-          <div>
-            <WanasWordmark locale={locale} />
-            <p>{ar ? "ديكور المناسبات والضيافة في القاهرة" : "Event decor and catering in Cairo"}</p>
-          </div>
-          <nav aria-label={ar ? "روابط وناس" : "WANAS links"}>
-            <Link href={studio}>{ar ? "طريقة التخطيط" : "How planning works"}</Link>
-            <Link href={plan}>{ar ? "خططوا لحفلكم" : "Plan an event"}</Link>
-            <Link href={`${home}/requests`}>{dictionary.myRequests}</Link>
-          </nav>
-          <div className={styles.footerNote}>
-            <span>{ar ? "© أتيليه وناس. جميع الحقوق محفوظة." : "© WANAS Atelier. All rights reserved."}</span>
-            <span>{ar ? "القاهرة · مصر" : "Cairo · Egypt"}</span>
-          </div>
+        <div className={styles.showcase}>
+          <Image className="image-edge" src="/atelier/home/pavilion.webp" alt="" fill loading="eager" sizes="(max-width: 760px) 1px, 48vw" />
         </div>
-      </footer>
+      </main>
     </div>
   );
 }

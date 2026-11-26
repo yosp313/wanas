@@ -85,7 +85,7 @@ export function MoodboardGallery({
               onClick={() => onChange(selected ? "" : direction.id)}
             >
               <span className={styles.moodImage}>
-                <Image src={`/atelier/${direction.image}.webp`} alt="" fill sizes="(max-width: 680px) 45vw, 25vw" />
+                <Image className="image-edge" src={`/atelier/${direction.image}.webp`} alt="" fill sizes="(max-width: 680px) 45vw, 25vw" />
                 <span className={styles.moodCheck} aria-hidden="true">
                   {selected ? (
                     <>
@@ -151,6 +151,7 @@ export function MoodboardGallery({
             <div className={styles.previewCard}>
               <figure className={styles.previewHero}>
                 <Image
+                  className="image-edge"
                   src={`/atelier/${terracotta ? "kosha" : preview.image}.webp`}
                   alt=""
                   fill
@@ -164,11 +165,11 @@ export function MoodboardGallery({
               {terracotta && (
                 <div className={styles.previewDetails}>
                   <div>
-                    <Image src="/atelier/centerpiece.webp" alt="" width={64} height={56} />
+                    <Image className="image-edge" src="/atelier/centerpiece.webp" alt="" width={64} height={56} />
                     <span><small>{ar ? "تنسيق الطاولة" : "Table decor"}</small>{ar ? "زهور طاولة منخفضة" : "Low floral centerpieces"}</span>
                   </div>
                   <div>
-                    <Image src="/atelier/lighting.webp" alt="" width={64} height={56} />
+                    <Image className="image-edge" src="/atelier/lighting.webp" alt="" width={64} height={56} />
                     <span><small>{ar ? "الإضاءة" : "Lighting"}</small>{ar ? "إضاءة شموع دافئة" : "Warm candlelight"}</span>
                   </div>
                 </div>

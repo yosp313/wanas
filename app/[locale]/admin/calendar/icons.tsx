@@ -29,5 +29,5 @@ const icons = {
 
 export function CalendarIcon({ name }: { name: keyof typeof icons }) {
   const Icon = icons[name];
-  return <Icon aria-hidden="true" size={20} strokeWidth={1.75} />;
+  return <Icon aria-hidden="true" className={name === "send" ? "icon-directional" : undefined} size={18} />;
 }
