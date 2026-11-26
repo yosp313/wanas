@@ -3,7 +3,7 @@ import Link from "next/link";
 import { LuArrowRight, LuArrowUpRight } from "react-icons/lu";
 import { catalog } from "@/lib/catalog/catalog";
 import type { Locale } from "@/lib/i18n/config";
-import { ceremonies, dining, studioSteps, venues } from "./content";
+import { ceremonies, dining, settings, studioSteps, venues } from "./content";
 import { SettingGallery } from "./SettingGallery";
 import styles from "./homepage.module.css";
 
@@ -18,11 +18,8 @@ export function Homepage({ locale }: { locale: Locale }) {
     <main className={styles.site}>
       <section className={styles.hero} id="start">
         <div className={styles.intro}>
-          <h1>{t(["Event decor\nin Cairo", "ديكور المناسبات\nفي القاهرة"])}</h1>
-          <p>{t([
-            "From the kosha to the tables, we style your venue and arrange catering if you need it.",
-            "من الكوشة إلى موائد الضيوف، ننسّق ديكور مكانكم ونوفّر الضيافة عند الطلب.",
-          ])}</p>
+          <h1 lang="en" dir="ltr">{"Your Vision.\nOur People.\nYour Celebration."}</h1>
+          <p lang="ar" dir="rtl">تَفَاصِيل يَوْمَك.. بِلَمْسَة مِنْ نَاسْنَا</p>
           <form action={planner} className={styles.startForm}>
             <label htmlFor="occasion">{t(["Your occasion", "مناسبتكم"])}</label>
             <div className={styles.formControls}>
@@ -35,17 +32,10 @@ export function Homepage({ locale }: { locale: Locale }) {
             <small>{t(["Sign in when you’re ready to send your request.", "سجّلوا الدخول عند إرسال الطلب."])}</small>
           </form>
         </div>
-        <SettingGallery locale={locale} />
+        <SettingGallery locale={locale} slides={settings} label={t(["Event settings", "مشاهد المناسبات"])} hero />
       </section>
 
       <div className={styles.wrap}>
-        <nav className={styles.index} aria-label={t(["On this page", "في هذه الصفحة"])}>
-          <a href="#ceremonies">{t(["Decor by occasion", "الديكور حسب المناسبة"])}</a>
-          <a href="#venues">{t(["Venue ideas", "أفكار للمكان"])}</a>
-          <a href="#hospitality">{t(["Catering", "الضيافة"])}</a>
-          <a href="#studio">{t(["How planning works", "طريقة التخطيط"])}</a>
-        </nav>
-
         <section id="ceremonies" className={styles.band}>
           <header className={styles.sectionHead}>
             <h2>{t(["Find your occasion", "اختاروا مناسبتكم"])}</h2>
@@ -68,22 +58,13 @@ export function Homepage({ locale }: { locale: Locale }) {
         </section>
       </div>
 
-      <section id="venues" className={`${styles.band} ${styles.venues}`}>
-        <div className={styles.wrap}>
-          <header className={styles.sectionHead}>
-            <h2>{t(["Your venue, styled", "ديكور يناسب مكانكم"])}</h2>
+      <section id="venues" aria-labelledby="venues-heading">
+        <SettingGallery locale={locale} slides={venues} label={t(["Venue ideas", "أفكار للمكان"])}>
+          <header className={styles.venueIntro}>
+            <h2 id="venues-heading">{t(["Your venue, styled", "ديكور يناسب مكانكم"])}</h2>
             <p>{t(["You choose the venue. We plan the lighting, drapery, and flowers for the space.", "اختاروا المكان، ونتولّى تنسيق الإضاءة والأقمشة والزهور بما يناسبه."])}</p>
           </header>
-          <ul className={styles.venueList}>
-            {venues.map((card) => (
-              <li key={card.image}>
-                <div className={styles.photo}><Image className="image-edge" src={`/atelier/home/${card.image}.webp`} alt="" fill sizes="(max-width: 900px) 44vw, 23vw" /></div>
-                <h3>{t(card.title)}</h3>
-                <p>{t(card.description)}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
+        </SettingGallery>
       </section>
 
       <section id="hospitality" className={`${styles.band} ${styles.wrap}`}>
@@ -92,11 +73,13 @@ export function Homepage({ locale }: { locale: Locale }) {
           <p>{t(["Add catering to your brief if you’d like WANAS to handle the food as well.", "أضيفوا الضيافة إلى طلبكم إذا أردتم أن يتولّى فريق وناس تقديم الطعام."])}</p>
         </header>
         <ul className={styles.dining}>
-          {dining.map((card) => (
-            <li key={card.image}>
-              <div className={styles.photo}><Image className="image-edge" src={`/atelier/home/${card.image}.webp`} alt="" fill sizes="(max-width: 640px) 88vw, 31vw" /></div>
-              <h3>{t(card.title)}</h3>
-              <p>{t(card.description)}</p>
+          {dining.map(({ icon: Icon, title, description }) => (
+            <li key={title[0]}>
+              <div className={styles.diningIcon}><Icon aria-hidden="true" /></div>
+              <div className={styles.diningCopy}>
+                <h3>{t(title)}</h3>
+                <p>{t(description)}</p>
+              </div>
             </li>
           ))}
         </ul>

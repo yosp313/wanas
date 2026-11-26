@@ -150,6 +150,21 @@ a { color: var(--accent); }
   text-decoration: none;
 }
 
+.site-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.social-icons {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  color: var(--accent);
+  font-size: 1.125rem;
+}
+
 ::selection { background: var(--accent-soft); color: var(--accent-dark); }
 
 .shell {

@@ -2,9 +2,10 @@
 
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { useSelectedLayoutSegments } from "next/navigation";
-import { Suspense } from "react";
+import { usePathname, useSelectedLayoutSegments } from "next/navigation";
+import { Suspense, useEffect, useRef } from "react";
 import { LuArrowUpRight, LuGlobe } from "react-icons/lu";
+import { SocialIcons } from "@/components/SocialIcons";
 import { WanasWordmark } from "@/components/WanasWordmark";
 import type { Locale } from "@/lib/i18n/config";
 import LocaleSwitcher from "./locale-switcher";
@@ -17,14 +18,33 @@ export function SiteNavbar({ locale, myRequests, switchLanguage }: {
 }) {
   const [segment, subpage] = useSelectedLayoutSegments();
   const home = `/${locale}`;
+  const sticky = usePathname() === home;
+  const header = useRef<HTMLElement>(null);
   const ar = locale === "ar";
+
+  useEffect(() => {
+    const element = header.current;
+    if (!sticky || !element) return;
+    const root = document.documentElement;
+    const updateOffset = () => root.style.setProperty("--site-header-height", `${element.offsetHeight}px`);
+    updateOffset();
+    const observer = new ResizeObserver(updateOffset);
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty("--site-header-height");
+    };
+  }, [sticky]);
 
   if (segment === "admin") return null;
 
   return (
-    <header className={styles.header}>
+    <header ref={header} className={sticky ? `${styles.header} ${styles.sticky}` : styles.header}>
       <div className={styles.inner}>
-        <WanasWordmark locale={locale} />
+        <div className="site-brand">
+          <WanasWordmark locale={locale} />
+          <SocialIcons />
+        </div>
         <nav className={styles.links} aria-label={ar ? "التنقل الرئيسي" : "Main navigation"}>
           <Link href={`${home}#ceremonies`}>{ar ? "المناسبات" : "Occasions"}</Link>
           <Link href={`${home}#studio`}>{ar ? "طريقة التخطيط" : "How it works"}</Link>

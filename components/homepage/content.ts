@@ -1,10 +1,21 @@
+import type { IconType } from "react-icons";
+import { LuCookingPot, LuMartini, LuUtensils } from "react-icons/lu";
+
 type Bilingual = readonly [en: string, ar: string];
 
-type Card = {
+export type GallerySlide = {
   image: string;
   title: Bilingual;
-  description: Bilingual;
+  description?: Bilingual;
 };
+
+type Card = GallerySlide & { description: Bilingual };
+
+export const settings = [
+  { image: "reception-concept", title: ["A courtyard reception", "استقبال في الفناء"] },
+  { image: "kosha-hero", title: ["The ceremony setting", "تنسيق الكوشة والمراسم"] },
+  { image: "feast", title: ["Dinner under the lights", "عشاء في الهواء الطلق"] },
+] satisfies GallerySlide[];
 
 export const ceremonies = [
   {
@@ -40,7 +51,7 @@ export const venues = [
     description: ["Arched colonnades, warm uplighting, and a central fountain.", "أروقة مقوّسة وإضاءة دافئة ونافورة في الوسط."],
   },
   {
-    image: "glasshouse",
+    image: "glasshouse-concept",
     title: ["Botanical glasshouse", "حديقة زجاجية"],
     description: ["Filtered daylight and greenery suspended above the aisle.", "ضوء طبيعي ونباتات متدلّية فوق الممر."],
   },
@@ -58,21 +69,21 @@ export const venues = [
 
 export const dining = [
   {
-    image: "canapes",
+    icon: LuMartini,
     title: ["Canapés and mocktails", "مقبلات ومشروبات الاستقبال"],
     description: ["Small bites served on trays as guests gather, with botanical mocktails.", "لقيمات تُقدّم على صوانٍ أثناء استقبال الضيوف مع مشروبات عشبية."],
   },
   {
-    image: "buffet",
+    icon: LuCookingPot,
     title: ["Buffet and live cooking", "بوفيه ومحطات طهي حيّة"],
     description: ["Copper serving dishes, roast meats, flatbreads, and regional mezze.", "أوانٍ نحاسية ولحوم مشوية وخبز طازج ومقبلات عربية."],
   },
   {
-    image: "cloche",
+    icon: LuUtensils,
     title: ["Plated multi-course dinner", "وليمة رسمية متعددة الأطباق"],
     description: ["Individual courses served at the table beneath silver cloches.", "أطباق فردية تُقدّم على المائدة تحت أغطية فضية."],
   },
-] satisfies Card[];
+] satisfies { icon: IconType; title: Bilingual; description: Bilingual }[];
 
 export const studioSteps = [
   {

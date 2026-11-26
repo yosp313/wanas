@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import Link from "next/link";
 import { Toaster } from "sonner";
 import { notFound } from "next/navigation";
+import { SocialIcons } from "@/components/SocialIcons";
 import { WanasWordmark } from "@/components/WanasWordmark";
 import { isLocale, locales } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -63,7 +64,10 @@ export default async function LocaleLayout({
           {children}
           <footer className="atelier-footer">
             <div>
-              <WanasWordmark locale={locale} />
+              <div className="site-brand">
+                <WanasWordmark locale={locale} />
+                <SocialIcons />
+              </div>
               <p>{locale === "ar" ? "ديكور المناسبات والضيافة في القاهرة" : "Event decor and catering in Cairo"}</p>
             </div>
             <nav aria-label={locale === "ar" ? "روابط وناس" : "WANAS links"}>

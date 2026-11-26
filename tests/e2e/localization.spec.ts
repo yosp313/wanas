@@ -36,8 +36,6 @@ test("the homepage seeds a new plan and preserves an existing draft", async ({ p
   const occasion = page.getByLabel("Your occasion");
   await page.getByRole("button", { name: "Open the planner" }).click();
   await expect(occasion).toBeFocused();
-  await page.getByRole("button", { name: "Next setting" }).click();
-  await expect(page.getByText("The ceremony setting")).toBeVisible();
   await page.getByRole("link", { name: "Occasions", exact: true }).click();
   await expect(page).toHaveURL(/#ceremonies$/);
   await page.getByLabel("Your occasion").selectOption("anniversary");
@@ -53,6 +51,67 @@ test("the homepage seeds a new plan and preserves an existing draft", async ({ p
   await expect(page).toHaveURL(/\/en\/plan\?eventType=wedding$/);
   await expect(anniversary).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByLabel("Venue name")).toHaveValue("Garden room");
+});
+
+test("the landing slideshows rotate, pause, and support direct selection", async ({ page }) => {
+  await page.clock.install();
+  await page.goto("/en");
+  const hero = page.getByRole("figure", { name: "Event settings" });
+  const reception = hero.getByRole("button", { name: "A courtyard reception" });
+  const ceremony = hero.getByRole("button", { name: "The ceremony setting" });
+  await expect(hero.getByRole("button", { name: "Pause slideshow" })).toBeVisible();
+  await expect(reception).toHaveAttribute("aria-current", "true");
+  await page.clock.runFor(6000);
+  await expect(ceremony).toHaveAttribute("aria-current", "true");
+
+  await hero.getByRole("button", { name: "Pause slideshow" }).click();
+  await page.mouse.move(0, 0);
+  await page.locator("body").click({ position: { x: 1, y: 1 } });
+  await page.clock.runFor(6000);
+  await expect(ceremony).toHaveAttribute("aria-current", "true");
+  await expect(hero.getByRole("button", { name: "Play slideshow" })).toBeVisible();
+  await reception.click();
+  await expect(reception).toHaveAttribute("aria-current", "true");
+
+  const venues = page.getByRole("figure", { name: "Venue ideas" });
+  await venues.scrollIntoViewIfNeeded();
+  await page.mouse.move(0, 0);
+  await expect(venues.getByRole("button", { name: "Historic courtyard" })).toHaveAttribute("aria-current", "true");
+  await page.clock.runFor(6000);
+  await expect(venues.getByRole("button", { name: "Botanical glasshouse" })).toHaveAttribute("aria-current", "true");
+  const ballroom = venues.getByRole("button", { name: "Hotel ballroom" });
+  await ballroom.press("Enter");
+  await expect(ballroom).toHaveAttribute("aria-current", "true");
+  await expect(venues.getByText("Ceiling installations, layered drapery, and a custom stage.")).toBeVisible();
+  await venues.getByRole("button", { name: "Next venue" }).click();
+  await expect(venues.getByRole("button", { name: "Historic courtyard" })).toHaveAttribute("aria-current", "true");
+});
+
+test("the sticky navbar clears section links on a narrow Arabic landing page", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.clock.install();
+  await page.goto("/ar");
+  const navbar = page.getByRole("banner");
+  await expect(page.getByRole("navigation", { name: "في هذه الصفحة" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "إيقاف عرض الصور مؤقتًا" })).toBeHidden();
+  await page.clock.runFor(6000);
+  await expect(page.getByRole("button", { name: "استقبال في الفناء" })).toHaveAttribute("aria-current", "true");
+  expect((await navbar.boundingBox())?.height).toBeLessThan(120);
+  await navbar.getByRole("link", { name: "المناسبات", exact: true }).click();
+  await expect(page).toHaveURL(/#ceremonies$/);
+  const anchors = () => page.evaluate(() => ({
+    scroll: window.scrollY,
+    header: document.querySelector("header")!.getBoundingClientRect().top,
+    clearance: document.getElementById("ceremonies")!.getBoundingClientRect().top
+      - document.querySelector("header")!.getBoundingClientRect().bottom,
+    overflow: document.documentElement.scrollWidth - window.innerWidth,
+  }));
+  await expect.poll(async () => (await anchors()).scroll).toBeGreaterThan(100);
+  const { header, clearance, overflow } = await anchors();
+  expect(header).toBe(0);
+  expect(clearance).toBeGreaterThanOrEqual(0);
+  expect(overflow).toBe(0);
 });
 
 test("the planner validates individual fields before continuing", async ({ page }) => {
